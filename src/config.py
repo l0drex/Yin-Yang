@@ -124,7 +124,7 @@ def get_config():
     return config
 
 
-def update(plugin: Optional[str], key, value):
+def update(key, value, plugin: Optional[str]):
     """Update the value of a key in configuration"""
     if plugin is None:
         config[key] = value
@@ -198,9 +198,12 @@ def get_gtk_enabled():
     return config["gtkEnabled"]
 
 
-def get(key):
+def get(key, plugin: Optional[str]):
     """Return the given key from the config"""
-    return config[key]
+    if plugin is None:
+        return config[key]
+    else:
+        return config[plugin][key]
 
 
 def is_scheduled():
