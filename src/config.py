@@ -2,6 +2,8 @@ import json
 import os
 import pathlib
 import re
+from enum import Enum
+from typing import Optional
 
 from main import assembly_version
 from suntime import Sun, SunTimeException
@@ -9,6 +11,18 @@ from suntime import Sun, SunTimeException
 # aliases for path to use later on
 home = os.getenv("HOME")
 path = home + "/.config"
+
+# plugin categories are used in the gui
+plugins = {
+    "system": ["kde", "gnome", "gtk", "kvantum", "wallpaper"],
+    "applications": ["firefox", "vscode", "atom"]
+}
+
+
+class Modes(Enum):
+    manual = "manual"
+    scheduled = "manual time"
+    followSun = "sunset and sunrise"
 
 
 def exists():
@@ -67,53 +81,42 @@ def set_sun_time():
 # generate path for yin-yang if there is none this will be skipped
 pathlib.Path(path + "/yin_yang").mkdir(parents=True, exist_ok=True)
 
-# if there is no config generate a generic one
-config = {}
-config["version"] = "2.0"
-config["soundEnabled"] = False
-config["version"] = assembly_version
-config["desktop"] = get_desktop()
-config["followSun"] = False
-config["latitude"] = ""
-config["longitude"] = ""
-config["schedule"] = False
-config["switchToDark"] = "20:00"
-config["switchToLight"] = "07:00"
-config["running"] = False
-config["theme"] = ""
-config["codeLightTheme"] = "Default Light+"
-config["codeDarkTheme"] = "Default Dark+"
-config["codeEnabled"] = False
-config["kdeLightTheme"] = "org.kde.breeze.desktop"
-config["kdeDarkTheme"] = "org.kde.breezedark.desktop"
-config["kdeEnabled"] = False
-config["gtkLightTheme"] = ""
-config["gtkDarkTheme"] = ""
-config["atomLightTheme"] = ""
-config["atomDarkTheme"] = ""
-config["atomEnabled"] = False
-config["gtkEnabled"] = False
-config["wallpaperLightTheme"] = ""
-config["wallpaperDarkTheme"] = ""
-config["wallpaperEnabled"] = False
-config["firefoxEnabled"] = False
-config["firefoxDarkTheme"] = "firefox-compact-dark@mozilla.org"
-config["firefoxLightTheme"] = "firefox-compact-light@mozilla.org"
-config["firefoxActiveTheme"] = "firefox-compact-light@mozilla.org"
-config["gnomeEnabled"] = False
-config["gnomeLightTheme"] = ""
-config["gnomeDarkTheme"] = ""
-config["kvantumEnabled"] = False
-config["kvantumLightTheme"] = ""
-config["kvantumDarkTheme"] = ""
-config["soundEnabled"] = True
-
 if exists():
     # making config global for this module
     with open(path + "/yin_yang/yin_yang.json", "r") as conf:
         config = json.load(conf)
+else:
+    # if there is no config generate a generic one
+    config = {
+        "version":          assembly_version,
+        "running":          False,
+        "theme":            "",
+        "soundEnabled":     False,
+        "desktop":          get_desktop(),
+        "mode":             Modes.manual.value,
+        "latitude":         "",
+        "longitude":        "",
+        "switchToDark":     "20:00",
+        "switchToLight":    "07:00"
+    }
 
-config["desktop"] = get_desktop()
+    # plugin settings
+    for plugin in plugins:
+        config[plugin] = {
+            "enabled": False,
+            "lightTheme": "",
+            "darkTheme": ""
+        }
+
+    # default themes
+    config["code"]["LightTheme"] = "Default Light+"
+    config["code"]["DarkTheme"] = "Default Dark+"
+
+    config["kde"]["LightTheme"] = "org.kde.breeze.desktop"
+    config["kde"]["DarkTheme"] = "org.kde.breezedark.desktop"
+
+    config["firefox"]["DarkTheme"] = "firefox-compact-dark@mozilla.org"
+    config["firefox"]["LightTheme"] = "firefox-compact-light@mozilla.org"
 
 
 def get_config():
@@ -121,9 +124,12 @@ def get_config():
     return config
 
 
-def update(key, value):
+def update(plugin: Optional[str], key, value):
     """Update the value of a key in configuration"""
-    config[key] = value
+    if plugin is None:
+        config[key] = value
+    else:
+        config[plugin][key] = value
     write_config()
 
 
