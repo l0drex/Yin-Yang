@@ -78,14 +78,7 @@ def set_sun_time():
         print("Error: {0}.".format(e))
 
 
-# generate path for yin-yang if there is none this will be skipped
-pathlib.Path(path + "/yin_yang").mkdir(parents=True, exist_ok=True)
-
-if exists():
-    # making config global for this module
-    with open(path + "/yin_yang/yin_yang.json", "r") as conf:
-        config = json.load(conf)
-else:
+def get_default():
     # if there is no config generate a generic one
     config = {
         "version":          assembly_version,
@@ -117,6 +110,63 @@ else:
 
     config["firefox"]["DarkTheme"] = "firefox-compact-dark@mozilla.org"
     config["firefox"]["LightTheme"] = "firefox-compact-light@mozilla.org"
+
+    return config
+
+
+def update_config(old_config: dict):
+    """Update old config files"""
+
+    # replace current config with defaults
+    config = get_default()
+
+    # replace default values with old ones
+    if old_config["version"] <= 2.1:
+        # determine mode
+        if old_config["schedule"]:
+            mode = Modes.scheduled.value
+        elif old_config["followSun"]:
+            mode = Modes.followSun.value
+        else:
+            mode = Modes.manual.value
+
+        config["mode"] = mode
+
+        # put settings for plugins into sections
+        for plugin in plugins:
+            for key in get_default()[plugin].keys:
+                config[plugin][key] = old_config[plugin+key.title()]
+
+    # after all checks, update the version
+    update("version", assembly_version)
+
+    return config
+
+
+def load_config():
+    """Load config from file or generate new one"""
+    # generate path for yin-yang if there is none this will be skipped
+    pathlib.Path(path + "/yin_yang").mkdir(parents=True, exist_ok=True)
+
+    # check if config exists
+    if os.path.isfile(path + "/yin_yang/yin_yang.json"):
+        # load config
+        with open(path + "/yin_yang/yin_yang.json", "r") as conf:
+            config = json.load(conf)
+
+    if config["version"] < assembly_version:
+        update_config()
+
+    if config is None or config == {}:
+        # use default values if something went wrong
+        print("Using default values.")
+        config = get_default()
+
+    return config
+
+
+# making config global
+config = load_config()
 
 
 def get(key, plugin: Optional[str]):
