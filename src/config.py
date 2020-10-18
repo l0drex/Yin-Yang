@@ -13,10 +13,7 @@ home = os.getenv("HOME")
 path = home + "/.config"
 
 # plugin categories are used in the gui
-plugins = {
-    "system": ["kde", "gnome", "gtk", "kvantum", "wallpaper"],
-    "applications": ["firefox", "vscode", "atom"]
-}
+plugins = ["kde", "gnome", "gtk", "kvantum", "wallpaper", "firefox", "code", "atom"]
 
 
 class Modes(Enum):
