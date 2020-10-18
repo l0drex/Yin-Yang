@@ -119,6 +119,14 @@ else:
     config["firefox"]["LightTheme"] = "firefox-compact-light@mozilla.org"
 
 
+def get(key, plugin: Optional[str]):
+    """Return the given key from the config"""
+    if plugin is None:
+        return config[key]
+    else:
+        return config[plugin][key]
+
+
 def get_config():
     """returns the config"""
     return config
@@ -137,152 +145,3 @@ def write_config(config=config):
     """Write configuration"""
     with open(path + "/yin_yang/yin_yang.json", 'w') as conf:
         json.dump(config, conf, indent=4)
-
-
-def gtk_exists():
-    return os.path.isfile(path + "/gtk-3.0/settings.ini")
-
-
-def get_enabled_plugins():
-    """returns a list of plugins which are activated"""
-    pass
-
-
-def get_light_time():
-    """returns the time which should toggle the lightMode"""
-    pass
-
-
-def get_dark_time():
-    """returns the time which should toggle the lightMode"""
-    pass
-
-
-def get_theme():
-    return config["theme"]
-
-
-def get_kde_light_theme():
-    return config["kdeLightTheme"]
-
-
-def get_kde_dark_theme():
-    return config["kdeDarkTheme"]
-
-
-def get_kde_enabled():
-    return config["kdeEnabled"]
-
-
-def get_code_light_theme():
-    return config["codeLightTheme"]
-
-
-def get_code_dark_theme():
-    return config["codeDarkTheme"]
-
-
-def get_code_enabled():
-    return config["codeEnabled"]
-
-
-def get_gtk_light_theme():
-    return config["gtkLightTheme"]
-
-
-def get_gtk_dark_theme():
-    return config["gtkDarkTheme"]
-
-
-def get_gtk_enabled():
-    return config["gtkEnabled"]
-
-
-def get(key, plugin: Optional[str]):
-    """Return the given key from the config"""
-    if plugin is None:
-        return config[key]
-    else:
-        return config[plugin][key]
-
-
-def is_scheduled():
-    return config["schedule"]
-
-
-def get_version():
-    return config["version"]
-
-
-def kde_get_light_theme():
-    """Return the KDE light theme specified in the yin-yang config"""
-    return config["kdeLightTheme"]
-
-
-def kde_get_dark_theme():
-    """Return the KDE dark theme specified in the yin-yang config"""
-    return config["kdeDarkTheme"]
-
-
-def kde_get_checkbox():
-    return config["kdeEnabled"]
-
-
-def gtk_get_light_theme():
-    """Return the  GTK Light theme specified in the yin-yang config"""
-    return config["gtkLightTheme"]
-
-
-def gtk_get_dark_theme():
-    """Return the  GTK dark theme specified in the yin-yang config"""
-    return config["gtkDarkTheme"]
-
-
-def sound_get_checkbox():
-    return config["soundEnabled"]
-
-
-def gtk_get_checkbox():
-    return config["gtkEnabled"]
-
-
-def code_get_light_theme():
-    """Return the code light theme specified in the yin-yang config"""
-    return config["codeLightTheme"]
-
-
-def code_get_dark_theme():
-    """Return the  code dark theme specified in the yin-yang config"""
-    return config["codeDarkTheme"]
-
-
-def code_get_checkbox():
-    return config["codeEnabled"]
-
-
-def gnome_get_light_theme():
-    """Return the  Gnome Shell Light theme specified in the yin-yang config"""
-    return config["gnomeLightTheme"]
-
-
-def gnome_get_dark_theme():
-    """Return the  Gnome Shell dark theme specified in the yin-yang config"""
-    return config["gnomeDarkTheme"]
-
-
-def gnome_get_checkbox():
-    return config["gnomeEnabled"]
-
-
-def kvantum_get_light_theme():
-    """Return the Kvantum Light theme specified in the yin-yang config"""
-    return config["kvantumLightTheme"]
-
-
-def kvantum_get_dark_theme():
-    """Return the Kvantum dark theme specified in the yin-yang config"""
-    return config["kvantumDarkTheme"]
-
-
-def kvantum_get_checkbox():
-    return config["kvantumEnabled"]
