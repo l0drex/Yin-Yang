@@ -13,7 +13,8 @@ home = os.getenv("HOME")
 path = home + "/.config"
 
 # plugin categories are used in the gui
-plugins = ["kde", "gnome", "gtk", "kvantum", "wallpaper", "firefox", "code", "atom"]
+plugins = ["kde", "gnome", "gtk", "kvantum", "wallpaper",
+           "firefox", "code", "atom"]
 
 
 class Modes(Enum):
@@ -42,15 +43,20 @@ def get_desktop():
     plasma_re = re.compile(r'plasma')
     plasma5_re = re.compile(r'plasma5')
 
-    if gnome_re.search(env) or gnome_re.search(second_env) or gnome_re.search(third_env):
+    if(gnome_re.search(env) or
+       gnome_re.search(second_env) or gnome_re.search(third_env)):
         return "gtk"
-    if budgie_re.search(env) or budgie_re.search(second_env) or budgie_re.search(third_env):
+    if(budgie_re.search(env) or
+       budgie_re.search(second_env) or budgie_re.search(third_env)):
         return "gtk"
-    if kde_re.search(env) or kde_re.search(second_env) or kde_re.search(third_env):
+    if(kde_re.search(env) or
+       kde_re.search(second_env) or kde_re.search(third_env)):
         return "kde"
-    if plasma_re.search(env) or plasma_re.search(second_env) or plasma_re.search(third_env):
+    if(plasma_re.search(env) or
+       plasma_re.search(second_env) or plasma_re.search(third_env)):
         return "kde"
-    if plasma5_re.search(env) or plasma5_re.search(second_env) or plasma5_re.search(third_env):
+    if(plasma5_re.search(env) or
+       plasma5_re.search(second_env) or plasma5_re.search(third_env)):
         return "kde"
     return "unknown"
 
