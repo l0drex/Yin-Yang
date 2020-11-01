@@ -83,7 +83,7 @@ def set_sun_time():
 
 def get_default():
     # if there is no config generate a generic one
-    config = {
+    conf_default = {
         "version":          assembly_version,
         "running":          False,
         "theme":            "",
@@ -98,30 +98,30 @@ def get_default():
 
     # plugin settings
     for plugin in plugins:
-        config[plugin] = {
+        conf_default[plugin] = {
             "enabled": False,
             "lightTheme": "",
             "darkTheme": ""
         }
 
     # default themes
-    config["code"]["LightTheme"] = "Default Light+"
-    config["code"]["DarkTheme"] = "Default Dark+"
+    conf_default["code"]["LightTheme"] = "Default Light+"
+    conf_default["code"]["DarkTheme"] = "Default Dark+"
 
-    config["kde"]["LightTheme"] = "org.kde.breeze.desktop"
-    config["kde"]["DarkTheme"] = "org.kde.breezedark.desktop"
+    conf_default["kde"]["LightTheme"] = "org.kde.breeze.desktop"
+    conf_default["kde"]["DarkTheme"] = "org.kde.breezedark.desktop"
 
-    config["firefox"]["DarkTheme"] = "firefox-compact-dark@mozilla.org"
-    config["firefox"]["LightTheme"] = "firefox-compact-light@mozilla.org"
+    conf_default["firefox"]["DarkTheme"] = "firefox-compact-dark@mozilla.org"
+    conf_default["firefox"]["LightTheme"] = "firefox-compact-light@mozilla.org"
 
-    return config
+    return conf_default
 
 
 def update_config(old_config: dict):
     """Update old config files"""
 
     # replace current config with defaults
-    config = get_default()
+    conf = get_default()
 
     # replace default values with old ones
     if old_config["version"] <= 2.1:
@@ -133,46 +133,48 @@ def update_config(old_config: dict):
         else:
             mode = Modes.manual.value
 
-        config["mode"] = mode
+        conf["mode"] = mode
 
         # put settings for plugins into sections
         for plugin in plugins:
-            for key in get_default()[plugin].keys:
-                config[plugin][key] = old_config[plugin+key.title()]
+            for key in get_default()[plugin].keys():
+                conf[plugin][key] = old_config[plugin+key.title()]
 
     # after all checks, update the version
     update("version", assembly_version)
 
-    return config
+    return conf
 
 
 def load_config():
     """Load config from file or generate new one"""
     # generate path for yin-yang if there is none this will be skipped
     pathlib.Path(path + "/yin_yang").mkdir(parents=True, exist_ok=True)
+    
+    conf = {}
 
-    # check if config exists
+    # check if conf exists
     if os.path.isfile(path + "/yin_yang/yin_yang.json"):
-        # load config
+        # load conf
         with open(path + "/yin_yang/yin_yang.json", "r") as conf:
-            config = json.load(conf)
+            conf = json.load(conf)
 
-    if config["version"] < assembly_version:
-        update_config()
+    if conf["version"] < assembly_version:
+        conf = update_config(conf)
 
-    if config is None or config == {}:
+    if conf is None or conf == {}:
         # use default values if something went wrong
         print("Using default values.")
-        config = get_default()
+        conf = get_default()
 
-    return config
+    return conf
 
 
-# making config global
+# making conf global
 config = load_config()
 
 
-def get(key, plugin: Optional[str]):
+def get(key, plugin: Optional[str] = None):
     """Return the given key from the config"""
     if plugin is None:
         return config[key]
@@ -185,7 +187,7 @@ def get_config():
     return config
 
 
-def update(key, value, plugin: Optional[str]):
+def update(key, value, plugin: Optional[str] = None):
     """Update the value of a key in configuration"""
     if plugin is None:
         config[key] = value
@@ -194,7 +196,7 @@ def update(key, value, plugin: Optional[str]):
     write_config()
 
 
-def write_config(config=config):
+def write_config(conf=config):
     """Write configuration"""
-    with open(path + "/yin_yang/yin_yang.json", 'w') as conf:
-        json.dump(config, conf, indent=4)
+    with open(path + "/yin_yang/yin_yang.json", 'w') as conf_file:
+        json.dump(conf, conf_file, indent=4)
