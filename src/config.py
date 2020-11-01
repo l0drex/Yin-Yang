@@ -23,9 +23,123 @@ class Modes(Enum):
     followSun = "sunset and sunrise"
 
 
-def exists():
-    """returns True or False whether Config exists"""
-    return os.path.isfile(path + "/yin_yang/yin_yang.json")
+def get_default():
+    # if there is no config generate a generic one
+    conf_default = {
+        "version": assembly_version,
+        "running": False,
+        "theme": "",
+        "soundEnabled": False,
+        "desktop": get_desktop(),
+        "mode": Modes.manual.value,
+        "latitude": "",
+        "longitude": "",
+        "switchToDark": "20:00",
+        "switchToLight": "07:00"
+    }
+
+    # plugin settings
+    for plugin in plugins:
+        conf_default[plugin] = {
+            "enabled": False,
+            "lightTheme": "",
+            "darkTheme": ""
+        }
+
+    # default themes
+    conf_default["code"]["LightTheme"] = "Default Light+"
+    conf_default["code"]["DarkTheme"] = "Default Dark+"
+
+    conf_default["kde"]["LightTheme"] = "org.kde.breeze.desktop"
+    conf_default["kde"]["DarkTheme"] = "org.kde.breezedark.desktop"
+
+    conf_default["firefox"]["DarkTheme"] = "firefox-compact-dark@mozilla.org"
+    conf_default["firefox"]["LightTheme"] = "firefox-compact-light@mozilla.org"
+
+    return conf_default
+
+
+class ConfigParser:
+    config: dict
+
+    def __init__(self):
+        self.config = self.load()
+
+    def update_config(self):
+        """Update old config files"""
+
+        # replace current config with defaults
+        config_old = self.config.copy()
+        self.config = get_default()
+
+        # replace default values with old ones
+        if config_old["version"] <= 2.1:
+            # determine mode
+            if config_old["schedule"]:
+                mode = Modes.scheduled.value
+            elif config_old["followSun"]:
+                mode = Modes.followSun.value
+            else:
+                mode = Modes.manual.value
+
+            self.config["mode"] = mode
+
+            # put settings for plugins into sections
+            for plugin in plugins:
+                for key in get_default()[plugin].keys():
+                    self.config[plugin][key] = config_old[plugin + key.title()]
+
+        # after all checks, update the version
+        self.update("version", assembly_version)
+
+        return config_old
+
+    def load(self):
+        """Load config from file or generate new one"""
+        # generate path for yin-yang if there is none this will be skipped
+        pathlib.Path(path + "/yin_yang").mkdir(parents=True, exist_ok=True)
+
+        conf = {}
+
+        # check if conf exists
+        if os.path.isfile(path + "/yin_yang/yin_yang.json"):
+            # load conf
+            with open(path + "/yin_yang/yin_yang.json", "r") as conf:
+                conf = json.load(conf)
+
+        if conf["version"] < assembly_version:
+            conf = self.update_config()
+
+        if conf is None or conf == {}:
+            # use default values if something went wrong
+            print("Using default values.")
+            conf = get_default()
+
+        return conf
+
+    def get(self, key, plugin: Optional[str] = None):
+        """Return the given key from the config"""
+        if plugin is None:
+            return self.config[key]
+        else:
+            return self.config[plugin][key]
+
+    def get_config(self):
+        """returns the config"""
+        return self.config
+
+    def update(self, key, value, plugin: Optional[str] = None):
+        """Update the value of a key in configuration"""
+        if plugin is None:
+            self.config[key] = value
+        else:
+            self.config[plugin][key] = value
+        self.write()
+
+    def write(self):
+        """Write configuration"""
+        with open(path + "/yin_yang/yin_yang.json", 'w') as conf_file:
+            json.dump(self.config, conf_file, indent=4)
 
 
 def get_desktop():
@@ -79,124 +193,3 @@ def set_sun_time():
 
     except SunTimeException as e:
         print("Error: {0}.".format(e))
-
-
-def get_default():
-    # if there is no config generate a generic one
-    conf_default = {
-        "version":          assembly_version,
-        "running":          False,
-        "theme":            "",
-        "soundEnabled":     False,
-        "desktop":          get_desktop(),
-        "mode":             Modes.manual.value,
-        "latitude":         "",
-        "longitude":        "",
-        "switchToDark":     "20:00",
-        "switchToLight":    "07:00"
-    }
-
-    # plugin settings
-    for plugin in plugins:
-        conf_default[plugin] = {
-            "enabled": False,
-            "lightTheme": "",
-            "darkTheme": ""
-        }
-
-    # default themes
-    conf_default["code"]["LightTheme"] = "Default Light+"
-    conf_default["code"]["DarkTheme"] = "Default Dark+"
-
-    conf_default["kde"]["LightTheme"] = "org.kde.breeze.desktop"
-    conf_default["kde"]["DarkTheme"] = "org.kde.breezedark.desktop"
-
-    conf_default["firefox"]["DarkTheme"] = "firefox-compact-dark@mozilla.org"
-    conf_default["firefox"]["LightTheme"] = "firefox-compact-light@mozilla.org"
-
-    return conf_default
-
-
-def update_config(old_config: dict):
-    """Update old config files"""
-
-    # replace current config with defaults
-    conf = get_default()
-
-    # replace default values with old ones
-    if old_config["version"] <= 2.1:
-        # determine mode
-        if old_config["schedule"]:
-            mode = Modes.scheduled.value
-        elif old_config["followSun"]:
-            mode = Modes.followSun.value
-        else:
-            mode = Modes.manual.value
-
-        conf["mode"] = mode
-
-        # put settings for plugins into sections
-        for plugin in plugins:
-            for key in get_default()[plugin].keys():
-                conf[plugin][key] = old_config[plugin+key.title()]
-
-    # after all checks, update the version
-    update("version", assembly_version)
-
-    return conf
-
-
-def load_config():
-    """Load config from file or generate new one"""
-    # generate path for yin-yang if there is none this will be skipped
-    pathlib.Path(path + "/yin_yang").mkdir(parents=True, exist_ok=True)
-    
-    conf = {}
-
-    # check if conf exists
-    if os.path.isfile(path + "/yin_yang/yin_yang.json"):
-        # load conf
-        with open(path + "/yin_yang/yin_yang.json", "r") as conf:
-            conf = json.load(conf)
-
-    if conf["version"] < assembly_version:
-        conf = update_config(conf)
-
-    if conf is None or conf == {}:
-        # use default values if something went wrong
-        print("Using default values.")
-        conf = get_default()
-
-    return conf
-
-
-# making conf global
-config = load_config()
-
-
-def get(key, plugin: Optional[str] = None):
-    """Return the given key from the config"""
-    if plugin is None:
-        return config[key]
-    else:
-        return config[plugin][key]
-
-
-def get_config():
-    """returns the config"""
-    return config
-
-
-def update(key, value, plugin: Optional[str] = None):
-    """Update the value of a key in configuration"""
-    if plugin is None:
-        config[key] = value
-    else:
-        config[plugin][key] = value
-    write_config()
-
-
-def write_config(conf=config):
-    """Write configuration"""
-    with open(path + "/yin_yang/yin_yang.json", 'w') as conf_file:
-        json.dump(conf, conf_file, indent=4)
