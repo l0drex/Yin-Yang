@@ -117,16 +117,17 @@ class ConfigParser:
 
         return conf
 
+    def write(self):
+        """Write configuration"""
+        with open(path + "/yin_yang/yin_yang.json", 'w') as conf_file:
+            json.dump(self.config, conf_file, indent=4)
+
     def get(self, key, plugin: Optional[str] = None):
         """Return the given key from the config"""
         if plugin is None:
             return self.config[key]
         else:
             return self.config[plugin][key]
-
-    def get_config(self):
-        """returns the config"""
-        return self.config
 
     def update(self, key, value, plugin: Optional[str] = None):
         """Update the value of a key in configuration"""
@@ -136,10 +137,9 @@ class ConfigParser:
             self.config[plugin][key] = value
         self.write()
 
-    def write(self):
-        """Write configuration"""
-        with open(path + "/yin_yang/yin_yang.json", 'w') as conf_file:
-            json.dump(self.config, conf_file, indent=4)
+    def get_config(self):
+        """returns the config"""
+        return self.config
 
 
 def get_desktop():
@@ -175,9 +175,9 @@ def get_desktop():
     return "unknown"
 
 
-def set_sun_time():
-    latitude: float = float(get("latitude"))
-    longitude: float = float(get("latitude"))
+def set_sun_time(config: ConfigParser):
+    latitude: float = float(config.get("latitude"))
+    longitude: float = float(config.get("latitude"))
     sun = Sun(latitude, longitude)
 
     try:
@@ -188,8 +188,8 @@ def set_sun_time():
               format(today_sr.strftime('%H:%M'), today_ss.strftime('%H:%M')))
 
         # Get today's sunrise and sunset in UTC
-        update("switchToLight", today_sr.strftime('%H:%M'))
-        update("switchToDark", today_ss.strftime('%H:%M'))
+        config.update("switchToLight", today_sr.strftime('%H:%M'))
+        config.update("switchToDark", today_ss.strftime('%H:%M'))
 
     except SunTimeException as e:
         print("Error: {0}.".format(e))
