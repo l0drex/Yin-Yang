@@ -63,7 +63,17 @@ class ConfigParser:
     config: dict
 
     def __init__(self):
+        # load config from file
         self.config = self.load()
+
+        # use default values if something went wrong
+        if self.config is None or self.config == {}:
+            print("Using default values.")
+            self.config = get_default()
+
+        # check if config needs an update
+        if self.config["version"] < assembly_version:
+            self.update_config()
 
     def update_config(self):
         """Update old config files"""
@@ -106,14 +116,6 @@ class ConfigParser:
             # load conf
             with open(path + "/yin_yang/yin_yang.json", "r") as conf:
                 conf = json.load(conf)
-
-        if conf["version"] < assembly_version:
-            conf = self.update_config()
-
-        if conf is None or conf == {}:
-            # use default values if something went wrong
-            print("Using default values.")
-            conf = get_default()
 
         return conf
 
