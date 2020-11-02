@@ -28,7 +28,7 @@ def get_default():
     conf_default = {
         "version": assembly_version,
         "running": False,
-        "theme": "",
+        "dark_mode": False,
         "soundEnabled": False,
         "desktop": get_desktop(),
         "mode": Modes.manual.value,
@@ -68,14 +68,17 @@ class ConfigParser:
 
         # use default values if something went wrong
         if self.config is None or self.config == {}:
-            print("Using default values.")
+            print("Error while loading config. Using default values.")
             self.config = get_default()
+            self.write()
 
         # check if config needs an update
         if self.config["version"] < assembly_version:
+            print("Updating config file.")
             self.update_config()
+            self.write()
 
-    def update_config(self):
+    def update_config(self) -> dict:
         """Update old config files"""
 
         # replace current config with defaults
@@ -91,21 +94,25 @@ class ConfigParser:
                 mode = Modes.followSun.value
             else:
                 mode = Modes.manual.value
-
             self.config["mode"] = mode
+
+            # determine theme
+            self.config["dark_mode"] = config_old["theme"] == "dark"
 
             # put settings for plugins into sections
             for plugin in plugins:
                 for key in get_default()[plugin].keys():
-                    self.config[plugin][key] = config_old[plugin + key.title()]
+                    key_old = key[0].upper() + key[1:]
+                    self.config[plugin][key] = config_old[plugin + key_old]
 
         # after all checks, update the version
-        self.update("version", assembly_version)
+        self.config["version"] = assembly_version
 
         return config_old
 
-    def load(self):
+    def load(self) -> dict:
         """Load config from file or generate new one"""
+
         # generate path for yin-yang if there is none this will be skipped
         pathlib.Path(path + "/yin_yang").mkdir(parents=True, exist_ok=True)
 
@@ -121,6 +128,8 @@ class ConfigParser:
 
     def write(self):
         """Write configuration"""
+
+        print("Saving the config")
         with open(path + "/yin_yang/yin_yang.json", 'w') as conf_file:
             json.dump(self.config, conf_file, indent=4)
 
@@ -133,13 +142,13 @@ class ConfigParser:
 
     def update(self, key, value, plugin: Optional[str] = None):
         """Update the value of a key in configuration"""
+        # TODO create type for value and set that as return type
         if plugin is None:
             self.config[key] = value
         else:
             self.config[plugin][key] = value
-        self.write()
 
-    def get_config(self):
+    def get_config(self) -> dict:
         """returns the config"""
         return self.config
 
