@@ -152,6 +152,25 @@ class ConfigParser:
         """returns the config"""
         return self.config
 
+    def set_sun_time(self):
+        latitude: float = float(self.get("latitude"))
+        longitude: float = float(self.get("latitude"))
+        sun = Sun(latitude, longitude)
+
+        try:
+            today_sr = sun.get_local_sunrise_time()
+            today_ss = sun.get_local_sunset_time()
+
+            print('Today the sun raised at {} and get down at {}'.
+                  format(today_sr.strftime('%H:%M'), today_ss.strftime('%H:%M')))
+
+            # Get today's sunrise and sunset in UTC
+            self.update("switchToLight", today_sr.strftime('%H:%M'))
+            self.update("switchToDark", today_ss.strftime('%H:%M'))
+
+        except SunTimeException as e:
+            print("Error: {0}.".format(e))
+
 
 def get_desktop():
     """Return the current desktops name or 'unknown' if can't determine it"""
@@ -184,23 +203,3 @@ def get_desktop():
        plasma5_re.search(second_env) or plasma5_re.search(third_env)):
         return "kde"
     return "unknown"
-
-
-def set_sun_time(config: ConfigParser):
-    latitude: float = float(config.get("latitude"))
-    longitude: float = float(config.get("latitude"))
-    sun = Sun(latitude, longitude)
-
-    try:
-        today_sr = sun.get_local_sunrise_time()
-        today_ss = sun.get_local_sunset_time()
-
-        print('Today the sun raised at {} and get down at {}'.
-              format(today_sr.strftime('%H:%M'), today_ss.strftime('%H:%M')))
-
-        # Get today's sunrise and sunset in UTC
-        config.update("switchToLight", today_sr.strftime('%H:%M'))
-        config.update("switchToDark", today_ss.strftime('%H:%M'))
-
-    except SunTimeException as e:
-        print("Error: {0}.".format(e))
