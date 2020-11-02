@@ -3,14 +3,12 @@ import os
 import pathlib
 import re
 from enum import Enum
-from typing import Optional
+from typing import Optional, Union
 
 from main import assembly_version
 from suntime import Sun, SunTimeException
 
-# aliases for path to use later on
-home = os.getenv("HOME")
-path = home + "/.config"
+ConfigValue = Union[str, float, bool]
 
 # plugin categories are used in the gui
 plugins = ["kde", "gnome", "gtk", "kvantum", "wallpaper",
@@ -23,7 +21,12 @@ class Modes(Enum):
     followSun = "sunset and sunrise"
 
 
-def get_default():
+# aliases for path to use later on
+home = os.getenv("HOME")
+path = home + "/.config"
+
+
+def get_default() -> dict:
     # if there is no config generate a generic one
     conf_default = {
         "version": assembly_version,
@@ -32,8 +35,8 @@ def get_default():
         "soundEnabled": False,
         "desktop": get_desktop(),
         "mode": Modes.manual.value,
-        "latitude": "",
-        "longitude": "",
+        "latitude": 0.0,
+        "longitude": 0.0,
         "switchToDark": "20:00",
         "switchToLight": "07:00"
     }
@@ -79,7 +82,12 @@ class ConfigParser:
             self.write()
 
     def update_config(self) -> dict:
-        """Update old config files"""
+        """Update old config files
+        Adds keys or restructures the config if an old config was loaded from the config file.
+        Sets the new config directly to the dict in this class.
+
+        :returns: the old config
+        """
 
         # replace current config with defaults
         config_old = self.config.copy()
@@ -111,7 +119,7 @@ class ConfigParser:
         return config_old
 
     def load(self) -> dict:
-        """Load config from file or generate new one"""
+        """Load config from file"""
 
         # generate path for yin-yang if there is none this will be skipped
         pathlib.Path(path + "/yin_yang").mkdir(parents=True, exist_ok=True)
@@ -126,33 +134,63 @@ class ConfigParser:
 
         return conf
 
-    def write(self):
-        """Write configuration"""
+    def write(self) -> bool:
+        """Write configuration
+
+        :returns: whether save was successful
+        """
 
         print("Saving the config")
-        with open(path + "/yin_yang/yin_yang.json", 'w') as conf_file:
-            json.dump(self.config, conf_file, indent=4)
+        try:
+            with open(path + "/yin_yang/yin_yang.json", 'w') as conf_file:
+                json.dump(self.config, conf_file, indent=4)
+            return True
+        except IOError as e:
+            print(f"Error while writing the file: {e}")
+            return False
 
-    def get(self, key, plugin: Optional[str] = None):
-        """Return the given key from the config"""
+    def get(self, key, plugin: Optional[str] = None) -> ConfigValue:
+        """Return the given key from the config
+
+        :param key: the key to change
+        :param plugin: name of the plugin
+
+        :returns: value
+        """
+
         if plugin is None:
             return self.config[key]
         else:
             return self.config[plugin][key]
 
-    def update(self, key, value, plugin: Optional[str] = None):
-        """Update the value of a key in configuration"""
+    def update(self, key: str, value: ConfigValue, plugin: Optional[str] = None) -> ConfigValue:
+        """Update the value of a key in configuration
+
+        :param key: The setting to change
+        :param value: The value to set the setting to
+        :param plugin: Name of the plugin you may want to change
+
+        :returns: old value
+        """
+
         # TODO create type for value and set that as return type
-        if plugin is None:
-            self.config[key] = value
-        else:
-            self.config[plugin][key] = value
+        try:
+            if plugin is None:
+                self.config[key] = value
+            else:
+                self.config[plugin][key] = value
+            return True
+        except KeyError as e:
+            print(f'Error while updating {key}')
+            raise e
 
     def get_config(self) -> dict:
         """returns the config"""
+
         return self.config
 
     def set_sun_time(self):
+        """Sets the sunrise and sunset to config based on location"""
         latitude: float = float(self.get("latitude"))
         longitude: float = float(self.get("latitude"))
         sun = Sun(latitude, longitude)
