@@ -190,7 +190,6 @@ class ConfigParser:
         :returns: old value
         """
 
-        # TODO create type for value and set that as return type
         try:
             old = self.get(key, plugin)
             if plugin is None:
