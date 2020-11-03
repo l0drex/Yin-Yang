@@ -7,6 +7,8 @@ import json
 import struct
 from src import config
 
+configParser = config.ConfigParser()
+
 
 def parse_time(time: str):
     hour = int(time.split(":")[0])
@@ -55,12 +57,13 @@ def get_message():
 while True:
     message_received = get_message()
     if message_received == 'GetSettings':
-        message_send: dict = {}
-        message_send['schedule'] = config.get("schedule")
-        message_send['theme_dark'] = config.get("firefoxDarkTheme")
-        message_send['theme_light'] = config.get("firefoxLightTheme")
-        message_send['theme_active'] = config.get("firefoxActiveTheme")
-        message_send['time_day'] = parse_time(config.get("switchToLight"))
-        message_send['time_night'] = parse_time(config.get("switchToDark"))
+        message_send: dict = {
+            'schedule': configParser.get("schedule"),
+            'theme_dark': configParser.get("firefoxDarkTheme"),
+            'theme_light': configParser.get("firefoxLightTheme"),
+            'theme_active': configParser.get("firefoxActiveTheme"),
+            'time_day': parse_time(configParser.get("switchToLight")),
+            'time_night': parse_time(configParser.get("switchToDark"))
+        }
 
         send_message(encode_message(message_send))

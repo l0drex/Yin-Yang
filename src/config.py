@@ -5,7 +5,6 @@ import re
 from enum import Enum
 from typing import Optional, Union
 
-from main import assembly_version
 from suntime import Sun, SunTimeException
 
 ConfigValue = Union[str, float, bool]
@@ -29,59 +28,68 @@ path = home + "/.config"
 def get_default() -> dict:
     # if there is no config generate a generic one
     conf_default = {
-        "version": assembly_version,
+        "version": -1,
         "running": False,
         "dark_mode": False,
-        "soundEnabled": False,
+        "sound_enabled": False,
         "desktop": get_desktop(),
         "mode": Modes.manual.value,
         "latitude": 0.0,
         "longitude": 0.0,
-        "switchToDark": "20:00",
-        "switchToLight": "07:00"
+        "switch_to_dark": "20:00",
+        "switch_to_light": "07:00"
     }
 
     # plugin settings
     for plugin in plugins:
         conf_default[plugin] = {
             "enabled": False,
-            "lightTheme": "",
-            "darkTheme": ""
+            "light_theme": "",
+            "dark_theme": ""
         }
 
     # default themes
-    conf_default["code"]["LightTheme"] = "Default Light+"
-    conf_default["code"]["DarkTheme"] = "Default Dark+"
+    conf_default["code"]["light_theme"] = "Default Light+"
+    conf_default["code"]["dark_theme"] = "Default Dark+"
 
-    conf_default["kde"]["LightTheme"] = "org.kde.breeze.desktop"
-    conf_default["kde"]["DarkTheme"] = "org.kde.breezedark.desktop"
+    conf_default["kde"]["light_theme"] = "org.kde.breeze.desktop"
+    conf_default["kde"]["dark_theme"] = "org.kde.breezedark.desktop"
 
-    conf_default["firefox"]["DarkTheme"] = "firefox-compact-dark@mozilla.org"
-    conf_default["firefox"]["LightTheme"] = "firefox-compact-light@mozilla.org"
+    conf_default["firefox"]["dark_theme"] = "firefox-compact-dark@mozilla.org"
+    conf_default["firefox"]["light_theme"] = "firefox-compact-light@mozilla.org"
 
     return conf_default
 
 
 class ConfigParser:
-    config: dict
+    config: dict = None
 
-    def __init__(self):
-        # load config from file
-        self.config = self.load()
+    def __init__(self, version: float):
+        # FIXME
+        # if version < 0:
+        # return
+
+        if self.config is None:
+            # load config from file
+            self.config = self.load()
 
         # use default values if something went wrong
         if self.config is None or self.config == {}:
             print("Error while loading config. Using default values.")
             self.config = get_default()
+            self.update("version", version)
             self.write()
 
         # check if config needs an update
-        if self.config["version"] < assembly_version:
+        if self.config["version"] < version:
             print("Updating config file.")
             self.update_config()
             self.write()
 
-    def update_config(self) -> dict:
+        if self.get("mode") == Modes.followSun:
+            self.set_sun_time()
+
+    def update_config(self):
         """Update old config files
         Adds keys or restructures the config if an old config was loaded from the config file.
         Sets the new config directly to the dict in this class.
@@ -94,6 +102,8 @@ class ConfigParser:
         self.config = get_default()
 
         # replace default values with old ones
+        if config_old["version"] < 0:
+            return config_old
         if config_old["version"] <= 2.1:
             # determine mode
             if config_old["schedule"]:
@@ -112,11 +122,8 @@ class ConfigParser:
                 for key in get_default()[plugin].keys():
                     key_old = key[0].upper() + key[1:]
                     self.config[plugin][key] = config_old[plugin + key_old]
-
-        # after all checks, update the version
-        self.config["version"] = assembly_version
-
         return config_old
+
 
     def load(self) -> dict:
         """Load config from file"""
@@ -158,10 +165,20 @@ class ConfigParser:
         :returns: value
         """
 
-        if plugin is None:
-            return self.config[key]
-        else:
-            return self.config[plugin][key]
+        try:
+            if plugin is None:
+                return self.config[key.casefold()]
+            else:
+                return self.config[plugin.casefold()][key.casefold()]
+        except KeyError as e:
+            print(f"Unknown key {key}")
+            if plugin is None:
+                for p in plugins:
+                    if p in key:
+                        print("Key is deprecated. Use plugin option instead")
+                        return self.get(key.replace(p, ''), plugin=p)
+            else:
+                raise e
 
     def update(self, key: str, value: ConfigValue, plugin: Optional[str] = None) -> ConfigValue:
         """Update the value of a key in configuration
@@ -175,11 +192,12 @@ class ConfigParser:
 
         # TODO create type for value and set that as return type
         try:
+            old = self.get(key, plugin)
             if plugin is None:
-                self.config[key] = value
+                self.config[key.casefold()] = value
             else:
-                self.config[plugin][key] = value
-            return True
+                self.config[plugin.casefold()][key.casefold()] = value
+            return old
         except KeyError as e:
             print(f'Error while updating {key}')
             raise e

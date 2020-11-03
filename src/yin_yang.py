@@ -26,6 +26,8 @@ from src.plugins import kde, gtkkde, wallpaper, vscode, atom, gtk, firefox, gnom
 user = pwd.getpwuid(os.getuid())[0]
 path = "/home/" + user + "/.config/"
 
+config = config.ConfigParser(-1)
+
 terminate = False
 
 
@@ -35,28 +37,28 @@ class Yang(threading.Thread):
         self.thread_id = thread_id
 
     def run(self):
-        if config.get("codeEnabled"):
+        if config.get("Enabled", plugin="code"):
             vscode.switch_to_light()
-        if config.get("atomEnabled"):
+        if config.get("Enabled", plugin="atom"):
             atom.switch_to_light()
-        if config.get("kdeEnabled"):
+        if config.get("Enabled", plugin="kde"):
             kde.switch_to_light()
-        if config.get("wallpaperEnabled"):
+        if config.get("Enabled", plugin="wallpaper"):
             wallpaper.switch_to_light()
         # kde support
-        if config.get("gtkEnabled") and config.get("desktop") == "kde":
+        if config.get("Enabled", plugin="gtk") and config.get("desktop") == "kde":
             gtkkde.switch_to_light()
         # gnome and budgie support
-        if config.get("gtkEnabled") and config.get("desktop") == "gtk":
+        if config.get("Enabled", plugin="gtk") and config.get("desktop") == "gtk":
             gtk.switch_to_light()
         # gnome-shell
-        if config.get("gnomeEnabled"):
+        if config.get("Enabled", plugin="gnome"):
             gnome.switch_to_light()
         # firefox support
-        if config.get("firefoxEnabled"):
+        if config.get("Enabled", plugin="firefox"):
             firefox.switch_to_light()
         # kvantum support
-        if config.get("kvantumEnabled"):
+        if config.get("Enabled", plugin="kvantum"):
             kvantum.switch_to_light()
         play_sound("./assets/light.wav")
 
@@ -67,28 +69,28 @@ class Yin(threading.Thread):
         self.thread_id = thread_id
 
     def run(self):
-        if config.get("codeEnabled"):
+        if config.get("Enabled", plugin="code"):
             vscode.switch_to_dark()
-        if config.get("atomEnabled"):
+        if config.get("Enabled", plugin="atom"):
             atom.switch_to_dark()
-        if config.get("kdeEnabled"):
+        if config.get("Enabled", "kde"):
             kde.switch_to_dark()
-        if config.get("wallpaperEnabled"):
+        if config.get("Enabled", plugin="wallpaper"):
             wallpaper.switch_to_dark()
         # kde support
-        if config.get("gtkEnabled") and config.get("desktop") == "kde":
+        if config.get("Enabled", plugin="gtk") and config.get("desktop") == "kde":
             gtkkde.switch_to_dark()
         # gnome and budgie support
-        if config.get("gtkEnabled") and config.get("desktop") == "gtk":
+        if config.get("Enabled", plugin="gtk") and config.get("desktop") == "gtk":
             gtk.switch_to_dark()
         # gnome-shell
-        if config.get("gnomeEnabled"):
+        if config.get("Enabled", plugin="gnome"):
             gnome.switch_to_dark()
         # firefox support
-        if config.get("firefoxEnabled"):
+        if config.get("Enabled", plugin="firefox"):
             firefox.switch_to_dark()
         # kvantum support
-        if config.get("kvantumEnabled"):
+        if config.get("Enabled", plugin="kvantum"):
             kvantum.switch_to_dark()
         play_sound("./assets/dark.wav")
 
@@ -105,22 +107,18 @@ class Daemon(threading.Thread):
                 config.update("running", False)
                 break
 
-            if not config.is_scheduled():
+            if not config.get('mode') == config.Modes.scheduled.value:
                 config.update("running", False)
                 break
 
-            editable = config.get_config()
-
-            theme = config.get("theme")
-
             if should_be_light():
-                if theme == "light":
+                if not config.get("dark_mode"):
                     time.sleep(30)
                     continue
                 else:
                     switch_to_light()
             else:
-                if theme == "dark":
+                if config.get("dark_mode"):
                     time.sleep(30)
                     continue
                 else:
@@ -132,14 +130,14 @@ class Daemon(threading.Thread):
 def switch_to_light():
     yang = Yang(1)
     yang.start()
-    config.update("theme", "light")
+    config.update("dark_mode", False)
     yang.join()
 
 
 def switch_to_dark():
     yin = Yin(2)
     yin.start()
-    config.update("theme", "dark")
+    config.update("dark_mode", True)
     yin.join()
 
 
@@ -166,7 +164,7 @@ def play_sound(sound):
     :rtype: I hope you will hear your Sound ;)
     """
 
-    if config.get("soundEnabled"):
+    if config.get("sound_Enabled"):
         subprocess.run(["paplay", resource_path(sound)])
 
 
@@ -175,10 +173,10 @@ def should_be_light():
     # returns: True if it should be light
     # returns: False if the theme should be dark
 
-    d_hour = int(config.get("switchToDark").split(":")[0])
-    d_minute = int(config.get("switchToDark").split(":")[1])
-    l_hour = int(config.get("switchToLight").split(":")[0])
-    l_minute = int(config.get("switchToLight").split(":")[1])
+    d_hour = int(config.get("switch_To_Dark").split(":")[0])
+    d_minute = int(config.get("switch_To_Dark").split(":")[1])
+    l_hour = int(config.get("switch_To_Light").split(":")[0])
+    l_minute = int(config.get("switch_To_Light").split(":")[1])
     hour = datetime.datetime.now().time().hour
     minute = datetime.datetime.now().time().minute
 
