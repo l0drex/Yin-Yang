@@ -14,14 +14,6 @@ QtWidgets.QApplication.setAttribute(
     QtCore.Qt.AA_EnableHighDpiScaling, True)
 
 
-def toggle_theme():
-    """Switch themes"""
-    if configParser.get("dark_mode"):
-        yin_yang.switch_to_dark()
-    else:
-        yin_yang.switch_to_light()
-
-
 def main():
     # using ArgumentParser for parsing arguments
     parser = ArgumentParser()
@@ -54,7 +46,7 @@ def main():
         elif args.toggle:
             # toggle theme manually
             configParser.update("mode", config.Modes.manual.value)
-            toggle_theme()
+            yin_yang.toggle_theme()
 
 
 if __name__ == "__main__":
