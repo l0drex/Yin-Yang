@@ -149,6 +149,10 @@ class ConfigParser:
         :returns: whether save was successful
         """
 
+        if DEBUGGING:
+            print('Saving the config in debug mode is disabled!')
+            return False
+
         print("Saving the config")
         try:
             with open(path + "/yin_yang/yin_yang.json", 'w') as conf_file:
