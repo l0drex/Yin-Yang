@@ -10,8 +10,10 @@ from suntime import Sun, SunTimeException
 ConfigValue = Union[str, float, bool]
 
 # plugin categories are used in the gui
-plugins = ["kde", "gnome", "gtk", "kvantum", "wallpaper",
+PLUGINS = ["kde", "gnome", "gtk", "kvantum", "wallpaper",
            "firefox", "code", "atom"]
+
+DEBUGGING = True
 
 
 class Modes(Enum):
@@ -41,7 +43,7 @@ def get_default() -> dict:
     }
 
     # plugin settings
-    for plugin in plugins:
+    for plugin in PLUGINS:
         conf_default[plugin] = {
             "enabled": False,
             "light_theme": "",
@@ -69,13 +71,13 @@ class ConfigParser:
         # if version < 0:
         # return
 
-        if self.config is None:
+        if self.config is None and not DEBUGGING:
             # load config from file
             self.config = self.load()
 
         # use default values if something went wrong
         if self.config is None or self.config == {}:
-            print("Error while loading config. Using default values.")
+            print("Using default values.")
             self.config = get_default()
             self.update("version", version)
             self.write()
@@ -117,8 +119,8 @@ class ConfigParser:
             # determine theme
             self.config["dark_mode"] = config_old["theme"] == "dark"
 
-            # put settings for plugins into sections
-            for plugin in plugins:
+            # put settings for PLUGINS into sections
+            for plugin in PLUGINS:
                 for key in get_default()[plugin].keys():
                     key_old = key[0].upper() + key[1:]
                     self.config[plugin][key] = config_old[plugin + key_old]
@@ -173,7 +175,7 @@ class ConfigParser:
         except KeyError as e:
             print(f"Unknown key {key}")
             if plugin is None:
-                for p in plugins:
+                for p in PLUGINS:
                     if p in key:
                         print("Key is deprecated. Use plugin option instead")
                         return self.get(key.replace(p, ''), plugin=p)
