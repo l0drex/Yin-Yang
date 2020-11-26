@@ -4,10 +4,12 @@ import pathlib
 import re
 from enum import Enum
 from typing import Optional, Union
+
+import requests
 from suntime import Sun, SunTimeException
 from src.plugins import kde, gnome, gtk, kvantum, wallpaper, vscode, atom, sound
 
-ConfigValue = Union[str, float, bool]
+ConfigValue = Union[str, float, bool, tuple]
 
 # default objects
 PLUGINS = [kde.Kde(), gnome.Gnome(), gtk.Gtk(), kvantum.Kvantum(), wallpaper.Wallpaper(),
@@ -35,8 +37,7 @@ def get_default() -> dict:
         "dark_mode": False,
         "desktop": get_desktop(),
         "mode": Modes.manual.value,
-        "latitude": 0.0,
-        "longitude": 0.0,
+        "coordinates": (0, 0),
         "switch_to_dark": "20:00",
         "switch_to_light": "07:00"
     }
@@ -74,6 +75,7 @@ class ConfigParser:
 
         # update times for sunset and sunrise
         if self.get("mode") == Modes.followSun:
+            self.update('coordinates', get_location())
             self.set_sun_time()
 
         # save the config
@@ -189,6 +191,7 @@ class ConfigParser:
                 self.config[key.casefold()] = value
             else:
                 self.config[plugin.casefold()][key.casefold()] = value
+            self.write()
             return old
         except KeyError as e:
             print(f'Error while updating {key}')
@@ -201,8 +204,7 @@ class ConfigParser:
 
     def set_sun_time(self):
         """Sets the sunrise and sunset to config based on location"""
-        latitude: float = float(self.get("latitude"))
-        longitude: float = float(self.get("latitude"))
+        latitude, longitude = self.get('coordinates')
         sun = Sun(latitude, longitude)
 
         try:
@@ -251,6 +253,14 @@ def get_desktop():
        plasma5_re.search(second_env) or plasma5_re.search(third_env)):
         return "kde"
     return "unknown"
+
+
+def get_location() -> tuple:
+    """
+    Returns the current location as a tuple (latitude, longitude)
+    """
+    loc = requests.get('http://www.ipinfo.io/loc').text.split(',')
+    return float(loc[0]), float(loc[1])
 
 
 # create global object with current version
