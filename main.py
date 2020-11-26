@@ -10,7 +10,7 @@ from PyQt5 import QtCore
 QtWidgets.QApplication.setAttribute(
     QtCore.Qt.AA_EnableHighDpiScaling, True)
 
-config.debugging = True
+config.debugging = False
 
 
 def main():

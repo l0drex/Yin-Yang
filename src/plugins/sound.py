@@ -17,6 +17,7 @@ def resource_path(relative_path):
 
 
 class Sound(Plugin):
+    name = 'Sound'
     theme_bright = './assets/light.wav'
     theme_dark = './assets/dark.wav'
 

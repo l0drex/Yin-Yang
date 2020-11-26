@@ -76,6 +76,9 @@ class ConfigParser:
         if self.get("mode") == Modes.followSun:
             self.set_sun_time()
 
+        # save the config
+        self.write()
+
     def update_config(self):
         """Update old config files
         Adds keys or restructures the config if an old config was loaded from the config file.
@@ -106,9 +109,9 @@ class ConfigParser:
 
             # put settings for PLUGINS into sections
             for plugin in PLUGINS:
-                for key in get_default()[plugin.name.casefold()].keys():
+                for key in get_default()[plugin.name].keys():
                     key_old = key[0].upper() + key[1:]
-                    self.config[plugin.name.casefold()][key] = config_old[plugin.name.casefold() + key_old]
+                    self.config[plugin.name][key] = config_old[plugin.name.casefold() + key_old]
         return config_old
 
     def load(self) -> dict:
