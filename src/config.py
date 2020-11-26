@@ -4,14 +4,14 @@ import pathlib
 import re
 from enum import Enum
 from typing import Optional, Union
-
 from suntime import Sun, SunTimeException
+from src.plugins import kde, gnome, gtk, kvantum, wallpaper, vscode, atom
 
 ConfigValue = Union[str, float, bool]
 
-# plugin categories are used in the gui
-PLUGINS = ["kde", "gnome", "gtk", "kvantum", "wallpaper",
-           "firefox", "code", "atom"]
+# default objects
+PLUGINS = [kde.Kde, gnome.Gnome, gtk.Gtk, kvantum.Kvantum, wallpaper.Wallpaper,
+           vscode.Vscode, atom.Atom]
 
 DEBUGGING = True
 
@@ -44,10 +44,10 @@ def get_default() -> dict:
 
     # plugin settings
     for plugin in PLUGINS:
-        conf_default[plugin] = {
+        conf_default[plugin.name] = {
             "enabled": False,
-            "light_theme": "",
-            "dark_theme": ""
+            "light_theme": plugin.theme_bright,
+            "dark_theme": plugin.theme_dark
         }
 
     return conf_default
@@ -111,11 +111,10 @@ class ConfigParser:
 
             # put settings for PLUGINS into sections
             for plugin in PLUGINS:
-                for key in get_default()[plugin].keys():
+                for key in get_default()[plugin.name.casefold()].keys():
                     key_old = key[0].upper() + key[1:]
-                    self.config[plugin][key] = config_old[plugin + key_old]
+                    self.config[plugin.name.casefold()][key] = config_old[plugin.name.casefold() + key_old]
         return config_old
-
 
     def load(self) -> dict:
         """Load config from file"""
@@ -170,9 +169,9 @@ class ConfigParser:
             print(f"Unknown key {key}")
             if plugin is None:
                 for p in PLUGINS:
-                    if p in key:
+                    if p.name.casefold() in key:
                         print("Key is deprecated. Use plugin option instead")
-                        return self.get(key.replace(p, ''), plugin=p)
+                        return self.get(key.replace(p.name, ''), plugin=p.name)
             else:
                 raise e
 
