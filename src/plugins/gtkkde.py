@@ -31,6 +31,7 @@ def inplace_change(filename, old_string, new_string):
 
 
 class GtkKde(Plugin):
+    name = 'GTK'
     theme_bright = 'Breeze'
     theme_dark = 'Breeze'
 

@@ -39,6 +39,7 @@ def write_new_settings(settings, path):
 
 
 class Vscode(Plugin):
+    name = 'VS Code'
     theme_bright = 'Default Light+'
     theme_dark = 'Default Dark+'
 

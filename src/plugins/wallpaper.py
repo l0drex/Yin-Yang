@@ -4,6 +4,7 @@ from src.plugins.plugin import Plugin
 
 
 class Wallpaper(Plugin):
+    name = 'Wallpaper'
     theme_dark = ''
     theme_bright = ''
 

@@ -3,6 +3,7 @@ from src.plugins.plugin import Plugin
 
 
 class Gtk(Plugin):
+    name = 'GTK'
     # TODO set default theme names
     theme_dark = ''
     theme_bright = ''

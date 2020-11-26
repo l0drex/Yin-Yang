@@ -3,6 +3,7 @@ from src.plugins.plugin import Plugin
 
 
 class Kvantum(Plugin):
+    name = 'Kvantum'
     # TODO set default themes
     theme_bright = ''
     theme_dark = ''

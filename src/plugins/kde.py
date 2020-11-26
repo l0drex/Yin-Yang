@@ -3,6 +3,7 @@ from src.plugins.plugin import Plugin
 
 
 class Kde(Plugin):
+    name = 'KDE'
     theme_bright = 'org.kde.breeze.desktop'
     theme_dark = 'org.kde.breezedark.desktop'
 

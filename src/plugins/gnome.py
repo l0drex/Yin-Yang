@@ -5,6 +5,7 @@ from src.plugins.plugin import Plugin
 
 
 class Gnome(Plugin):
+    name = 'Gnome'
     # TODO set the default theme for gnome
     theme_dark = ''
     theme_bright = ''

@@ -50,16 +50,6 @@ def get_default() -> dict:
             "dark_theme": ""
         }
 
-    # default themes
-    conf_default["code"]["light_theme"] = "Default Light+"
-    conf_default["code"]["dark_theme"] = "Default Dark+"
-
-    conf_default["kde"]["light_theme"] = "org.kde.breeze.desktop"
-    conf_default["kde"]["dark_theme"] = "org.kde.breezedark.desktop"
-
-    conf_default["firefox"]["dark_theme"] = "firefox-compact-dark@mozilla.org"
-    conf_default["firefox"]["light_theme"] = "firefox-compact-light@mozilla.org"
-
     return conf_default
 
 
