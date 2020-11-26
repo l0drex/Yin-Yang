@@ -6,9 +6,8 @@ class Plugin:
     # default themes
     theme_dark = None
     theme_bright = None
-    enabled: bool = False
 
-    def __init__(self, enabled: bool, theme_dark: Optional[str], theme_bright: Optional[str]):
+    def __init__(self, theme_dark: Optional[str], theme_bright: Optional[str]):
         # check default values
         if self.theme_dark is None or self.theme_bright is None:
             raise ValueError('Default value for theme is not set!')

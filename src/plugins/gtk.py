@@ -62,13 +62,13 @@ class Gtk(Plugin):
                 inplace_change(path + "/settings.ini",
                                current_theme, "gtk-theme-name=" + theme)
 
-    def __init__(self, enabled: bool, theme_dark: Optional[str], theme_bright: Optional[str]):
-        super().__init__(enabled, theme_dark, theme_bright)
+    def __init__(self, theme_dark: Optional[str], theme_bright: Optional[str]):
+        super().__init__(theme_dark, theme_bright)
 
         if config.get_desktop() == 'kde':
-            self.mode = self.Kde(enabled, theme_dark, theme_bright)
+            self.mode = self.Kde(theme_dark, theme_bright)
         else:
-            self.mode = self.Standard(enabled, theme_dark, theme_bright)
+            self.mode = self.Standard(theme_dark, theme_bright)
 
     def set_theme(self, theme: str):
         self.mode.set_theme(theme)
