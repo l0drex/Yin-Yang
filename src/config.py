@@ -5,13 +5,14 @@ import re
 from enum import Enum
 from typing import Optional, Union
 from suntime import Sun, SunTimeException
-from src.plugins import kde, gnome, gtk, kvantum, wallpaper, vscode, atom
+from src.plugins import kde, gnome, gtk, kvantum, wallpaper, vscode, atom, sound
 
 ConfigValue = Union[str, float, bool]
 
 # default objects
 PLUGINS = [kde.Kde(), gnome.Gnome(), gtk.Gtk(), kvantum.Kvantum(), wallpaper.Wallpaper(),
-           vscode.Vscode(), atom.Atom()]
+           vscode.Vscode(), atom.Atom(),
+           sound.Sound()]
 
 
 class Modes(Enum):
@@ -32,7 +33,6 @@ def get_default() -> dict:
         "version": -1,
         "running": False,
         "dark_mode": False,
-        "sound_enabled": False,
         "desktop": get_desktop(),
         "mode": Modes.manual.value,
         "latitude": 0.0,
