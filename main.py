@@ -1,13 +1,10 @@
 import sys
 from argparse import ArgumentParser
 from src import yin_yang
-from src import config
+from src.config import config, Modes
 from src import gui
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
-
-assembly_version = 2.2
-configParser = config.ConfigParser(2.2)
 
 # fix HiDpi scaling
 QtWidgets.QApplication.setAttribute(
@@ -35,8 +32,8 @@ def main():
     else:
         # set settings via terminal
         if args.schedule:
-            mode = configParser.get("mode")
-            if mode == config.Modes.manual.value:
+            mode = config.get("mode")
+            if mode == Modes.manual.value:
                 print("looks like you did not specified a time")
                 print("You can use the gui with yin-yang -gui")
                 print("Or edit the config found in ~/.config/yin_yang/yin_yang.json")
@@ -45,13 +42,13 @@ def main():
                 print(f"Using mode {mode}")
         elif args.toggle:
             # toggle theme manually
-            configParser.update("mode", config.Modes.manual.value)
+            config.update("mode", Modes.manual.value)
             yin_yang.toggle_theme()
 
 
 if __name__ == "__main__":
     main()
-    if configParser.get("mode") != config.Modes.manual.value:
-        configParser.update("running", False)
+    if config.get("mode") != Modes.manual.value:
+        config.update("running", False)
         print("START thread listener")
         yin_yang.start_daemon()

@@ -29,6 +29,7 @@ path = home + "/.config"
 
 def get_default() -> dict:
     # if there is no config generate a generic one
+    # NOTE: if you change or add new values here, make sure to update the version number and update_config() method
     conf_default = {
         "version": -1,
         "running": False,
@@ -253,3 +254,7 @@ def get_desktop():
        plasma5_re.search(second_env) or plasma5_re.search(third_env)):
         return "kde"
     return "unknown"
+
+
+# create global object with current version
+config = ConfigParser(2.2)

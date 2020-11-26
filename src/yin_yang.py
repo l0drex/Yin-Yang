@@ -12,11 +12,7 @@ import datetime
 import threading
 import time
 
-from src import config
-
-
-configParser = config.ConfigParser(-1)
-plugins = config.PLUGINS
+from src.config import config, PLUGINS, Modes
 
 
 class Daemon(threading.Thread):
@@ -26,16 +22,16 @@ class Daemon(threading.Thread):
         threading.Thread.__init__(self)
         self.thread_id = thread_id
 
-        self.dark_mode: bool = configParser.get('dark_mode')
+        self.dark_mode: bool = config.get('dark_mode')
 
     def run(self):
         while True:
             if self.terminate:
-                configParser.update("running", False)
+                config.update("running", False)
                 break
 
-            if configParser.get('mode') == config.Modes.manual.value:
-                configParser.update("running", False)
+            if config.get('mode') == Modes.manual.value:
+                config.update("running", False)
                 break
 
             # check if dark mode should be enabled
@@ -44,8 +40,8 @@ class Daemon(threading.Thread):
             # switch if necessary
             if dark != self.dark_mode:
                 self.dark_mode = dark
-                configParser.update('dark_mode', dark)
-                for p in plugins:
+                config.update('dark_mode', dark)
+                for p in PLUGINS:
                     p.set_mode(dark)
 
             time.sleep(30)
@@ -61,10 +57,10 @@ def should_be_dark():
     Determines whether dark mode should be enabled or not
     """
 
-    d_hour = int(configParser.get("switch_To_Dark").split(":")[0])
-    d_minute = int(configParser.get("switch_To_Dark").split(":")[1])
-    l_hour = int(configParser.get("switch_To_Light").split(":")[0])
-    l_minute = int(configParser.get("switch_To_Light").split(":")[1])
+    d_hour = int(config.get("switch_To_Dark").split(":")[0])
+    d_minute = int(config.get("switch_To_Dark").split(":")[1])
+    l_hour = int(config.get("switch_To_Light").split(":")[0])
+    l_minute = int(config.get("switch_To_Light").split(":")[1])
     hour = datetime.datetime.now().time().hour
     minute = datetime.datetime.now().time().minute
 
@@ -76,5 +72,5 @@ def should_be_dark():
 
 def toggle_theme():
     """Switch themes"""
-    for p in plugins:
-        p.set_mode(not configParser.get('dark_mode'))
+    for p in PLUGINS:
+        p.set_mode(not config.get('dark_mode'))
