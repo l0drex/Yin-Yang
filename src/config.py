@@ -13,8 +13,6 @@ ConfigValue = Union[str, float, bool]
 PLUGINS = [kde.Kde, gnome.Gnome, gtk.Gtk, kvantum.Kvantum, wallpaper.Wallpaper,
            vscode.Vscode, atom.Atom]
 
-DEBUGGING = True
-
 
 class Modes(Enum):
     manual = "manual"
@@ -56,13 +54,14 @@ def get_default() -> dict:
 
 class ConfigParser:
     config: dict = None
+    debugging = False
 
     def __init__(self, version: float):
         # FIXME
         # if version < 0:
         # return
 
-        if self.config is None and not DEBUGGING:
+        if self.config is None and not self.debugging:
             # load config from file
             self.config = self.load()
 
@@ -139,7 +138,7 @@ class ConfigParser:
         :returns: whether save was successful
         """
 
-        if DEBUGGING:
+        if self.debugging:
             print('Saving the config in debug mode is disabled!')
             return False
 

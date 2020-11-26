@@ -10,6 +10,8 @@ from PyQt5 import QtCore
 QtWidgets.QApplication.setAttribute(
     QtCore.Qt.AA_EnableHighDpiScaling, True)
 
+config.debugging = True
+
 
 def main():
     # using ArgumentParser for parsing arguments
