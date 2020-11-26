@@ -1,11 +1,11 @@
 import pwd
 import os
 import re
-from src import config
+from src.plugins.plugin import Plugin
 
 # aliases for path to use later on
 user = pwd.getpwuid(os.getuid())[0]
-path = "/home/"+user+"/.config"
+path = "/home/"+user+"/.config/gtk-3.0"
 
 
 def inplace_change(filename, old_string, new_string):
@@ -30,23 +30,14 @@ def inplace_change(filename, old_string, new_string):
         f.write(s)
 
 
-def switch_to_light():
-    gtk_theme = config.get_gtk_light_theme()
-    gtk_path = path + "/gtk-3.0"
-    with open(gtk_path+"/settings.ini", "r") as file:
-        # search for the theme section and change it
-        current_theme = re.findall(
-            "gtk-theme-name=[A-z -]*", str(file.readlines()))[0][:-2]
-        inplace_change(gtk_path+"/settings.ini",
-                       current_theme, "gtk-theme-name="+gtk_theme)
+class GtkKde(Plugin):
+    theme_bright = 'Breeze'
+    theme_dark = 'Breeze'
 
-
-def switch_to_dark():
-    gtk_theme = config.get_gtk_dark_theme()
-    gtk_path = path + "/gtk-3.0"
-    with open(gtk_path+"/settings.ini", "r") as file:
-        # search for the theme section and change it
-        current_theme = re.findall(
-            "gtk-theme-name=[A-z -]*", str(file.readlines()))[0][:-2]
-        inplace_change(gtk_path+"/settings.ini",
-                       current_theme, "gtk-theme-name="+gtk_theme)
+    def set_theme(self, theme: str):
+        with open(path + "/settings.ini", "r") as file:
+            # search for the theme section and change it
+            current_theme = re.findall(
+                'gtk-theme-name=[A-z -]*', str(file.readlines()))[0][:-2]
+            inplace_change(path + "/settings.ini",
+                           current_theme, "gtk-theme-name=" + theme)

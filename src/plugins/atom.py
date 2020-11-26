@@ -1,12 +1,11 @@
 import os
 import pwd
-import json
 import re
-from src import config
+from src.plugins.plugin import Plugin
 
 # aliases for path to use later on
 user = pwd.getpwuid(os.getuid())[0]
-path = "/home/"+user+"/.atom/"
+path = "/home/"+user+"/.atom/config.cson"
 
 
 def inplace_change(filename, old_string, new_string):
@@ -30,13 +29,6 @@ def inplace_change(filename, old_string, new_string):
         f.write(s)
 
 
-def write_new_settings(settings, path):
-    print("SETTINGS ", len(settings))
-    # simple adds a new field to the settings
-    settings["workbench.colorTheme"] = "Default"
-    with open(path, 'w') as conf:
-        json.dump(settings, conf, indent=4)
-
 def get_old_theme(settings):
     """returns the theme which is currently used
        uses regex to find the currently used theme
@@ -53,23 +45,15 @@ def get_old_theme(settings):
             print(used_theme)
             return used_theme
 
-def switch_to_light():
-    # get theme out of config
-    atom_theme = config.get("atomLightTheme")
 
-    # getting the old theme first
-    current_theme = get_old_theme(path+"config.cson")
+class Atom(Plugin):
+    # TODO set default themes
+    theme_dark = ''
+    theme_bright = ''
 
-    # updating the old theme with theme specfied in config
-    inplace_change(path+"config.cson", current_theme, atom_theme)
+    def set_theme(self, theme: str):
+        # getting the old theme first
+        current_theme = get_old_theme(path)
 
-
-def switch_to_dark():
-    # get theme out of config
-    atom_theme = config.get("atomDarkTheme")
-
-    # getting the old theme first
-    current_theme = get_old_theme(path+"config.cson")
-
-    # updating the old theme with theme specfied in config
-    inplace_change(path+"config.cson", current_theme, atom_theme)
+        # updating the old theme with theme specified in config
+        inplace_change(path, current_theme, theme)

@@ -1,17 +1,14 @@
 import subprocess
-from src import config
+from src.plugins.plugin import Plugin
 
 
-def switch_to_light():
-    gtk_theme = config.get("gtkLightTheme")
-    # gtk_theme = "Default"
-    # uses a kde api to switch to a light theme
-    subprocess.run(["gsettings", "set", "org.gnome.desktop.interface", "gtk-theme", gtk_theme]) # Applications theme
-    #subprocess.run(["gsettings", "set", "org.gnome.shell.extensions.user-theme", "name", '"{}"'.format(gtk_theme)]) # Shell theme
+class Gtk(Plugin):
+    # TODO set default theme names
+    theme_dark = ''
+    theme_bright = ''
 
-
-def switch_to_dark():
-    gtk_theme = config.get("gtkDarkTheme")
-    # uses a kde api to switch to a dark theme
-    subprocess.run(["gsettings", "set", "org.gnome.desktop.interface", "gtk-theme", gtk_theme]) # Applications theme
-    #subprocess.run(["gsettings", "set", "org.gnome.shell.extensions.user-theme", "name", '"{}"'.format(gtk_theme)]) # Shell theme
+    def set_theme(self, theme: str):
+        # gtk_theme = "Default"
+        # uses a kde api to switch to a light theme
+        subprocess.run(["gsettings", "set", "org.gnome.desktop.interface", "gtk-theme", theme]) # Applications theme
+        #subprocess.run(["gsettings", "set", "org.gnome.shell.extensions.user-theme", "name", '"{}"'.format(gtk_theme)]) # Shell theme

@@ -1,13 +1,15 @@
 import subprocess
-from src import config
+from src.plugins.plugin import Plugin
 
 # WIP: Potential Check  for https://gist.github.com/atiensivu/fcc3183e9a6fd74ec1a283e3b9ad05f0 to reduce common issues, or write it in the FAQ
 
-def switch_to_light():
-    gnome_theme = config.get("gnomeLightTheme")
-    subprocess.run(["gsettings", "set", "org.gnome.shell.extensions.user-theme", "name", '"{}"'.format(gnome_theme)]) # Shell theme
 
+class Gnome(Plugin):
+    # TODO set the default theme for gnome
+    theme_dark = ''
+    theme_bright = ''
 
-def switch_to_dark():
-    gnome_theme = config.get("gnomeDarkTheme")
-    subprocess.run(["gsettings", "set", "org.gnome.shell.extensions.user-theme", "name", '"{}"'.format(gnome_theme)]) # Shell theme
+    def set_theme(self, theme: str):
+        # Shell theme
+        subprocess.run(["gsettings", "set", "org.gnome.shell.extensions.user-theme", "name",
+                        '"{}"'.format(theme)])
