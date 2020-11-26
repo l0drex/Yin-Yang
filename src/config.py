@@ -2,18 +2,222 @@ import json
 import os
 import pathlib
 import re
-
-from main import assembly_version
+from enum import Enum
+from typing import Optional, Union
 from suntime import Sun, SunTimeException
+from src.plugins import kde, gnome, gtk, kvantum, wallpaper, vscode, atom, sound
+
+ConfigValue = Union[str, float, bool]
+
+# default objects
+PLUGINS = [kde.Kde(), gnome.Gnome(), gtk.Gtk(), kvantum.Kvantum(), wallpaper.Wallpaper(),
+           vscode.Vscode(), atom.Atom(),
+           sound.Sound()]
+
+
+class Modes(Enum):
+    manual = "manual"
+    scheduled = "manual time"
+    followSun = "sunset and sunrise"
+
 
 # aliases for path to use later on
 home = os.getenv("HOME")
 path = home + "/.config"
 
 
-def exists():
-    """returns True or False whether Config exists"""
-    return os.path.isfile(path + "/yin_yang/yin_yang.json")
+def get_default() -> dict:
+    # if there is no config generate a generic one
+    # NOTE: if you change or add new values here, make sure to update the version number and update_config() method
+    conf_default = {
+        "version": -1,
+        "running": False,
+        "dark_mode": False,
+        "desktop": get_desktop(),
+        "mode": Modes.manual.value,
+        "latitude": 0.0,
+        "longitude": 0.0,
+        "switch_to_dark": "20:00",
+        "switch_to_light": "07:00"
+    }
+
+    # plugin settings
+    for plugin in PLUGINS:
+        conf_default[plugin.name] = {
+            "enabled": False,
+            "light_theme": plugin.theme_bright,
+            "dark_theme": plugin.theme_dark
+        }
+
+    return conf_default
+
+
+class ConfigParser:
+    config: dict = None
+    debugging = False
+
+    def __init__(self, version: float):
+        # load config from file
+        self.config = self.load()
+
+        # use default values if something went wrong
+        if self.config is None or self.config == {}:
+            print("Using default values.")
+            self.config = get_default()
+            self.update("version", version)
+
+        # check if config needs an update
+        # if the default values are set, the version number is below 0
+        if 0 < self.config["version"] < version:
+            print("Updating config file.")
+            self.update_config()
+
+        # update times for sunset and sunrise
+        if self.get("mode") == Modes.followSun:
+            self.set_sun_time()
+
+        # save the config
+        self.write()
+
+    def update_config(self):
+        """Update old config files
+        Adds keys or restructures the config if an old config was loaded from the config file.
+        Sets the new config directly to the dict in this class.
+
+        :returns: the old config
+        """
+
+        # replace current config with defaults
+        config_old = self.config.copy()
+        self.config = get_default()
+
+        # replace default values with old ones
+        if config_old["version"] < 0:
+            return config_old
+        if config_old["version"] <= 2.1:
+            # determine mode
+            if config_old["schedule"]:
+                mode = Modes.scheduled.value
+            elif config_old["followSun"]:
+                mode = Modes.followSun.value
+            else:
+                mode = Modes.manual.value
+            self.config["mode"] = mode
+
+            # determine theme
+            self.config["dark_mode"] = config_old["theme"] == "dark"
+
+            # put settings for PLUGINS into sections
+            for plugin in PLUGINS:
+                for key in get_default()[plugin.name].keys():
+                    key_old = key[0].upper() + key[1:]
+                    self.config[plugin.name][key] = config_old[plugin.name.casefold() + key_old]
+        return config_old
+
+    def load(self) -> dict:
+        """Load config from file"""
+
+        # generate path for yin-yang if there is none this will be skipped
+        pathlib.Path(path + "/yin_yang").mkdir(parents=True, exist_ok=True)
+
+        conf = {}
+
+        # check if conf exists
+        if os.path.isfile(path + "/yin_yang/yin_yang.json"):
+            # load conf
+            with open(path + "/yin_yang/yin_yang.json", "r") as conf:
+                conf = json.load(conf)
+
+        return conf
+
+    def write(self) -> bool:
+        """Write configuration
+
+        :returns: whether save was successful
+        """
+
+        if self.debugging:
+            print('Saving the config in debug mode is disabled!')
+            return False
+
+        print("Saving the config")
+        try:
+            with open(path + "/yin_yang/yin_yang.json", 'w') as conf_file:
+                json.dump(self.config, conf_file, indent=4)
+            return True
+        except IOError as e:
+            print(f"Error while writing the file: {e}")
+            return False
+
+    def get(self, key, plugin: Optional[str] = None) -> ConfigValue:
+        """Return the given key from the config
+
+        :param key: the key to change
+        :param plugin: name of the plugin
+
+        :returns: value
+        """
+
+        try:
+            if plugin is None:
+                return self.config[key.casefold()]
+            else:
+                return self.config[plugin][key.casefold()]
+        except KeyError as e:
+            print(f"Unknown key {key}")
+            if plugin is None:
+                for p in PLUGINS:
+                    if p.name.casefold() in key:
+                        print("Key is deprecated. Use plugin option instead")
+                        return self.get(key.replace(p.name, ''), plugin=p.name)
+            else:
+                raise e
+
+    def update(self, key: str, value: ConfigValue, plugin: Optional[str] = None) -> ConfigValue:
+        """Update the value of a key in configuration
+
+        :param key: The setting to change
+        :param value: The value to set the setting to
+        :param plugin: Name of the plugin you may want to change
+
+        :returns: old value
+        """
+
+        try:
+            old = self.get(key, plugin)
+            if plugin is None:
+                self.config[key.casefold()] = value
+            else:
+                self.config[plugin.casefold()][key.casefold()] = value
+            return old
+        except KeyError as e:
+            print(f'Error while updating {key}')
+            raise e
+
+    def get_config(self) -> dict:
+        """returns the config"""
+
+        return self.config
+
+    def set_sun_time(self):
+        """Sets the sunrise and sunset to config based on location"""
+        latitude: float = float(self.get("latitude"))
+        longitude: float = float(self.get("latitude"))
+        sun = Sun(latitude, longitude)
+
+        try:
+            today_sr = sun.get_local_sunrise_time()
+            today_ss = sun.get_local_sunset_time()
+
+            print('Today the sun raised at {} and get down at {}'.
+                  format(today_sr.strftime('%H:%M'), today_ss.strftime('%H:%M')))
+
+            # Get today's sunrise and sunset in UTC
+            self.update("switchToLight", today_sr.strftime('%H:%M'))
+            self.update("switchToDark", today_ss.strftime('%H:%M'))
+
+        except SunTimeException as e:
+            print("Error: {0}.".format(e))
 
 
 def get_desktop():
@@ -31,250 +235,23 @@ def get_desktop():
     plasma_re = re.compile(r'plasma')
     plasma5_re = re.compile(r'plasma5')
 
-    if gnome_re.search(env) or gnome_re.search(second_env) or gnome_re.search(third_env):
+    if(gnome_re.search(env) or
+       gnome_re.search(second_env) or gnome_re.search(third_env)):
         return "gtk"
-    if budgie_re.search(env) or budgie_re.search(second_env) or budgie_re.search(third_env):
+    if(budgie_re.search(env) or
+       budgie_re.search(second_env) or budgie_re.search(third_env)):
         return "gtk"
-    if kde_re.search(env) or kde_re.search(second_env) or kde_re.search(third_env):
+    if(kde_re.search(env) or
+       kde_re.search(second_env) or kde_re.search(third_env)):
         return "kde"
-    if plasma_re.search(env) or plasma_re.search(second_env) or plasma_re.search(third_env):
+    if(plasma_re.search(env) or
+       plasma_re.search(second_env) or plasma_re.search(third_env)):
         return "kde"
-    if plasma5_re.search(env) or plasma5_re.search(second_env) or plasma5_re.search(third_env):
+    if(plasma5_re.search(env) or
+       plasma5_re.search(second_env) or plasma5_re.search(third_env)):
         return "kde"
     return "unknown"
 
 
-def set_sun_time():
-    print("run")
-    latitude: float = float(get("latitude"))
-    longitude: float = float(get("longitude"))
-    sun = Sun(latitude, longitude)
-
-    try:
-        today_sr = sun.get_local_sunrise_time()
-        today_ss = sun.get_local_sunset_time()
-
-        print('Today the sun raised at {} and get down at {}'.
-              format(today_sr.strftime('%H:%M'), today_ss.strftime('%H:%M')))
-
-        # Get today's sunrise and sunset in UTC
-        update("switchToLight", today_sr.strftime('%H:%M'))
-        update("switchToDark", today_ss.strftime('%H:%M'))
-
-    except SunTimeException as e:
-        print("Error: {0}.".format(e))
-
-
-# generate path for yin-yang if there is none this will be skipped
-pathlib.Path(path + "/yin_yang").mkdir(parents=True, exist_ok=True)
-
-# if there is no config generate a generic one
-config = {}
-config["version"] = "2.0"
-config["soundEnabled"] = False
-config["version"] = assembly_version
-config["desktop"] = get_desktop()
-config["followSun"] = False
-config["latitude"] = ""
-config["longitude"] = ""
-config["schedule"] = False
-config["switchToDark"] = "20:00"
-config["switchToLight"] = "07:00"
-config["running"] = False
-config["theme"] = ""
-config["codeLightTheme"] = "Default Light+"
-config["codeDarkTheme"] = "Default Dark+"
-config["codeEnabled"] = False
-config["kdeLightTheme"] = "org.kde.breeze.desktop"
-config["kdeDarkTheme"] = "org.kde.breezedark.desktop"
-config["kdeEnabled"] = False
-config["gtkLightTheme"] = ""
-config["gtkDarkTheme"] = ""
-config["atomLightTheme"] = ""
-config["atomDarkTheme"] = ""
-config["atomEnabled"] = False
-config["gtkEnabled"] = False
-config["wallpaperLightTheme"] = ""
-config["wallpaperDarkTheme"] = ""
-config["wallpaperEnabled"] = False
-config["firefoxEnabled"] = False
-config["firefoxDarkTheme"] = "firefox-compact-dark@mozilla.org"
-config["firefoxLightTheme"] = "firefox-compact-light@mozilla.org"
-config["firefoxActiveTheme"] = "firefox-compact-light@mozilla.org"
-config["gnomeEnabled"] = False
-config["gnomeLightTheme"] = ""
-config["gnomeDarkTheme"] = ""
-config["kvantumEnabled"] = False
-config["kvantumLightTheme"] = ""
-config["kvantumDarkTheme"] = ""
-config["soundEnabled"] = True
-
-if exists():
-    # making config global for this module
-    with open(path + "/yin_yang/yin_yang.json", "r") as conf:
-        config = json.load(conf)
-
-config["desktop"] = get_desktop()
-
-
-def get_config():
-    """returns the config"""
-    return config
-
-
-def update(key, value):
-    """Update the value of a key in configuration"""
-    config[key] = value
-    write_config()
-
-
-def write_config(config=config):
-    """Write configuration"""
-    with open(path + "/yin_yang/yin_yang.json", 'w') as conf:
-        json.dump(config, conf, indent=4)
-
-
-def gtk_exists():
-    return os.path.isfile(path + "/gtk-3.0/settings.ini")
-
-
-def get_enabled_plugins():
-    """returns a list of plugins which are activated"""
-    pass
-
-
-def get_light_time():
-    """returns the time which should toggle the lightMode"""
-    pass
-
-
-def get_dark_time():
-    """returns the time which should toggle the lightMode"""
-    pass
-
-
-def get_theme():
-    return config["theme"]
-
-
-def get_kde_light_theme():
-    return config["kdeLightTheme"]
-
-
-def get_kde_dark_theme():
-    return config["kdeDarkTheme"]
-
-
-def get_kde_enabled():
-    return config["kdeEnabled"]
-
-
-def get_code_light_theme():
-    return config["codeLightTheme"]
-
-
-def get_code_dark_theme():
-    return config["codeDarkTheme"]
-
-
-def get_code_enabled():
-    return config["codeEnabled"]
-
-
-def get_gtk_light_theme():
-    return config["gtkLightTheme"]
-
-
-def get_gtk_dark_theme():
-    return config["gtkDarkTheme"]
-
-
-def get_gtk_enabled():
-    return config["gtkEnabled"]
-
-
-def get(key):
-    """Return the given key from the config"""
-    return config[key]
-
-
-def is_scheduled():
-    return config["schedule"]
-
-
-def get_version():
-    return config["version"]
-
-
-def kde_get_light_theme():
-    """Return the KDE light theme specified in the yin-yang config"""
-    return config["kdeLightTheme"]
-
-
-def kde_get_dark_theme():
-    """Return the KDE dark theme specified in the yin-yang config"""
-    return config["kdeDarkTheme"]
-
-
-def kde_get_checkbox():
-    return config["kdeEnabled"]
-
-
-def gtk_get_light_theme():
-    """Return the  GTK Light theme specified in the yin-yang config"""
-    return config["gtkLightTheme"]
-
-
-def gtk_get_dark_theme():
-    """Return the  GTK dark theme specified in the yin-yang config"""
-    return config["gtkDarkTheme"]
-
-
-def sound_get_checkbox():
-    return config["soundEnabled"]
-
-
-def gtk_get_checkbox():
-    return config["gtkEnabled"]
-
-
-def code_get_light_theme():
-    """Return the code light theme specified in the yin-yang config"""
-    return config["codeLightTheme"]
-
-
-def code_get_dark_theme():
-    """Return the  code dark theme specified in the yin-yang config"""
-    return config["codeDarkTheme"]
-
-
-def code_get_checkbox():
-    return config["codeEnabled"]
-
-
-def gnome_get_light_theme():
-    """Return the  Gnome Shell Light theme specified in the yin-yang config"""
-    return config["gnomeLightTheme"]
-
-
-def gnome_get_dark_theme():
-    """Return the  Gnome Shell dark theme specified in the yin-yang config"""
-    return config["gnomeDarkTheme"]
-
-
-def gnome_get_checkbox():
-    return config["gnomeEnabled"]
-
-
-def kvantum_get_light_theme():
-    """Return the Kvantum Light theme specified in the yin-yang config"""
-    return config["kvantumLightTheme"]
-
-
-def kvantum_get_dark_theme():
-    """Return the Kvantum dark theme specified in the yin-yang config"""
-    return config["kvantumDarkTheme"]
-
-
-def kvantum_get_checkbox():
-    return config["kvantumEnabled"]
+# create global object with current version
+config = ConfigParser(2.2)

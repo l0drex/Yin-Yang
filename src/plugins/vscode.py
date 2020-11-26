@@ -1,7 +1,7 @@
 import os
 import pwd
 import json
-from src import config
+from src.plugins.plugin import Plugin
 
 # aliases for path to use later on
 user = pwd.getpwuid(os.getuid())[0]
@@ -38,59 +38,33 @@ def write_new_settings(settings, path):
         json.dump(settings, conf, indent=4)
 
 
-def switch_to_light():
-    code_theme = config.get("codeLightTheme")
-    possible_editors = [
-        path+"/VSCodium/User/settings.json",
-        path+"/Code - OSS/User/settings.json",
-        path+"/Code/User/settings.json",
-        path+"/Code - Insiders/User/settings.json",
-    ]
+class Vscode(Plugin):
+    name = 'VS Code'
+    theme_bright = 'Default Light+'
+    theme_dark = 'Default Dark+'
 
-    for editor in possible_editors:
-        if os.path.isfile(editor):
-            # getting the old theme to replace it
-            with open(editor, "r") as sett:
-                try:
-                    settings = json.load(sett)
-                except json.decoder.JSONDecodeError:
-                    settings = {}
-                    settings["workbench.colorTheme"] = ""
-                    write_new_settings(settings, editor)
-                try:
-                    old_theme = settings["workbench.colorTheme"]
-                except KeyError:
-                    # happens when the default theme in vscode is
-                    print("NO THEME SECTION INSIDE SETTINGS")
-                    write_new_settings(settings, editor)
-            inplace_change(editor,
-                           old_theme, code_theme)
+    def set_theme(self, theme: str):
+        possible_editors = [
+            path + "/VSCodium/User/settings.json",
+            path + "/Code - OSS/User/settings.json",
+            path + "/Code/User/settings.json",
+            path + "/Code - Insiders/User/settings.json",
 
+        ]
 
-def switch_to_dark():
-    code_theme = config.get("codeDarkTheme")
-    possible_editors = [
-        path+"/VSCodium/User/settings.json",
-        path+"/Code - OSS/User/settings.json",
-        path+"/Code/User/settings.json",
-        path+"/Code - Insiders/User/settings.json",
-
-    ]
-
-    for editor in possible_editors:
-        if os.path.isfile(editor):
-            # getting the old theme to replace it
-            with open(editor, "r") as sett:
-                try:
-                    settings = json.load(sett)
-                except json.decoder.JSONDecodeError:
-                    settings = {}
-                    settings["workbench.colorTheme"] = ""
-                    write_new_settings(settings, editor)
-                try:
-                    old_theme = settings["workbench.colorTheme"]
-                except KeyError:
-                    # happens when the default theme in vscode is used
-                    write_new_settings(settings, editor)
-            inplace_change(editor,
-                           old_theme, code_theme)
+        for editor in possible_editors:
+            if os.path.isfile(editor):
+                # getting the old theme to replace it
+                with open(editor, "r") as sett:
+                    try:
+                        settings = json.load(sett)
+                    except json.decoder.JSONDecodeError:
+                        settings = {"workbench.colorTheme": ""}
+                        write_new_settings(settings, editor)
+                    try:
+                        old_theme = settings["workbench.colorTheme"]
+                    except KeyError:
+                        # happens when the default theme in vscode is used
+                        write_new_settings(settings, editor)
+                inplace_change(editor,
+                               old_theme, theme)

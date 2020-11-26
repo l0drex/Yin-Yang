@@ -1,16 +1,12 @@
 import subprocess
-from src import config
+from src.plugins.plugin import Plugin
 
 
-def switch_to_light():
-    kde_theme = config.get("kdeLightTheme")
-    # uses a kde api to switch to a light theme
-    print("LIGHT:", kde_theme)
-    subprocess.run(["lookandfeeltool", "-a", kde_theme])
+class Kde(Plugin):
+    name = 'KDE'
+    theme_bright = 'org.kde.breeze.desktop'
+    theme_dark = 'org.kde.breezedark.desktop'
 
-
-def switch_to_dark():
-    kde_theme = config.get("kdeDarkTheme")
-    # uses a kde api to switch to a dark theme
-    print("Dark:", kde_theme)
-    subprocess.run(["lookandfeeltool", "-a", kde_theme])
+    def set_theme(self, theme: str):
+        # uses a kde api to switch to a light theme
+        subprocess.run(["lookandfeeltool", "-a", theme])
