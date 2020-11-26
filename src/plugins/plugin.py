@@ -7,7 +7,7 @@ class Plugin:
     theme_dark = None
     theme_bright = None
 
-    def __init__(self, theme_dark: Optional[str], theme_bright: Optional[str]):
+    def __init__(self, theme_dark: Optional[str] = None, theme_bright: Optional[str] = None):
         # check default values
         if self.theme_dark is None or self.theme_bright is None:
             raise ValueError('Default value for theme is not set!')
@@ -15,16 +15,16 @@ class Plugin:
         # set the themes
         if theme_dark is not None and theme_dark != self.theme_dark:
             self.theme_dark = theme_dark
-        if theme_bright is not None and theme_bright != self.theme_bright:
+        if theme_dark is not None and theme_bright != self.theme_bright:
             self.theme_bright = theme_bright
-
-        self.enabled = enabled
 
     def set_mode(self, dark: bool):
         """Set the theme"""
         if dark:
+            print(f'Switching theme to {self.theme_dark} in {self.name}')
             self.set_theme(self.theme_dark)
         else:
+            print(f'Switching theme to {self.theme_bright} in {self.name}')
             self.set_theme(self.theme_bright)
 
     def set_theme(self, theme: str):

@@ -4,7 +4,6 @@ import re
 import subprocess
 from typing import Optional
 
-from src import config
 from src.plugins.plugin import Plugin
 
 # aliases for path to use later on
@@ -36,6 +35,8 @@ def inplace_change(filename, old_string, new_string):
 
 class Gtk(Plugin):
     name = 'GTK'
+    theme_dark = ''
+    theme_bright = ''
 
     # these subclasses are called instead of the actual class to change behaviour in different environments
     # while keeping consistency with other plugins
@@ -46,7 +47,6 @@ class Gtk(Plugin):
         theme_bright = ''
 
         def set_theme(self, theme: str):
-            # uses a kde api to switch to a light theme
             subprocess.run(
                 ["gsettings", "set", "org.gnome.desktop.interface", "gtk-theme", theme])  # Applications theme
 
@@ -62,13 +62,17 @@ class Gtk(Plugin):
                 inplace_change(path + "/settings.ini",
                                current_theme, "gtk-theme-name=" + theme)
 
-    def __init__(self, theme_dark: Optional[str], theme_bright: Optional[str]):
+    def __init__(self, theme_dark: Optional[str] = None, theme_bright: Optional[str] = None):
         super().__init__(theme_dark, theme_bright)
 
-        if config.get_desktop() == 'kde':
-            self.mode = self.Kde(theme_dark, theme_bright)
-        else:
-            self.mode = self.Standard(theme_dark, theme_bright)
+        self.mode = self.Standard()
+
+        # FIXME themes are not set correctly
+        self.theme_dark = self.mode.theme_dark
+        self.theme_bright = self.mode.theme_bright
+
+    def use_kde(self):
+        self.mode = self.Kde()
 
     def set_theme(self, theme: str):
         self.mode.set_theme(theme)

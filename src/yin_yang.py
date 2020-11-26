@@ -15,14 +15,28 @@ import time
 from src.config import config, PLUGINS, Modes
 
 
+dark_mode: bool = config.get('dark_mode')
+
+
+def set_mode(dark: bool):
+    global dark_mode
+
+    if dark == dark_mode:
+        return
+
+    dark_mode = dark
+    config.update('dark_mode', dark)
+    for p in PLUGINS:
+        if config.get('enabled', plugin=p.name):
+            p.set_mode(dark)
+
+
 class Daemon(threading.Thread):
     terminate = False
 
     def __init__(self, thread_id):
         threading.Thread.__init__(self)
         self.thread_id = thread_id
-
-        self.dark_mode: bool = config.get('dark_mode')
 
     def run(self):
         while True:
@@ -34,15 +48,8 @@ class Daemon(threading.Thread):
                 config.update("running", False)
                 break
 
-            # check if dark mode should be enabled
-            dark: bool = should_be_dark()
-
-            # switch if necessary
-            if dark != self.dark_mode:
-                self.dark_mode = dark
-                config.update('dark_mode', dark)
-                for p in PLUGINS:
-                    p.set_mode(dark)
+            # check if dark mode should be enabled and switch if necessary
+            set_mode(should_be_dark())
 
             time.sleep(30)
 
@@ -72,5 +79,4 @@ def should_be_dark():
 
 def toggle_theme():
     """Switch themes"""
-    for p in PLUGINS:
-        p.set_mode(not config.get('dark_mode'))
+    set_mode(not config.get('dark_mode'))

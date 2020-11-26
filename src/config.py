@@ -10,8 +10,8 @@ from src.plugins import kde, gnome, gtk, kvantum, wallpaper, vscode, atom
 ConfigValue = Union[str, float, bool]
 
 # default objects
-PLUGINS = [kde.Kde, gnome.Gnome, gtk.Gtk, kvantum.Kvantum, wallpaper.Wallpaper,
-           vscode.Vscode, atom.Atom]
+PLUGINS = [kde.Kde(), gnome.Gnome(), gtk.Gtk(), kvantum.Kvantum(), wallpaper.Wallpaper(),
+           vscode.Vscode(), atom.Atom()]
 
 
 class Modes(Enum):
@@ -57,27 +57,22 @@ class ConfigParser:
     debugging = False
 
     def __init__(self, version: float):
-        # FIXME
-        # if version < 0:
-        # return
-
-        if self.config is None and not self.debugging:
-            # load config from file
-            self.config = self.load()
+        # load config from file
+        self.config = self.load()
 
         # use default values if something went wrong
         if self.config is None or self.config == {}:
             print("Using default values.")
             self.config = get_default()
             self.update("version", version)
-            self.write()
 
         # check if config needs an update
-        if self.config["version"] < version:
+        # if the default values are set, the version number is below 0
+        if 0 < self.config["version"] < version:
             print("Updating config file.")
             self.update_config()
-            self.write()
 
+        # update times for sunset and sunrise
         if self.get("mode") == Modes.followSun:
             self.set_sun_time()
 
@@ -164,7 +159,7 @@ class ConfigParser:
             if plugin is None:
                 return self.config[key.casefold()]
             else:
-                return self.config[plugin.casefold()][key.casefold()]
+                return self.config[plugin][key.casefold()]
         except KeyError as e:
             print(f"Unknown key {key}")
             if plugin is None:
