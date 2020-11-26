@@ -1,6 +1,3 @@
-#!/bin/python
-
-
 """
 title: yin_yang
 description: yin_yang provides a easy way to toggle between light and dark
@@ -14,85 +11,29 @@ license: MIT
 import datetime
 import os
 import pwd
-import subprocess
-import sys
 import threading
 import time
 
 from src import config
-from src.plugins import kde, gtkkde, wallpaper, vscode, atom, gtk, firefox, gnome, kvantum
 
 # aliases for path to use later on
 user = pwd.getpwuid(os.getuid())[0]
 path = "/home/" + user + "/.config/"
 
 configParser = config.ConfigParser(-1)
+plugins = config.PLUGINS
 
 terminate = False
 
 
-class Yang(threading.Thread):
+class Switch(threading.Thread):
     def __init__(self, thread_id):
         threading.Thread.__init__(self)
         self.thread_id = thread_id
 
-    def run(self):
-        if configParser.get("Enabled", plugin="code"):
-            vscode.switch_to_light()
-        if configParser.get("Enabled", plugin="atom"):
-            atom.switch_to_light()
-        if configParser.get("Enabled", plugin="kde"):
-            kde.switch_to_light()
-        if configParser.get("Enabled", plugin="wallpaper"):
-            wallpaper.switch_to_light()
-        # kde support
-        if configParser.get("Enabled", plugin="gtk") and config.get("desktop") == "kde":
-            gtkkde.switch_to_light()
-        # gnome and budgie support
-        if configParser.get("Enabled", plugin="gtk") and config.get("desktop") == "gtk":
-            gtk.switch_to_light()
-        # gnome-shell
-        if configParser.get("Enabled", plugin="gnome"):
-            gnome.switch_to_light()
-        # firefox support
-        if configParser.get("Enabled", plugin="firefox"):
-            firefox.switch_to_light()
-        # kvantum support
-        if configParser.get("Enabled", plugin="kvantum"):
-            kvantum.switch_to_light()
-        play_sound("./assets/light.wav")
-
-
-class Yin(threading.Thread):
-    def __init__(self, thread_id):
-        threading.Thread.__init__(self)
-        self.thread_id = thread_id
-
-    def run(self):
-        if configParser.get("Enabled", plugin="code"):
-            vscode.switch_to_dark()
-        if configParser.get("Enabled", plugin="atom"):
-            atom.switch_to_dark()
-        if configParser.get("Enabled", "kde"):
-            kde.switch_to_dark()
-        if configParser.get("Enabled", plugin="wallpaper"):
-            wallpaper.switch_to_dark()
-        # kde support
-        if configParser.get("Enabled", plugin="gtk") and config.get("desktop") == "kde":
-            gtkkde.switch_to_dark()
-        # gnome and budgie support
-        if configParser.get("Enabled", plugin="gtk") and config.get("desktop") == "gtk":
-            gtk.switch_to_dark()
-        # gnome-shell
-        if configParser.get("Enabled", plugin="gnome"):
-            gnome.switch_to_dark()
-        # firefox support
-        if configParser.get("Enabled", plugin="firefox"):
-            firefox.switch_to_dark()
-        # kvantum support
-        if configParser.get("Enabled", plugin="kvantum"):
-            kvantum.switch_to_dark()
-        play_sound("./assets/dark.wav")
+    def set_mode(self, dark: bool):
+        for p in plugins:
+            p.set_mode(dark)
 
 
 class Daemon(threading.Thread):
@@ -111,14 +52,14 @@ class Daemon(threading.Thread):
                 configParser.update("running", False)
                 break
 
-            if should_be_light():
-                if not configParser.get("dark_mode"):
+            if should_be_dark():
+                if configParser.get("dark_mode"):
                     time.sleep(30)
                     continue
                 else:
                     switch_to_light()
             else:
-                if configParser.get("dark_mode"):
+                if not configParser.get("dark_mode"):
                     time.sleep(30)
                     continue
                 else:
@@ -146,29 +87,7 @@ def start_daemon():
     daemon.start()
 
 
-def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-
-    return os.path.join(base_path, relative_path)
-
-
-def play_sound(sound):
-    """ Description - only works with pulseaudio.
-    :type sound: String (Path)
-    :param sound: Sound path to be played audio file from
-    :rtype: I hope you will hear your Sound ;)
-    """
-
-    if configParser.get("sound_Enabled"):
-        subprocess.run(["paplay", resource_path(sound)])
-
-
-def should_be_light():
+def should_be_dark():
     # desc: return if the Theme should be light
     # returns: True if it should be light
     # returns: False if the theme should be dark
@@ -181,9 +100,9 @@ def should_be_light():
     minute = datetime.datetime.now().time().minute
 
     if hour >= l_hour and hour < d_hour:
-        return not (hour == l_hour and minute <= l_minute)
+        return hour == l_hour and minute <= l_minute
     else:
-        return hour == d_hour and minute <= d_minute
+        return not (hour == d_hour and minute <= d_minute)
 
 
 def toggle_theme():
