@@ -55,7 +55,8 @@ def get_default() -> dict:
 
 class ConfigParser:
     config: dict = None
-    debugging = False
+    debugging: bool = False
+    changed: bool = False
 
     def __init__(self, version: float):
         # load config from file
@@ -114,6 +115,7 @@ class ConfigParser:
                 for key in get_default()[plugin.name].keys():
                     key_old = key[0].upper() + key[1:]
                     self.config[plugin.name][key] = config_old[plugin.name.casefold() + key_old]
+        self.changed = True
         return config_old
 
     def load(self) -> dict:
@@ -130,6 +132,8 @@ class ConfigParser:
             with open(path + "/yin_yang/yin_yang.json", "r") as conf:
                 conf = json.load(conf)
 
+        # no unsaved changes yet
+        self.changed = False
         return conf
 
     def write(self) -> bool:
@@ -142,10 +146,18 @@ class ConfigParser:
             print('Saving the config in debug mode is disabled!')
             return False
 
+        if not self.changed:
+            print('No changes were made, skipping save')
+            return False
+
         print("Saving the config")
         try:
             with open(path + "/yin_yang/yin_yang.json", 'w') as conf_file:
                 json.dump(self.config, conf_file, indent=4)
+
+            # no unsaved changes anymore
+            self.changed = False
+
             return True
         except IOError as e:
             print(f"Error while writing the file: {e}")
@@ -191,7 +203,10 @@ class ConfigParser:
                 self.config[key.casefold()] = value
             else:
                 self.config[plugin.casefold()][key.casefold()] = value
-            self.write()
+
+            # new unsaved changes
+            self.changed = True
+
             return old
         except KeyError as e:
             print(f'Error while updating {key}')
