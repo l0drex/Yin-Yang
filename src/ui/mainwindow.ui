@@ -9,20 +9,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>271</width>
-    <height>523</height>
+    <width>433</width>
+    <height>643</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>271</width>
+    <width>377</width>
     <height>0</height>
-   </size>
-  </property>
-  <property name="maximumSize">
-   <size>
-    <width>271</width>
-    <height>523</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -52,201 +46,556 @@
      </layout>
     </item>
     <item>
-     <widget class="QWidget" name="manual" native="true">
-      <property name="enabled">
-       <bool>false</bool>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>1</number>
       </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
-        <widget class="QPushButton" name="buttonLight">
-         <property name="text">
-          <string>Light</string>
-         </property>
-         <property name="autoDefault">
-          <bool>false</bool>
-         </property>
-         <property name="default">
-          <bool>false</bool>
-         </property>
-         <property name="flat">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="buttonDark">
-         <property name="text">
-          <string>Dark</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item>
-     <widget class="QGroupBox" name="automatic">
-      <property name="title">
-       <string>automatic</string>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <property name="spacing">
-        <number>6</number>
-       </property>
-       <item>
-        <widget class="QRadioButton" name="buttonSchedule">
-         <property name="text">
-          <string>scheduled</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QFrame" name="time">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <layout class="QFormLayout" name="formLayout">
-          <property name="labelAlignment">
-           <set>Qt::AlignCenter</set>
+      <widget class="QWidget" name="settings">
+       <attribute name="title">
+        <string>Settings</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QRadioButton" name="buttonManual">
+          <property name="text">
+           <string>manual</string>
           </property>
-          <property name="horizontalSpacing">
-           <number>40</number>
+          <property name="checked">
+           <bool>true</bool>
           </property>
-          <item row="0" column="0">
-           <widget class="QLabel" name="labelLight">
-            <property name="text">
-             <string>Light:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QTimeEdit" name="inTimeLight">
-            <property name="displayFormat">
-             <string>HH:mm</string>
-            </property>
-            <property name="time">
-             <time>
-              <hour>8</hour>
-              <minute>0</minute>
-              <second>0</second>
-             </time>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="labelDark">
-            <property name="text">
-             <string>Dark:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QTimeEdit" name="inTimeDark">
-            <property name="displayFormat">
-             <string>HH:mm</string>
-            </property>
-            <property name="time">
-             <time>
-              <hour>20</hour>
-              <minute>0</minute>
-              <second>0</second>
-             </time>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QRadioButton" name="buttonSun">
-         <property name="text">
-          <string>set sunset and sunrise</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QFrame" name="location">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <layout class="QFormLayout" name="formLayout_2">
-          <item row="0" column="0">
-           <widget class="QLabel" name="labelLatitude">
-            <property name="text">
-             <string>Latitude:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="labelLongitude">
-            <property name="text">
-             <string>Longitude:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QDoubleSpinBox" name="inLatitude">
-            <property name="suffix">
-             <string>°</string>
-            </property>
-            <property name="minimum">
-             <double>-90.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>90.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QDoubleSpinBox" name="inLongitude">
-            <property name="suffix">
-             <string>°</string>
-            </property>
-            <property name="minimum">
-             <double>-180.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>180.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-      </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="buttonSchedule">
+          <property name="text">
+           <string>scheduled</string>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="time">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <layout class="QFormLayout" name="formLayout">
+           <property name="labelAlignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+           <property name="horizontalSpacing">
+            <number>40</number>
+           </property>
+           <item row="0" column="0">
+            <widget class="QLabel" name="labelLight">
+             <property name="text">
+              <string>Light:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QTimeEdit" name="inTimeLight">
+             <property name="displayFormat">
+              <string>HH:mm</string>
+             </property>
+             <property name="time">
+              <time>
+               <hour>8</hour>
+               <minute>0</minute>
+               <second>0</second>
+              </time>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="labelDark">
+             <property name="text">
+              <string>Dark:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QTimeEdit" name="inTimeDark">
+             <property name="displayFormat">
+              <string>HH:mm</string>
+             </property>
+             <property name="time">
+              <time>
+               <hour>20</hour>
+               <minute>0</minute>
+               <second>0</second>
+              </time>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="buttonSun">
+          <property name="text">
+           <string>set sunset and sunrise</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="location">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <layout class="QFormLayout" name="formLayout_2">
+           <item row="0" column="0">
+            <widget class="QLabel" name="labelLatitude">
+             <property name="text">
+              <string>Latitude:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="labelLongitude">
+             <property name="text">
+              <string>Longitude:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QDoubleSpinBox" name="inLatitude">
+             <property name="suffix">
+              <string>°</string>
+             </property>
+             <property name="minimum">
+              <double>-90.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>90.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QDoubleSpinBox" name="inLongitude">
+             <property name="suffix">
+              <string>°</string>
+             </property>
+             <property name="minimum">
+              <double>-180.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>180.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QPushButton" name="buttonLocation">
+             <property name="text">
+              <string>Set current location</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="plugins">
+       <attribute name="title">
+        <string>Plugins</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QToolBox" name="toolBox">
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="system">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>-149</y>
+             <width>380</width>
+             <height>468</height>
+            </rect>
+           </property>
+           <attribute name="label">
+            <string>System</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_5">
+            <item>
+             <widget class="QGroupBox" name="groupKde">
+              <property name="title">
+               <string>KDE</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_9">
+               <item>
+                <widget class="QComboBox" name="kde_light"/>
+               </item>
+               <item>
+                <widget class="QComboBox" name="kde_dark"/>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="groupGnome">
+              <property name="title">
+               <string>Gnome</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_2">
+               <item>
+                <widget class="QLineEdit" name="gnome_light">
+                 <property name="placeholderText">
+                  <string>Light Theme</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="gnome_dark">
+                 <property name="placeholderText">
+                  <string>Dark Theme</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="groupKvantum">
+              <property name="title">
+               <string>Kvantum</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_4">
+               <item>
+                <widget class="QLineEdit" name="kvantum_light">
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="placeholderText">
+                  <string>Light Theme</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="kvantum_dark">
+                 <property name="placeholderText">
+                  <string>Dark Theme</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="groupGtk">
+              <property name="title">
+               <string>GTK</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_5">
+               <item>
+                <widget class="QLineEdit" name="gtk_light">
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="placeholderText">
+                  <string>Light Theme</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="gtk_dark">
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="placeholderText">
+                  <string>Dark Theme</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="groupWallpaper">
+              <property name="toolTip">
+               <string>Change the wallpaper depending on the theme</string>
+              </property>
+              <property name="title">
+               <string>Wallpaper</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_7">
+               <item>
+                <widget class="QWidget" name="wallpaper_light_group" native="true">
+                 <layout class="QVBoxLayout" name="verticalLayout_9">
+                  <item>
+                   <widget class="QLineEdit" name="wallpaper_light">
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="placeholderText">
+                     <string>Light</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QDialogButtonBox" name="wallpaper_light_open">
+                    <property name="standardButtons">
+                     <set>QDialogButtonBox::Open</set>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="wallpaper_dark_group" native="true">
+                 <layout class="QVBoxLayout" name="verticalLayout_10">
+                  <item>
+                   <widget class="QLineEdit" name="wallpaper_dark">
+                    <property name="placeholderText">
+                     <string>Dark</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QDialogButtonBox" name="wallpaper_dark_open">
+                    <property name="standardButtons">
+                     <set>QDialogButtonBox::Open</set>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="applications">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>401</width>
+             <height>170</height>
+            </rect>
+           </property>
+           <attribute name="label">
+            <string>Applications</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_6">
+            <item>
+             <widget class="QGroupBox" name="groupVscode">
+              <property name="title">
+               <string>VS Code</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout">
+               <item>
+                <widget class="QLineEdit" name="code_light">
+                 <property name="placeholderText">
+                  <string>Light Theme</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="code_dark">
+                 <property name="placeholderText">
+                  <string>Dark Theme</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="groupAtom">
+              <property name="title">
+               <string>Atom</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_8">
+               <item>
+                <widget class="QLineEdit" name="atom_light">
+                 <property name="placeholderText">
+                  <string>Light Theme</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="atom_dark">
+                 <property name="placeholderText">
+                  <string>Dark Theme</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="other">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>380</width>
+             <height>212</height>
+            </rect>
+           </property>
+           <attribute name="label">
+            <string>Miscellaneous</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_7">
+            <item>
+             <widget class="QGroupBox" name="groupSound">
+              <property name="toolTip">
+               <string>Make a sound when the theme is switched.</string>
+              </property>
+              <property name="title">
+               <string>Sound</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_10">
+               <item>
+                <widget class="QWidget" name="sound_light_group" native="true">
+                 <layout class="QVBoxLayout" name="verticalLayout">
+                  <item>
+                   <widget class="QLineEdit" name="sound_light">
+                    <property name="placeholderText">
+                     <string>Light Sound</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QDialogButtonBox" name="sound_light_open">
+                    <property name="standardButtons">
+                     <set>QDialogButtonBox::Open</set>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="sound_dark_group" native="true">
+                 <layout class="QVBoxLayout" name="verticalLayout_8">
+                  <item>
+                   <widget class="QLineEdit" name="sound_dark">
+                    <property name="placeholderText">
+                     <string>Dark Sound</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QDialogButtonBox" name="sound_dark_open">
+                    <property name="standardButtons">
+                     <set>QDialogButtonBox::Open</set>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="groupUsb">
+              <property name="toolTip">
+               <string>Change the power state of a usb port. Useful when you have a light connected</string>
+              </property>
+              <property name="title">
+               <string>USB</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_3">
+               <item>
+                <widget class="QCheckBox" name="usb_light">
+                 <property name="text">
+                  <string>power when light</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="usb_dark">
+                 <property name="text">
+                  <string>power when dark</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
     <item>
-     <widget class="QCheckBox" name="checkSound">
-      <property name="text">
-       <string>enable sounds</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="buttonApplication">
-      <property name="text">
-       <string>Select Applications</string>
+     <widget class="QDialogButtonBox" name="buttonBox">
+      <property name="standardButtons">
+       <set>QDialogButtonBox::Apply|QDialogButtonBox::Reset|QDialogButtonBox::RestoreDefaults</set>
       </property>
      </widget>
     </item>
@@ -266,12 +615,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>86</x>
-     <y>218</y>
+     <x>114</x>
+     <y>192</y>
     </hint>
     <hint type="destinationlabel">
-     <x>191</x>
-     <y>296</y>
+     <x>219</x>
+     <y>280</y>
     </hint>
    </hints>
   </connection>
@@ -282,92 +631,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>245</x>
-     <y>319</y>
+     <x>273</x>
+     <y>308</y>
     </hint>
     <hint type="destinationlabel">
      <x>254</x>
      <y>379</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonLight</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>buttonDark</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>95</x>
-     <y>157</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>200</x>
-     <y>148</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonLight</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>buttonLight</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>42</x>
-     <y>152</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>62</x>
-     <y>156</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonLight</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>automatic</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>27</x>
-     <y>154</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>91</x>
-     <y>183</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonDark</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>automatic</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>274</x>
-     <y>148</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>274</x>
-     <y>184</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>automatic</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>manual</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>162</x>
-     <y>191</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>173</x>
-     <y>167</y>
     </hint>
    </hints>
   </connection>
