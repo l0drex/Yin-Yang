@@ -125,11 +125,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.get_kde_themes()
 
             index_light = self.ui.kde_light.findText(
-                self.get_kde_theme_short(config.get("Light_Theme", plugin='kde')))
+                kde.get_kde_theme_short(config.get("Light_Theme", plugin='kde')))
             self.ui.kde_light.setCurrentIndex(index_light)
 
             index_dark = self.ui.kde_dark.findText(
-                self.get_kde_theme_short(config.get("Dark_Theme", plugin='kde')))
+                kde.get_kde_theme_short(config.get("Dark_Theme", plugin='kde')))
             self.ui.kde_dark.setCurrentIndex(index_dark)
         else:
             self.ui.groupKde.setChecked(False)
@@ -157,7 +157,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.kvantum_dark.setText(config.get("Dark_Theme", plugin='kvantum'))
 
         # wallpaper
-        self.ui.groupWallpaper.setChecked(config.get("wallpaperEnabled", plugin=''))
+        self.ui.groupWallpaper.setChecked(config.get("Enabled", plugin='wallpaper'))
+        self.ui.wallpaper_light.setText(config.get('light_theme', plugin='wallpaper'))
+        self.ui.wallpaper_dark.setText(config.get('dark_theme', plugin='wallpaper'))
 
         # VSCode
         self.ui.groupVscode.setChecked(config.get("Enabled", plugin='vs code'))
@@ -168,6 +170,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.groupAtom.setChecked(config.get("Enabled", plugin='atom'))
         self.ui.atom_light.setText(config.get("Light_Theme", plugin='atom'))
         self.ui.atom_dark.setText(config.get("Dark_Theme", plugin='atom'))
+
+        # Sound
+        self.ui.groupSound.setChecked(config.get('enabled', plugin='sound'))
+        self.ui.sound_light.setText(config.get('light_theme', plugin='sound'))
+        self.ui.sound_dark.setText(config.get('dark_theme', plugin='sound'))
+
+        # Usb
+        self.ui.groupUsb.setChecked(config.get('enabled', plugin='usb'))
+        self.ui.usb_light.setText(config.get('light_theme', plugin='usb'))
+        self.ui.usb_dark.setText(config.get('dark_theme', plugin='usb'))
 
     def get_kde_themes(self):
         """
@@ -296,8 +308,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.set_config()
             return config.write()
         elif button == QDialogButtonBox.Reset:
+            self.set_config()
             config.load()
+            self.get_config()
         elif button == QDialogButtonBox.RestoreDefaults:
             config.set_default()
+            self.get_config()
         else:
             raise ValueError(f'Unknown button {button}')

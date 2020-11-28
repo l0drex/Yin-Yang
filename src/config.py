@@ -7,14 +7,14 @@ from typing import Optional, Union
 
 import requests
 from suntime import Sun, SunTimeException
-from src.plugins import kde, gnome, gtk, kvantum, wallpaper, vscode, atom, sound
+from src.plugins import kde, gnome, gtk, kvantum, wallpaper, vscode, atom, sound, usb
 
 ConfigValue = Union[str, float, bool, tuple]
 
 # default objects
 PLUGINS = [kde.Kde(), gnome.Gnome(), gtk.Gtk(), kvantum.Kvantum(), wallpaper.Wallpaper(),
            vscode.Vscode(), atom.Atom(),
-           sound.Sound()]
+           sound.Sound(), usb.Usb()]
 
 
 class Modes(Enum):
@@ -44,7 +44,7 @@ def get_default() -> dict:
 
     # plugin settings
     for plugin in PLUGINS:
-        conf_default[plugin.name] = {
+        conf_default[plugin.name.casefold()] = {
             "enabled": False,
             "light_theme": plugin.theme_bright,
             "dark_theme": plugin.theme_dark
@@ -181,7 +181,7 @@ class ConfigParser:
             if plugin is None:
                 return self.config[key.casefold()]
             else:
-                return self.config[plugin][key.casefold()]
+                return self.config[plugin.casefold()][key.casefold()]
         except KeyError as e:
             print(f"Unknown key {key}")
             if plugin is None:
