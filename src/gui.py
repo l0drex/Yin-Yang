@@ -71,6 +71,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # set current version in statusbar
         self.ui.statusBar.showMessage("yin-yang: v" + str(config.get("version")))
+
         # set the correct mode
         if config.get("mode") == Modes.scheduled.value:
             self.ui.buttonSchedule.setChecked(True)
@@ -133,7 +134,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.kde_dark.setCurrentIndex(index_dark)
         else:
             self.ui.groupKde.setChecked(False)
-            self.ui.groupKde.setEnabled(False)
+            self.ui.groupKde.setVisible(False)
             config.update("Enabled", False, plugin='kde')
 
         # Gnome
@@ -143,7 +144,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.gnome_dark.setText(config.get("Dark_Theme", plugin='gnome'))
         else:
             self.ui.groupGnome.setChecked(False)
-            self.ui.groupGnome.setEnabled(False)
+            self.ui.groupGnome.setVisible(False)
             config.update("Enabled", False, plugin='gnome')
 
         # GTK
