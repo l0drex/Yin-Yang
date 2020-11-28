@@ -29,6 +29,7 @@ def set_mode(dark: bool):
     for p in PLUGINS:
         if config.get('enabled', plugin=p.name):
             p.set_mode(dark)
+    config.write()
 
 
 class Daemon(threading.Thread):
@@ -42,10 +43,12 @@ class Daemon(threading.Thread):
         while True:
             if self.terminate:
                 config.update("running", False)
+                config.write()
                 break
 
             if config.get('mode') == Modes.manual.value:
                 config.update("running", False)
+                config.write()
                 break
 
             # check if dark mode should be enabled and switch if necessary
