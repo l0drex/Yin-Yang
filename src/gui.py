@@ -285,12 +285,10 @@ class MainWindow(QtWidgets.QMainWindow):
     # TODO the following methods are very similar to each other, maybe there is a way to combine them
     def set_wallpaper_light(self):
         file_name, _ = QFileDialog.getOpenFileName(self, "Open Wallpaper Light", "")
-        subprocess.run(["notify-send", "Light Wallpaper set"])
         self.ui.wallpaper_light.setText(file_name)
 
     def set_wallpaper_dark(self):
         file_name, _ = QFileDialog.getOpenFileName(self, "Open Wallpaper Dark", "")
-        subprocess.run(["notify-send", "Dark Wallpaper set"])
         self.ui.wallpaper_dark.setText(file_name)
 
     def set_sound_light(self):
