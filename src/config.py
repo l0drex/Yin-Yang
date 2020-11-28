@@ -54,18 +54,16 @@ def get_default() -> dict:
 
 
 class ConfigParser:
-    config: dict = None
+    _config: dict = None
     debugging: bool = False
     changed: bool = False
 
     def __init__(self, version: float):
         # load config from file
-        self.config = self.load()
-
-        # use default values if something went wrong
-        if self.config is None or self.config == {}:
+        if not self.load():
+            # use default values if something went wrong
             print("Using default values.")
-            self.config = get_default()
+            self.set_default()
             self.update("version", version)
 
         # check if config needs an update
@@ -76,11 +74,14 @@ class ConfigParser:
 
         # update times for sunset and sunrise
         if self.get("mode") == Modes.followSun:
-            self.update('coordinates', get_location())
+            self.update('coordinates', get_current_location())
             self.set_sun_time()
 
         # save the config
         self.write()
+
+    def set_default(self):
+        self.config = get_default()
 
     def update_config(self):
         """Update old config files
@@ -118,7 +119,7 @@ class ConfigParser:
         self.changed = True
         return config_old
 
-    def load(self) -> dict:
+    def load(self) -> bool:
         """Load config from file"""
 
         # generate path for yin-yang if there is none this will be skipped
@@ -132,9 +133,13 @@ class ConfigParser:
             with open(path + "/yin_yang/yin_yang.json", "r") as conf:
                 conf = json.load(conf)
 
-        # no unsaved changes yet
-        self.changed = False
-        return conf
+        if conf is None or conf == {}:
+            return False
+        else:
+            # no unsaved changes yet
+            self.changed = False
+            self.config = conf
+            return True
 
     def write(self) -> bool:
         """Write configuration
@@ -230,8 +235,8 @@ class ConfigParser:
                   format(today_sr.strftime('%H:%M'), today_ss.strftime('%H:%M')))
 
             # Get today's sunrise and sunset in UTC
-            self.update("switchToLight", today_sr.strftime('%H:%M'))
-            self.update("switchToDark", today_ss.strftime('%H:%M'))
+            self.update("switch_to_light", today_sr.strftime('%H:%M'))
+            self.update("switch_to_dark", today_ss.strftime('%H:%M'))
 
         except SunTimeException as e:
             print("Error: {0}.".format(e))
@@ -270,7 +275,7 @@ def get_desktop():
     return "unknown"
 
 
-def get_location() -> tuple:
+def get_current_location() -> tuple:
     """
     Returns the current location as a tuple (latitude, longitude)
     """
