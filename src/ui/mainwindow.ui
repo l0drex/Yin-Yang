@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>433</width>
-    <height>643</height>
+    <width>377</width>
+    <height>579</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -48,7 +48,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="settings">
        <attribute name="title">
@@ -236,23 +236,23 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
-         <widget class="QToolBox" name="toolBox">
-          <property name="currentIndex">
-           <number>2</number>
+         <widget class="QScrollArea" name="scrollArea">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
           </property>
-          <widget class="QWidget" name="system">
+          <property name="widgetResizable">
+           <bool>true</bool>
+          </property>
+          <widget class="QWidget" name="scrollAreaWidgetContents">
            <property name="geometry">
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>380</width>
-             <height>468</height>
+             <width>324</width>
+             <height>704</height>
             </rect>
            </property>
-           <attribute name="label">
-            <string>System</string>
-           </attribute>
-           <layout class="QVBoxLayout" name="verticalLayout_5">
+           <layout class="QVBoxLayout" name="verticalLayout">
             <item>
              <widget class="QGroupBox" name="groupKde">
               <property name="title">
@@ -298,35 +298,6 @@
              </widget>
             </item>
             <item>
-             <widget class="QGroupBox" name="groupKvantum">
-              <property name="title">
-               <string>Kvantum</string>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_4">
-               <item>
-                <widget class="QLineEdit" name="kvantum_light">
-                 <property name="text">
-                  <string/>
-                 </property>
-                 <property name="placeholderText">
-                  <string>Light Theme</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLineEdit" name="kvantum_dark">
-                 <property name="placeholderText">
-                  <string>Dark Theme</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item>
              <widget class="QGroupBox" name="groupGtk">
               <property name="title">
                <string>GTK</string>
@@ -353,6 +324,35 @@
                  <property name="text">
                   <string/>
                  </property>
+                 <property name="placeholderText">
+                  <string>Dark Theme</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="groupKvantum">
+              <property name="title">
+               <string>Kvantum</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_4">
+               <item>
+                <widget class="QLineEdit" name="kvantum_light">
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="placeholderText">
+                  <string>Light Theme</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="kvantum_dark">
                  <property name="placeholderText">
                   <string>Dark Theme</string>
                  </property>
@@ -419,21 +419,6 @@
               </layout>
              </widget>
             </item>
-           </layout>
-          </widget>
-          <widget class="QWidget" name="applications">
-           <property name="geometry">
-            <rect>
-             <x>0</x>
-             <y>0</y>
-             <width>140</width>
-             <height>170</height>
-            </rect>
-           </property>
-           <attribute name="label">
-            <string>Applications</string>
-           </attribute>
-           <layout class="QVBoxLayout" name="verticalLayout_6">
             <item>
              <widget class="QGroupBox" name="groupVscode">
               <property name="title">
@@ -486,21 +471,6 @@
               </layout>
              </widget>
             </item>
-           </layout>
-          </widget>
-          <widget class="QWidget" name="other">
-           <property name="geometry">
-            <rect>
-             <x>0</x>
-             <y>0</y>
-             <width>401</width>
-             <height>212</height>
-            </rect>
-           </property>
-           <attribute name="label">
-            <string>Miscellaneous</string>
-           </attribute>
-           <layout class="QVBoxLayout" name="verticalLayout_7">
             <item>
              <widget class="QGroupBox" name="groupUsb">
               <property name="toolTip">
@@ -533,19 +503,6 @@
            </layout>
           </widget>
          </widget>
-        </item>
-        <item>
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
         </item>
        </layout>
       </widget>
