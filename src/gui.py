@@ -201,9 +201,9 @@ class MainWindow(QtWidgets.QMainWindow):
         """Sets the values to the config object, but does not save them"""
 
         # determine the mode to use
-        if self.ui.buttonSchedule.toggled:
+        if self.ui.buttonSchedule.isChecked():
             config.update('mode', Modes.scheduled.value)
-        elif self.ui.buttonSun.toggled:
+        elif self.ui.buttonSun.isChecked():
             config.update('mode', Modes.followSun.value)
         else:
             config.update('mode', Modes.manual.value)
@@ -211,6 +211,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # set values of application config
         self.set_time()
         self.set_location()
+        self.set_plugins()
 
     def set_time(self):
         """Sets the time set in the ui to the config"""
@@ -242,44 +243,44 @@ class MainWindow(QtWidgets.QMainWindow):
         # KDE
         config.update("enabled", self.ui.groupKde.isChecked(), plugin='kde')
         kde_light_short = self.ui.kde_light.currentText()
-        config.update("light", self.get_kde_theme_long(kde_light_short), plugin='kde')
+        config.update("light_theme", kde.get_kde_theme_long(kde_light_short), plugin='kde')
         kde_dark_short = self.ui.kde_dark.currentText()
-        config.update("dark", self.get_kde_theme_long(kde_dark_short), plugin='kde')
+        config.update("dark_theme", kde.get_kde_theme_long(kde_dark_short), plugin='kde')
 
         # Gnome
         config.update("enabled", self.ui.groupGnome.isChecked(), plugin='gnome')
-        config.update("light", self.ui.gnome_light.text(), plugin='gnome')
-        config.update("dark", self.ui.gnome_dark.text(), plugin='gnome')
+        config.update("light_theme", self.ui.gnome_light.text(), plugin='gnome')
+        config.update("dark_theme", self.ui.gnome_dark.text(), plugin='gnome')
 
         # gtk
         config.update("enabled", self.ui.groupGtk.isChecked(), plugin='gtk')
-        config.update("light", self.ui.gtk_light.text(), plugin='gtk')
-        config.update("dark", self.ui.gtk_dark.text(), plugin='gtk')
+        config.update("light_theme", self.ui.gtk_light.text(), plugin='gtk')
+        config.update("dark_theme", self.ui.gtk_dark.text(), plugin='gtk')
 
         # wallpaper
         config.update("enabled", self.ui.groupWallpaper.isChecked(), plugin='wallpaper')
-        config.update('light', self.ui.wallpaper_light.text(), plugin='wallpaper')
-        config.update('dark', self.ui.wallpaper_dark.text(), plugin='wallpaper')
+        config.update('light_theme', self.ui.wallpaper_light.text(), plugin='wallpaper')
+        config.update('dark_theme', self.ui.wallpaper_dark.text(), plugin='wallpaper')
 
         # vs code
         config.update("enabled", self.ui.groupVscode.isChecked(), plugin='vs code')
-        config.update("light", self.ui.code_light.text(), plugin='vs code')
-        config.update("dark", self.ui.code_dark.text(), plugin='vs code')
+        config.update("light_theme", self.ui.code_light.text(), plugin='vs code')
+        config.update("dark_theme", self.ui.code_dark.text(), plugin='vs code')
 
         # Kvantum
         config.update("enabled", self.ui.groupKvantum.isChecked(), plugin='Kvantum')
-        config.update("light", self.ui.kvantum_light.text(), plugin='Kvantum')
-        config.update("dark", self.ui.kvantum_dark.text(), plugin='Kvantum')
+        config.update("light_theme", self.ui.kvantum_light.text(), plugin='Kvantum')
+        config.update("dark_theme", self.ui.kvantum_dark.text(), plugin='Kvantum')
 
         # Atom
         config.update("enabled", self.ui.groupAtom.isChecked(), plugin='Atom')
-        config.update("light", self.ui.atom_light.text(), plugin='Atom')
-        config.update("dark", self.ui.atom_dark.text(), plugin='Atom')
+        config.update("light_theme", self.ui.atom_light.text(), plugin='Atom')
+        config.update("dark_theme", self.ui.atom_dark.text(), plugin='Atom')
 
         # sound
         config.update('enabled', self.ui.groupSound.isChecked(), plugin='sound')
-        config.update('light', self.ui.sound_light.text(), plugin='sound')
-        config.update('dark', self.ui.sound_dark.text(), plugin='sound')
+        config.update('light_theme', self.ui.sound_light.text(), plugin='sound')
+        config.update('dark_theme', self.ui.sound_dark.text(), plugin='sound')
 
     # TODO the following methods are very similar to each other, maybe there is a way to combine them
     def set_wallpaper_light(self):

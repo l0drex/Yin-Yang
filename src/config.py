@@ -62,14 +62,12 @@ class ConfigParser:
         # load config from file
         if not self.load():
             # use default values if something went wrong
-            print("Using default values.")
             self.set_default()
             self.update("version", version)
 
         # check if config needs an update
         # if the default values are set, the version number is below 0
         if 0 < self.config["version"] < version:
-            print("Updating config file.")
             self.update_config()
 
         # update times for sunset and sunrise
@@ -81,6 +79,7 @@ class ConfigParser:
         self.write()
 
     def set_default(self):
+        print('Setting default values.')
         self.config = get_default()
 
     def update_config(self):
@@ -90,6 +89,8 @@ class ConfigParser:
 
         :returns: the old config
         """
+
+        print('Attempt to update the config file')
 
         # replace current config with defaults
         config_old = self.config.copy()
@@ -122,6 +123,8 @@ class ConfigParser:
     def load(self) -> bool:
         """Load config from file"""
 
+        print('Loading config file')
+
         # generate path for yin-yang if there is none this will be skipped
         pathlib.Path(path + "/yin_yang").mkdir(parents=True, exist_ok=True)
 
@@ -134,6 +137,7 @@ class ConfigParser:
                 conf = json.load(conf)
 
         if conf is None or conf == {}:
+            print('Could not load config file.')
             return False
         else:
             # no unsaved changes yet
