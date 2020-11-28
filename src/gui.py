@@ -1,4 +1,3 @@
-import subprocess
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QTime
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QDialogButtonBox
@@ -66,8 +65,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.ui.wallpaper_light_open.clicked.connect(self.set_wallpaper_light)
         self.ui.wallpaper_dark_open.clicked.connect(self.set_wallpaper_dark)
-        self.ui.sound_light_open.clicked.connect(self.set_sound_light)
-        self.ui.sound_dark_open.clicked.connect(self.set_sound_dark)
 
     def get_config(self):
         """Sets the values from the config to the elements"""
@@ -81,6 +78,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.buttonSun.setChecked(True)
         else:
             self.ui.buttonManual.setChecked(True)
+
+        self.ui.enable_sound.setChecked(config.get('enabled', plugin='sound'))
+        self.ui.enable_notification.setChecked(config.get('enabled', plugin='notification'))
 
         # sets the correct time based on config
         self.get_time()
@@ -171,11 +171,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.atom_light.setText(config.get("Light_Theme", plugin='atom'))
         self.ui.atom_dark.setText(config.get("Dark_Theme", plugin='atom'))
 
-        # Sound
-        self.ui.groupSound.setChecked(config.get('enabled', plugin='sound'))
-        self.ui.sound_light.setText(config.get('light_theme', plugin='sound'))
-        self.ui.sound_dark.setText(config.get('dark_theme', plugin='sound'))
-
         # Usb
         self.ui.groupUsb.setChecked(config.get('enabled', plugin='usb'))
         self.ui.usb_light.setText(config.get('light_theme', plugin='usb'))
@@ -207,6 +202,9 @@ class MainWindow(QtWidgets.QMainWindow):
             config.update('mode', Modes.followSun.value)
         else:
             config.update('mode', Modes.manual.value)
+
+        config.update('enabled', self.ui.enable_sound.isChecked(), plugin='sound')
+        config.update('enabled', self.ui.enable_notification.isChecked(), plugin='notification')
 
         # set values of application config
         self.set_time()
@@ -277,11 +275,6 @@ class MainWindow(QtWidgets.QMainWindow):
         config.update("light_theme", self.ui.atom_light.text(), plugin='Atom')
         config.update("dark_theme", self.ui.atom_dark.text(), plugin='Atom')
 
-        # sound
-        config.update('enabled', self.ui.groupSound.isChecked(), plugin='sound')
-        config.update('light_theme', self.ui.sound_light.text(), plugin='sound')
-        config.update('dark_theme', self.ui.sound_dark.text(), plugin='sound')
-
     # TODO the following methods are very similar to each other, maybe there is a way to combine them
     def set_wallpaper_light(self):
         file_name, _ = QFileDialog.getOpenFileName(self, "Open Wallpaper Light", "")
@@ -290,14 +283,6 @@ class MainWindow(QtWidgets.QMainWindow):
     def set_wallpaper_dark(self):
         file_name, _ = QFileDialog.getOpenFileName(self, "Open Wallpaper Dark", "")
         self.ui.wallpaper_dark.setText(file_name)
-
-    def set_sound_light(self):
-        file_name, _ = QFileDialog.getOpenFileName(self, "Open Sound Light", "")
-        self.ui.sound_light.setText(file_name)
-
-    def set_sound_dark(self):
-        file_name, _ = QFileDialog.getOpenFileName(self, "Open Sound Dark", "")
-        self.ui.sound_dark.setText(file_name)
 
     def save_config(self, button):
         """Saves the config to the file or restores values"""

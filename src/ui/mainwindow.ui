@@ -202,6 +202,20 @@
          </widget>
         </item>
         <item>
+         <widget class="QCheckBox" name="enable_sound">
+          <property name="text">
+           <string>make a sound when switching the theme</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="enable_notification">
+          <property name="text">
+           <string>send a notification</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="verticalSpacer_2">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -224,13 +238,13 @@
         <item>
          <widget class="QToolBox" name="toolBox">
           <property name="currentIndex">
-           <number>0</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="system">
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>-149</y>
+             <y>0</y>
              <width>380</width>
              <height>468</height>
             </rect>
@@ -412,7 +426,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>401</width>
+             <width>140</width>
              <height>170</height>
             </rect>
            </property>
@@ -479,7 +493,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>380</width>
+             <width>401</width>
              <height>212</height>
             </rect>
            </property>
@@ -487,61 +501,6 @@
             <string>Miscellaneous</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_7">
-            <item>
-             <widget class="QGroupBox" name="groupSound">
-              <property name="toolTip">
-               <string>Make a sound when the theme is switched.</string>
-              </property>
-              <property name="title">
-               <string>Sound</string>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_10">
-               <item>
-                <widget class="QWidget" name="sound_light_group" native="true">
-                 <layout class="QVBoxLayout" name="verticalLayout">
-                  <item>
-                   <widget class="QLineEdit" name="sound_light">
-                    <property name="placeholderText">
-                     <string>Light Sound</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QDialogButtonBox" name="sound_light_open">
-                    <property name="standardButtons">
-                     <set>QDialogButtonBox::Open</set>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </widget>
-               </item>
-               <item>
-                <widget class="QWidget" name="sound_dark_group" native="true">
-                 <layout class="QVBoxLayout" name="verticalLayout_8">
-                  <item>
-                   <widget class="QLineEdit" name="sound_dark">
-                    <property name="placeholderText">
-                     <string>Dark Sound</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QDialogButtonBox" name="sound_dark_open">
-                    <property name="standardButtons">
-                     <set>QDialogButtonBox::Open</set>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
             <item>
              <widget class="QGroupBox" name="groupUsb">
               <property name="toolTip">
