@@ -64,7 +64,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # connect dialog buttons
         self.ui.buttonBox.clicked.connect(self.save_config)
 
-        # TODO connect plugins
+        self.ui.wallpaper_light_open.clicked.connect(self.set_wallpaper_light)
+        self.ui.wallpaper_dark_open.clicked.connect(self.set_wallpaper_dark)
+        self.ui.sound_light_open.clicked.connect(self.set_sound_light)
+        self.ui.sound_dark_open.clicked.connect(self.set_sound_dark)
 
     def get_config(self):
         """Sets the values from the config to the elements"""
@@ -111,7 +114,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.inLongitude.setValue(coordinates[1])
 
     def get_plugins(self):
-        # TODO get settings for every plugin in the config and set the ui elements accordingly
+        # TODO this is horrible, maybe some sort of iteration through the PLUGINS from config is possible?
 
         # KDE
         if config.get("desktop") == "kde":
@@ -266,17 +269,24 @@ class MainWindow(QtWidgets.QMainWindow):
         config.update('light', self.ui.sound_light.text(), plugin='sound')
         config.update('dark', self.ui.sound_dark.text(), plugin='sound')
 
+    # TODO the following methods are very similar to each other, maybe there is a way to combine them
     def set_wallpaper_light(self):
-        file_name, _ = QFileDialog.getOpenFileName(
-            self, "Open Wallpaper Light", "")
+        file_name, _ = QFileDialog.getOpenFileName(self, "Open Wallpaper Light", "")
         subprocess.run(["notify-send", "Light Wallpaper set"])
-        config.update("wallpaperLight_Theme", file_name)
+        self.ui.wallpaper_light.setText(file_name)
 
     def set_wallpaper_dark(self):
-        file_name, _ = QFileDialog.getOpenFileName(
-            self, "Open Wallpaper Dark", "")
+        file_name, _ = QFileDialog.getOpenFileName(self, "Open Wallpaper Dark", "")
         subprocess.run(["notify-send", "Dark Wallpaper set"])
-        config.update("wallpaperDark_Theme", file_name)
+        self.ui.wallpaper_dark.setText(file_name)
+
+    def set_sound_light(self):
+        file_name, _ = QFileDialog.getOpenFileName(self, "Open Sound Light", "")
+        self.ui.sound_light.setText(file_name)
+
+    def set_sound_dark(self):
+        file_name, _ = QFileDialog.getOpenFileName(self, "Open Sound Dark", "")
+        self.ui.sound_dark.setText(file_name)
 
     def save_config(self, button):
         """Saves the config to the file or restores values"""
