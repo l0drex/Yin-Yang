@@ -7,13 +7,13 @@ from typing import Optional, Union
 
 import requests
 from suntime import Sun, SunTimeException
-from src.plugins import kde, gnome, gtk, kvantum, wallpaper, vscode, atom, sound, usb, notify
+from src.plugins import kde, gnome, gtk, kvantum, wallpaper, vscode, atom, sound, usb, notify, konsole
 
 ConfigValue = Union[str, float, bool, tuple]
 
 # default objects
 PLUGINS = [kde.Kde(), gnome.Gnome(), gtk.Gtk(), kvantum.Kvantum(), wallpaper.Wallpaper(),
-           vscode.Vscode(), atom.Atom(),
+           vscode.Vscode(), atom.Atom(), konsole.Konsole(),
            sound.Sound(), usb.Usb(), notify.Notification()]
 
 
