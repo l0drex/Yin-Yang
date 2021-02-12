@@ -44,8 +44,6 @@ class Plugin:
         widget.setObjectName('group' + self.name)
 
         horizontal_layout = QtWidgets.QHBoxLayout(widget)
-        horizontal_layout.setContentsMargins(11, 11, 11, 11)
-        horizontal_layout.setSpacing(6)
 
         for inp in self.get_input(widget):
             horizontal_layout.addWidget(inp)

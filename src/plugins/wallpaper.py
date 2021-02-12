@@ -1,7 +1,7 @@
 import subprocess
 
 from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtWidgets import QDialogButtonBox
+from PyQt5.QtWidgets import QDialogButtonBox, QVBoxLayout
 
 from src import config
 from src.plugins.plugin import Plugin
@@ -32,12 +32,15 @@ class Wallpaper(Plugin):
 
         for theme in ['light', 'dark']:
             grp = QtWidgets.QWidget(widget)
+            horizontal_layout = QVBoxLayout(grp)
 
             inp = QtWidgets.QLineEdit(grp)
             inp.setPlaceholderText(_translate('MainWindow', f'{theme} theme'))
+            horizontal_layout.addWidget(inp)
 
             btn = QtWidgets.QDialogButtonBox(grp)
             btn.setStandardButtons(QDialogButtonBox.Open)
+            horizontal_layout.addWidget(btn)
 
             widgets.append(grp)
 

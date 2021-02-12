@@ -164,7 +164,6 @@ class MainWindow(QtWidgets.QMainWindow):
                     config.update("Enabled", False, plugin='gnome')
 
                 if plugin.name == 'Wallpaper':
-                    # FIXME no buttons nor input fields are shown here
                     children = widget.findChildren(QtWidgets.QPushButton)
                     children[0].clicked.connect(self.set_wallpaper_dark)
                     children[1].clicked.connect(self.set_wallpaper_light)
