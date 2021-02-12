@@ -22,6 +22,7 @@ class Wallpaper(Plugin):
                 subprocess.run(
                     ["sh", "/opt/yin-yang/src/change_wallpaper.sh", theme])
             if config.get_desktop() == "gtk":
+                # noinspection SpellCheckingInspection
                 subprocess.run(["gsettings", "set", "org.gnome.desktop.background",
                                 "picture-uri", "file://" + theme])
 
