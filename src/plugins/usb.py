@@ -9,3 +9,8 @@ class Usb(Plugin):
     def set_theme(self, theme: str):
         # TODO
         pass
+
+    def get_input(self, widget):
+        # TODO implement check boxes
+
+        return super(Usb, self).get_input(widget)

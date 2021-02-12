@@ -1,6 +1,9 @@
 import os
 import pwd
 import subprocess
+
+from PyQt5 import QtWidgets
+
 from src.plugins.plugin import Plugin
 
 
@@ -12,6 +15,9 @@ class Kde(Plugin):
     def set_theme(self, theme: str):
         # uses a kde api to switch to a light theme
         subprocess.run(["lookandfeeltool", "-a", theme])
+
+    def get_input(self, widget):
+        return [QtWidgets.QComboBox(widget), QtWidgets.QComboBox(widget)]
 
 
 def get_short_name(file) -> str:

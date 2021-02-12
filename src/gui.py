@@ -1,8 +1,9 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QTime
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QDialogButtonBox
+
 from src.ui.mainwindow import Ui_MainWindow
-from src.config import config, Modes, get_current_location
+from src.config import config, Modes, get_current_location, PLUGINS
 from src.plugins import kde
 
 
@@ -63,8 +64,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # connect dialog buttons
         self.ui.buttonBox.clicked.connect(self.save_config)
 
-        self.ui.wallpaper_light_open.clicked.connect(self.set_wallpaper_light)
-        self.ui.wallpaper_dark_open.clicked.connect(self.set_wallpaper_dark)
+        # TODO
+        if False:
+            self.ui.wallpaper_light_open.clicked.connect(self.set_wallpaper_light)
+            self.ui.wallpaper_dark_open.clicked.connect(self.set_wallpaper_dark)
 
     def get_config(self):
         """Sets the values from the config to the elements"""
@@ -115,69 +118,45 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.inLongitude.setValue(coordinates[1])
 
     def get_plugins(self):
-        # TODO this is horrible, maybe some sort of iteration through the PLUGINS from config is possible?
+        widget: QtWidgets.QWidget
+        for plugin in PLUGINS:
+            widget = plugin.get_widget(self.ui.scrollAreaWidgetContents)
+            self.ui.verticalLayout.addWidget(widget)
 
-        # KDE
-        if config.get("desktop") == "kde":
-            self.ui.groupKde.setChecked(config.get("enabled", plugin='kde'))
+            assert widget is not None, f'No widget for plugin {plugin.name} found'
 
-            # reads out all kde themes and displays them inside a combobox
+            widget.setChecked(config.get("Enabled", plugin=plugin.name))
 
-            self.get_kde_themes()
+            if plugin.name == 'KDE':
+                if config.get("desktop") != "kde":
+                    # make the widget invisible
+                    widget.setChecked(False)
+                    widget.setVisible(False)
+                    config.update("Enabled", False, plugin='kde')
+                else:
+                    # use combobox instead of line edit
+                    continue
+                    self.get_kde_themes(widget)
+                    index_light = self.ui.kde_light.findText(
+                        kde.get_kde_theme_short(config.get("Light_Theme", plugin='kde')))
+                    self.ui.kde_light.setCurrentIndex(index_light)
 
-            index_light = self.ui.kde_light.findText(
-                kde.get_kde_theme_short(config.get("Light_Theme", plugin='kde')))
-            self.ui.kde_light.setCurrentIndex(index_light)
+                    index_dark = self.ui.kde_dark.findText(
+                        kde.get_kde_theme_short(config.get("Dark_Theme", plugin='kde')))
+                    self.ui.kde_dark.setCurrentIndex(index_dark)
+            else:
+                if plugin.name == 'Gnome':
+                    if config.get("desktop") != "gnome":
+                        # make the widget invisible
+                        widget.setChecked(False)
+                        widget.setVisible(False)
+                        config.update("Enabled", False, plugin='gnome')
 
-            index_dark = self.ui.kde_dark.findText(
-                kde.get_kde_theme_short(config.get("Dark_Theme", plugin='kde')))
-            self.ui.kde_dark.setCurrentIndex(index_dark)
-        else:
-            self.ui.groupKde.setChecked(False)
-            self.ui.groupKde.setVisible(False)
-            config.update("Enabled", False, plugin='kde')
+                children = widget.findChildren(QtWidgets.QLineEdit)
+                children[0].setText(config.get("dark_theme", plugin=plugin.name))
+                children[1].setText(config.get("light_theme", plugin=plugin.name))
 
-        # Gnome
-        if config.get("desktop") == "gnome":
-            self.ui.groupGnome.setChecked(config.get("Enabled", plugin='gnome'))
-            self.ui.gnome_light.setText(config.get("Light_Theme", plugin='gnome'))
-            self.ui.gnome_dark.setText(config.get("Dark_Theme", plugin='gnome'))
-        else:
-            self.ui.groupGnome.setChecked(False)
-            self.ui.groupGnome.setVisible(False)
-            config.update("Enabled", False, plugin='gnome')
-
-        # GTK
-        self.ui.groupGtk.setChecked(config.get("Enabled", plugin='gtk'))
-        self.ui.gtk_light.setText(config.get("Light_Theme", plugin='gtk'))
-        self.ui.gtk_dark.setText(config.get("Dark_Theme", plugin='gtk'))
-
-        # Kvantum
-        self.ui.groupKvantum.setChecked(config.get("Enabled", plugin='kvantum'))
-        self.ui.kvantum_light.setText(config.get("Light_Theme", plugin='kvantum'))
-        self.ui.kvantum_dark.setText(config.get("Dark_Theme", plugin='kvantum'))
-
-        # wallpaper
-        self.ui.groupWallpaper.setChecked(config.get("Enabled", plugin='wallpaper'))
-        self.ui.wallpaper_light.setText(config.get('light_theme', plugin='wallpaper'))
-        self.ui.wallpaper_dark.setText(config.get('dark_theme', plugin='wallpaper'))
-
-        # VSCode
-        self.ui.groupVscode.setChecked(config.get("Enabled", plugin='vs code'))
-        self.ui.code_light.setText(config.get("Light_Theme", plugin='vs code'))
-        self.ui.code_dark.setText(config.get("Dark_Theme", plugin='vs code'))
-
-        # Atom
-        self.ui.groupAtom.setChecked(config.get("Enabled", plugin='atom'))
-        self.ui.atom_light.setText(config.get("Light_Theme", plugin='atom'))
-        self.ui.atom_dark.setText(config.get("Dark_Theme", plugin='atom'))
-
-        # Usb
-        self.ui.groupUsb.setChecked(config.get('enabled', plugin='usb'))
-        self.ui.usb_light.setText(config.get('light_theme', plugin='usb'))
-        self.ui.usb_dark.setText(config.get('dark_theme', plugin='usb'))
-
-    def get_kde_themes(self):
+    def get_kde_themes(self, widget):
         """
         Sends the kde themes to the ui.
         """
@@ -190,7 +169,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.ui.kde_light.addItem(name)
                     self.ui.kde_dark.addItem(name)
         else:
-            self.ui.groupKde.setChecked(False)
+            widget.setChecked(False)
             config.update("kdeEnabled", False)
 
     def set_config(self):
