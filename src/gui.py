@@ -10,64 +10,22 @@ from src.plugins import kde
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
+        # basic setup
         self.setWindowTitle("Yin & Yang")
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
+        # center the window
+        frame_gm = self.frameGeometry()
+        center_point = QtWidgets.QDesktopWidget().availableGeometry().center()
+        frame_gm.moveCenter(center_point)
+        self.move(frame_gm.topLeft())
 
         # set the config values to the elements
         self.get_config()
 
         # connects all buttons to the correct routes
         self.register_handlers()
-
-        # center the window
-        self.center()
-
-    def center(self):
-        """Centers the window"""
-        frame_gm = self.frameGeometry()
-        center_point = QtWidgets.QDesktopWidget().availableGeometry().center()
-        frame_gm.moveCenter(center_point)
-        self.move(frame_gm.topLeft())
-
-    def close_event(self, event):
-        """Overwrite the function that gets called when window is closed"""
-
-        if self.should_close():
-            event.accept()
-        else:
-            event.ignore()
-
-    def should_close(self) -> bool:
-        """Returns true if the user wants to close the application"""
-
-        # ask the user if he wants to save changes
-        if config.changed:
-            ret = QMessageBox.warning(self, 'Unsaved changes',
-                                      'The settings have been modified. Do you want to save them?',
-                                      QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
-            if ret == QMessageBox.Save:
-                return config.write()
-            elif ret == QMessageBox.Cancel:
-                return False
-        return True
-
-    def register_handlers(self):
-        # set sunrise and sunset times if mode is set to followSun or coordinates changed
-        self.ui.buttonSun.toggled.connect(self.get_time_sun)
-        self.ui.inLatitude.valueChanged.connect(self.get_time_sun)
-        self.ui.inLongitude.valueChanged.connect(self.get_time_sun)
-
-        # button to get the current position
-        self.ui.buttonLocation.pressed.connect(self.set_current_location)
-
-        # connect dialog buttons
-        self.ui.buttonBox.clicked.connect(self.save_config)
-
-        group_wallpaper = self.ui.scrollAreaWidgetContents.findChild(QtWidgets.QGroupBox, 'groupWallpaper')
-        buttons_wallpaper = group_wallpaper.findChildren(QtWidgets.QPushButton)
-        buttons_wallpaper[1].clicked.connect(self.set_wallpaper_light)
-        buttons_wallpaper[0].clicked.connect(self.set_wallpaper_dark)
 
     def get_config(self):
         """Sets the values from the config to the elements"""
@@ -121,7 +79,9 @@ class MainWindow(QtWidgets.QMainWindow):
         widget: QtWidgets.QWidget
         for plugin in PLUGINS:
             widget = plugin.get_widget(self.ui.scrollAreaWidgetContents)
-            self.ui.verticalLayout.addWidget(widget)
+            # FIXME widgets get added to the ui again when pressing reset
+            if not self.ui.verticalLayout.findChildren(QtWidgets.QGroupBox, widget.objectName()):
+                self.ui.verticalLayout.addWidget(widget)
 
             assert widget is not None, f'No widget for plugin {plugin.name} found'
 
@@ -171,6 +131,24 @@ class MainWindow(QtWidgets.QMainWindow):
                 children = widget.findChildren(QtWidgets.QLineEdit)
                 children[0].setText(config.get("dark_theme", plugin=plugin.name))
                 children[1].setText(config.get("light_theme", plugin=plugin.name))
+
+    def register_handlers(self):
+        # set sunrise and sunset times if mode is set to followSun or coordinates changed
+        self.ui.buttonSun.toggled.connect(self.get_time_sun)
+        self.ui.inLatitude.valueChanged.connect(self.get_time_sun)
+        self.ui.inLongitude.valueChanged.connect(self.get_time_sun)
+
+        # button to get the current position
+        self.ui.buttonLocation.pressed.connect(self.set_current_location)
+
+        # connect dialog buttons
+        self.ui.buttonBox.clicked.connect(self.save_config)
+
+        # wallpaper buttons
+        group_wallpaper = self.ui.scrollAreaWidgetContents.findChild(QtWidgets.QGroupBox, 'groupWallpaper')
+        buttons_wallpaper = group_wallpaper.findChildren(QtWidgets.QPushButton)
+        buttons_wallpaper[1].clicked.connect(self.set_wallpaper_light)
+        buttons_wallpaper[0].clicked.connect(self.set_wallpaper_dark)
 
     def set_config(self):
         """Sets the values to the config object, but does not save them"""
@@ -259,7 +237,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.set_config()
             return config.write()
         elif button == QDialogButtonBox.Reset:
-            self.set_config()
+            # TODO check if this is necessary
+            #self.set_config()
             config.load()
             self.get_config()
         elif button == QDialogButtonBox.RestoreDefaults:
@@ -267,3 +246,25 @@ class MainWindow(QtWidgets.QMainWindow):
             self.get_config()
         else:
             raise ValueError(f'Unknown button {button}')
+
+    def should_close(self) -> bool:
+        """Returns true if the user wants to close the application"""
+
+        # ask the user if he wants to save changes
+        if config.changed:
+            ret = QMessageBox.warning(self, 'Unsaved changes',
+                                      'The settings have been modified. Do you want to save them?',
+                                      QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
+            if ret == QMessageBox.Save:
+                return config.write()
+            elif ret == QMessageBox.Cancel:
+                return False
+        return True
+
+    def close_event(self, event):
+        """Overwrite the function that gets called when window is closed"""
+
+        if self.should_close():
+            event.accept()
+        else:
+            event.ignore()
