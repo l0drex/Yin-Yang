@@ -128,49 +128,44 @@ class MainWindow(QtWidgets.QMainWindow):
             widget.setChecked(config.get("Enabled", plugin=plugin.name))
 
             if plugin.name == 'KDE':
-                if config.get("desktop") != "kde":
+                if config.get("desktop") == "kde":
+                    # use combobox instead of line edit
+                    children = widget.findChildren(QtWidgets.QComboBox)
+                    # append the names to the combobox
+                    if config.get("desktop") == "kde":
+                        if children[0].count() == 0 and children[1].count() == 0:
+                            kde_themes = kde.get_kde_theme_names()
+
+                            for name, theme in kde_themes.items():
+                                for child in children:
+                                    child.addItem(name)
+                    else:
+                        widget.setChecked(False)
+                        config.update("kdeEnabled", False)
+
+                    # set the index
+                    index_dark = children[0].findText(
+                        kde.get_kde_theme_short(config.get("Dark_Theme", plugin='kde')))
+                    children[0].setCurrentIndex(index_dark)
+
+                    index_light = children[1].findText(
+                        kde.get_kde_theme_short(config.get("Light_Theme", plugin='kde')))
+                    children[1].setCurrentIndex(index_light)
+                else:
                     # make the widget invisible
                     widget.setChecked(False)
                     widget.setVisible(False)
                     config.update("Enabled", False, plugin='kde')
-                else:
-                    # use combobox instead of line edit
-                    continue
-                    self.get_kde_themes(widget)
-                    index_light = self.ui.kde_light.findText(
-                        kde.get_kde_theme_short(config.get("Light_Theme", plugin='kde')))
-                    self.ui.kde_light.setCurrentIndex(index_light)
-
-                    index_dark = self.ui.kde_dark.findText(
-                        kde.get_kde_theme_short(config.get("Dark_Theme", plugin='kde')))
-                    self.ui.kde_dark.setCurrentIndex(index_dark)
             else:
-                if plugin.name == 'Gnome':
-                    if config.get("desktop") != "gnome":
-                        # make the widget invisible
-                        widget.setChecked(False)
-                        widget.setVisible(False)
-                        config.update("Enabled", False, plugin='gnome')
+                if plugin.name == 'Gnome' and config.get("desktop") != "gnome":
+                    # make the widget invisible
+                    widget.setChecked(False)
+                    widget.setVisible(False)
+                    config.update("Enabled", False, plugin='gnome')
 
                 children = widget.findChildren(QtWidgets.QLineEdit)
                 children[0].setText(config.get("dark_theme", plugin=plugin.name))
                 children[1].setText(config.get("light_theme", plugin=plugin.name))
-
-    def get_kde_themes(self, widget):
-        """
-        Sends the kde themes to the ui.
-        """
-        if config.get("desktop") == "kde":
-            if(self.ui.kde_light.count() == 0 and
-               self.ui.kde_dark.count() == 0):
-                kde_themes = kde.get_kde_theme_names()
-
-                for name, theme in kde_themes.items():
-                    self.ui.kde_light.addItem(name)
-                    self.ui.kde_dark.addItem(name)
-        else:
-            widget.setChecked(False)
-            config.update("kdeEnabled", False)
 
     def set_config(self):
         """Sets the values to the config object, but does not save them"""
