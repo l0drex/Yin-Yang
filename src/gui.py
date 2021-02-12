@@ -237,19 +237,19 @@ class MainWindow(QtWidgets.QMainWindow):
             config.update("dark_theme", children[0].text(), plugin=plugin.name)
             config.update("light_theme", children[1].text(), plugin=plugin.name)
 
-    # TODO the following methods are very similar to each other, maybe there is a way to combine them
-    def set_wallpaper_light(self):
-        file_name, _ = QFileDialog.getOpenFileName(self, "Open Wallpaper Light", "")
+    def set_wallpaper(self, dark: bool):
+        file_name, _ = QFileDialog.getOpenFileName(self, f"Open Wallpaper {'dark' if dark else 'light'}", "")
 
         group_wallpaper = self.ui.scrollAreaWidgetContents.findChild(QtWidgets.QGroupBox, 'groupWallpaper')
-        buttons_wallpaper = group_wallpaper.findChildren(QtWidgets.QPushButton)
-        buttons_wallpaper[1].setText(file_name)
+        buttons_wallpaper = group_wallpaper.findChildren(QtWidgets.QLineEdit)
+        i = 0 if dark else 1
+        buttons_wallpaper[i].setText(file_name)
+
+    def set_wallpaper_light(self):
+        self.set_wallpaper(False)
 
     def set_wallpaper_dark(self):
-        file_name, _ = QFileDialog.getOpenFileName(self, "Open Wallpaper Dark", "")
-        group_wallpaper = self.ui.scrollAreaWidgetContents.findChild(QtWidgets.QGroupBox, 'groupWallpaper')
-        buttons_wallpaper = group_wallpaper.findChildren(QtWidgets.QPushButton)
-        buttons_wallpaper[0].setText(file_name)
+        self.set_wallpaper(True)
 
     def save_config(self, button):
         """Saves the config to the file or restores values"""
