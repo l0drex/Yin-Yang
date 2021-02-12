@@ -64,10 +64,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # connect dialog buttons
         self.ui.buttonBox.clicked.connect(self.save_config)
 
-        # TODO
-        if False:
-            self.ui.wallpaper_light_open.clicked.connect(self.set_wallpaper_light)
-            self.ui.wallpaper_dark_open.clicked.connect(self.set_wallpaper_dark)
+        group_wallpaper = self.ui.scrollAreaWidgetContents.findChild(QtWidgets.QGroupBox, 'groupWallpaper')
+        buttons_wallpaper = group_wallpaper.findChildren(QtWidgets.QPushButton)
+        buttons_wallpaper[1].clicked.connect(self.set_wallpaper_light)
+        buttons_wallpaper[0].clicked.connect(self.set_wallpaper_dark)
 
     def get_config(self):
         """Sets the values from the config to the elements"""
@@ -163,6 +163,12 @@ class MainWindow(QtWidgets.QMainWindow):
                     widget.setVisible(False)
                     config.update("Enabled", False, plugin='gnome')
 
+                if plugin.name == 'Wallpaper':
+                    # FIXME no buttons nor input fields are shown here
+                    children = widget.findChildren(QtWidgets.QPushButton)
+                    children[0].clicked.connect(self.set_wallpaper_dark)
+                    children[1].clicked.connect(self.set_wallpaper_light)
+
                 children = widget.findChildren(QtWidgets.QLineEdit)
                 children[0].setText(config.get("dark_theme", plugin=plugin.name))
                 children[1].setText(config.get("light_theme", plugin=plugin.name))
@@ -211,53 +217,40 @@ class MainWindow(QtWidgets.QMainWindow):
         self.get_location()
 
     def set_plugins(self):
-        # TODO this is kinda horrible
+        for plugin in PLUGINS:
+            widget = self.ui.scrollAreaWidgetContents.findChild(QtWidgets.QGroupBox, f'group{plugin.name}')
 
-        # KDE
-        config.update("enabled", self.ui.groupKde.isChecked(), plugin='kde')
-        kde_light_short = self.ui.kde_light.currentText()
-        config.update("light_theme", kde.get_kde_theme_long(kde_light_short), plugin='kde')
-        kde_dark_short = self.ui.kde_dark.currentText()
-        config.update("dark_theme", kde.get_kde_theme_long(kde_dark_short), plugin='kde')
+            if plugin.name == 'KDE':
+                # extra behaviour for combobox
+                children = widget.findChildren(QtWidgets.QComboBox)
 
-        # Gnome
-        config.update("enabled", self.ui.groupGnome.isChecked(), plugin='gnome')
-        config.update("light_theme", self.ui.gnome_light.text(), plugin='gnome')
-        config.update("dark_theme", self.ui.gnome_dark.text(), plugin='gnome')
+                config.update("enabled", widget.isChecked(), plugin='kde')
+                kde_dark_short = children[0].currentText()
+                kde_light_short = children[1].currentText()
+                config.update("dark_theme", kde.get_kde_theme_long(kde_dark_short), plugin='kde')
+                config.update("light_theme", kde.get_kde_theme_long(kde_light_short), plugin='kde')
 
-        # gtk
-        config.update("enabled", self.ui.groupGtk.isChecked(), plugin='gtk')
-        config.update("light_theme", self.ui.gtk_light.text(), plugin='gtk')
-        config.update("dark_theme", self.ui.gtk_dark.text(), plugin='gtk')
+                continue
 
-        # wallpaper
-        config.update("enabled", self.ui.groupWallpaper.isChecked(), plugin='wallpaper')
-        config.update('light_theme', self.ui.wallpaper_light.text(), plugin='wallpaper')
-        config.update('dark_theme', self.ui.wallpaper_dark.text(), plugin='wallpaper')
+            children = widget.findChildren(QtWidgets.QLineEdit)
 
-        # vs code
-        config.update("enabled", self.ui.groupVscode.isChecked(), plugin='vs code')
-        config.update("light_theme", self.ui.code_light.text(), plugin='vs code')
-        config.update("dark_theme", self.ui.code_dark.text(), plugin='vs code')
-
-        # Kvantum
-        config.update("enabled", self.ui.groupKvantum.isChecked(), plugin='Kvantum')
-        config.update("light_theme", self.ui.kvantum_light.text(), plugin='Kvantum')
-        config.update("dark_theme", self.ui.kvantum_dark.text(), plugin='Kvantum')
-
-        # Atom
-        config.update("enabled", self.ui.groupAtom.isChecked(), plugin='Atom')
-        config.update("light_theme", self.ui.atom_light.text(), plugin='Atom')
-        config.update("dark_theme", self.ui.atom_dark.text(), plugin='Atom')
+            config.update("enabled", widget.isChecked(), plugin=plugin.name)
+            config.update("dark_theme", children[0].text(), plugin=plugin.name)
+            config.update("light_theme", children[1].text(), plugin=plugin.name)
 
     # TODO the following methods are very similar to each other, maybe there is a way to combine them
     def set_wallpaper_light(self):
         file_name, _ = QFileDialog.getOpenFileName(self, "Open Wallpaper Light", "")
-        self.ui.wallpaper_light.setText(file_name)
+
+        group_wallpaper = self.ui.scrollAreaWidgetContents.findChild(QtWidgets.QGroupBox, 'groupWallpaper')
+        buttons_wallpaper = group_wallpaper.findChildren(QtWidgets.QPushButton)
+        buttons_wallpaper[1].setText(file_name)
 
     def set_wallpaper_dark(self):
         file_name, _ = QFileDialog.getOpenFileName(self, "Open Wallpaper Dark", "")
-        self.ui.wallpaper_dark.setText(file_name)
+        group_wallpaper = self.ui.scrollAreaWidgetContents.findChild(QtWidgets.QGroupBox, 'groupWallpaper')
+        buttons_wallpaper = group_wallpaper.findChildren(QtWidgets.QPushButton)
+        buttons_wallpaper[0].setText(file_name)
 
     def save_config(self, button):
         """Saves the config to the file or restores values"""
