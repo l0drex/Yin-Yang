@@ -7,6 +7,9 @@ from PyQt5 import QtWidgets
 from src.plugins.plugin import Plugin
 
 
+translations = {}
+
+
 class Kde(Plugin):
     name = 'KDE'
     theme_bright = 'org.kde.breeze.desktop'
@@ -42,13 +45,17 @@ def get_kde_theme_names():
     Returns a name_map with translations for kde theme names.
     """
 
-    themes = {}
+    global translations
+
+    if translations != {}:
+        return translations
 
     # aliases for path to use later on
     user = pwd.getpwuid(os.getuid())[0]
     path = "/home/" + user + "/.local/share/plasma/look-and-feel/"
 
     # asks the system what themes are available
+    # noinspection SpellCheckingInspection
     long_names = subprocess.check_output(["lookandfeeltool", "-l"], universal_newlines=True)
     long_names = long_names.splitlines()
 
@@ -58,19 +65,19 @@ def get_kde_theme_names():
         try:
             # load the name from the metadata.desktop file
             with open('/usr/share/plasma/look-and-feel/{long_name}/metadata.desktop'.format(**locals()), 'r') as file:
-                themes[get_short_name(file)] = long_name
-        except:
+                translations[get_short_name(file)] = long_name
+        except OSError:
             # check the next path if the themes exist there
             try:
                 # load the name from the metadata.desktop file
                 with open('{path}{long_name}/metadata.desktop'.format(**locals()), 'r') as file:
                     # search for the name
-                    themes[get_short_name(file)] = long_name
-            except:
-                # if no file exist lets just use the long_name name
-                themes[long_name] = long_name
+                    translations[get_short_name(file)] = long_name
+            except OSError:
+                # if no file exist lets just use the long name
+                translations[long_name] = long_name
 
-    return themes
+    return translations
 
 
 def get_kde_theme_long(short: str):
