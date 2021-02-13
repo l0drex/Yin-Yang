@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>main_window</class>
+ <widget class="QMainWindow" name="main_window">
   <property name="enabled">
    <bool>true</bool>
   </property>
@@ -26,12 +26,12 @@
    <iconset resource="../../resources.qrc">
     <normaloff>:/icons/assets/yin-yang.svg</normaloff>:/icons/assets/yin-yang.svg</iconset>
   </property>
-  <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_2">
+  <widget class="QWidget" name="central_widget">
+   <layout class="QVBoxLayout" name="central_widget_layout">
     <item>
-     <layout class="QHBoxLayout" name="logo">
+     <layout class="QHBoxLayout" name="logo_layout">
       <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
-       <widget class="QLabel" name="imgLogo">
+       <widget class="QLabel" name="logo">
         <property name="pixmap">
          <pixmap resource="../../resources.qrc">:/icons/assets/yin-yang.svg</pixmap>
         </property>
@@ -46,17 +46,17 @@
      </layout>
     </item>
     <item>
-     <widget class="QTabWidget" name="tabWidget">
+     <widget class="QTabWidget" name="tab_widget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="settings">
        <attribute name="title">
         <string>Settings</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_3">
+       <layout class="QVBoxLayout" name="settings_layout">
         <item>
-         <widget class="QRadioButton" name="buttonManual">
+         <widget class="QRadioButton" name="btn_manual">
           <property name="text">
            <string>manual</string>
           </property>
@@ -66,7 +66,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="buttonSchedule">
+         <widget class="QRadioButton" name="btn_schedule">
           <property name="text">
            <string>scheduled</string>
           </property>
@@ -86,7 +86,7 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <layout class="QFormLayout" name="formLayout">
+          <layout class="QFormLayout" name="time_layout">
            <property name="labelAlignment">
             <set>Qt::AlignCenter</set>
            </property>
@@ -94,7 +94,7 @@
             <number>40</number>
            </property>
            <item row="0" column="0">
-            <widget class="QLabel" name="labelLight">
+            <widget class="QLabel" name="label_light">
              <property name="text">
               <string>Light:</string>
              </property>
@@ -104,7 +104,7 @@
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QTimeEdit" name="inTimeLight">
+            <widget class="QTimeEdit" name="inp_time_light">
              <property name="displayFormat">
               <string>HH:mm</string>
              </property>
@@ -118,14 +118,14 @@
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QLabel" name="labelDark">
+            <widget class="QLabel" name="label_dark">
              <property name="text">
               <string>Dark:</string>
              </property>
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QTimeEdit" name="inTimeDark">
+            <widget class="QTimeEdit" name="inp_time_dark">
              <property name="displayFormat">
               <string>HH:mm</string>
              </property>
@@ -142,7 +142,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="buttonSun">
+         <widget class="QRadioButton" name="btn_sun">
           <property name="text">
            <string>set sunset and sunrise</string>
           </property>
@@ -153,23 +153,23 @@
           <property name="enabled">
            <bool>false</bool>
           </property>
-          <layout class="QFormLayout" name="formLayout_2">
+          <layout class="QFormLayout" name="location_layout">
            <item row="0" column="0">
-            <widget class="QLabel" name="labelLatitude">
+            <widget class="QLabel" name="label_latitude">
              <property name="text">
               <string>Latitude:</string>
              </property>
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QLabel" name="labelLongitude">
+            <widget class="QLabel" name="label_longitude">
              <property name="text">
               <string>Longitude:</string>
              </property>
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QDoubleSpinBox" name="inLatitude">
+            <widget class="QDoubleSpinBox" name="inp_latitude">
              <property name="suffix">
               <string>°</string>
              </property>
@@ -182,7 +182,7 @@
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QDoubleSpinBox" name="inLongitude">
+            <widget class="QDoubleSpinBox" name="inp_longitude">
              <property name="suffix">
               <string>°</string>
              </property>
@@ -195,7 +195,7 @@
             </widget>
            </item>
            <item row="2" column="1">
-            <widget class="QPushButton" name="buttonLocation">
+            <widget class="QPushButton" name="btn_location">
              <property name="text">
               <string>Set current location</string>
              </property>
@@ -205,21 +205,21 @@
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="enable_sound">
+         <widget class="QCheckBox" name="toggle_sound">
           <property name="text">
            <string>make a sound when switching the theme</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="enable_notification">
+         <widget class="QCheckBox" name="toggle_notification">
           <property name="text">
            <string>send a notification</string>
           </property>
          </widget>
         </item>
         <item>
-         <spacer name="verticalSpacer_2">
+         <spacer name="space_vertical">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>
@@ -237,25 +237,17 @@
        <attribute name="title">
         <string>Plugins</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_4">
+       <layout class="QVBoxLayout" name="plugins_layout">
         <item>
-         <widget class="QScrollArea" name="scrollArea">
+         <widget class="QScrollArea" name="plugins_scroll">
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
           </property>
           <property name="widgetResizable">
            <bool>true</bool>
           </property>
-          <widget class="QWidget" name="scrollAreaWidgetContents">
-           <property name="geometry">
-            <rect>
-             <x>0</x>
-             <y>0</y>
-             <width>345</width>
-             <height>357</height>
-            </rect>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout"/>
+          <widget class="QWidget" name="plugins_scroll_content">
+           <layout class="QVBoxLayout" name="plugins_scroll_content_layout"/>
           </widget>
          </widget>
         </item>
@@ -264,7 +256,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QDialogButtonBox" name="buttonBox">
+     <widget class="QDialogButtonBox" name="btn_box">
       <property name="standardButtons">
        <set>QDialogButtonBox::Apply|QDialogButtonBox::Reset|QDialogButtonBox::RestoreDefaults</set>
       </property>
@@ -272,7 +264,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QStatusBar" name="status_bar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
@@ -280,7 +272,7 @@
  </resources>
  <connections>
   <connection>
-   <sender>buttonSchedule</sender>
+   <sender>btn_schedule</sender>
    <signal>toggled(bool)</signal>
    <receiver>time</receiver>
    <slot>setEnabled(bool)</slot>
@@ -296,7 +288,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>buttonSun</sender>
+   <sender>btn_sun</sender>
    <signal>toggled(bool)</signal>
    <receiver>location</receiver>
    <slot>setEnabled(bool)</slot>

@@ -50,7 +50,7 @@ def main():
 
 if __name__ == "__main__":
     main()
-    if config.get("mode") != Modes.manual.value:
+    if False and config.get("mode") != Modes.manual.value:
         config.update("running", False)
         print("START thread listener")
         yin_yang.start_daemon()
