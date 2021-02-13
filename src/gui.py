@@ -78,6 +78,10 @@ class MainWindow(QtWidgets.QMainWindow):
     def get_plugins(self):
         widget: QtWidgets.QWidget
         for plugin in PLUGINS:
+            # filter out plugins for application
+            if plugin.name.casefold() in ['notification', 'sound']:
+                continue
+
             widget = self.ui.plugins_scroll_content.findChild(QtWidgets.QGroupBox, 'group'+plugin.name)
             if widget is None:
                 widget = plugin.get_widget(self.ui.plugins_scroll_content)
@@ -195,6 +199,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def set_plugins(self):
         for plugin in PLUGINS:
+            # filter out all plugins for application
+            if plugin.name.casefold() in ['notification', 'sound']:
+                continue
+
             widget = self.ui.plugins_scroll_content.findChild(QtWidgets.QGroupBox, f'group{plugin.name}')
 
             if plugin.name == 'KDE':
