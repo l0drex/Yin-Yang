@@ -10,7 +10,7 @@ from PyQt5 import QtCore
 QtWidgets.QApplication.setAttribute(
     QtCore.Qt.AA_EnableHighDpiScaling, True)
 
-config.debugging = False
+config.debugging = True
 
 
 def main():
@@ -50,7 +50,7 @@ def main():
 
 if __name__ == "__main__":
     main()
-    if False and config.get("mode") != Modes.manual.value:
+    if not config.debugging and config.get("mode") != Modes.manual.value:
         config.update("running", False)
         print("START thread listener")
         yin_yang.start_daemon()
