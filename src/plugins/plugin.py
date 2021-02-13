@@ -56,7 +56,7 @@ class Plugin:
 
         widgets = []
 
-        for theme in ['dark', 'light']:
+        for theme in ['light', 'dark']:
             inp = QLineEdit(widget)
             inp.setObjectName(f'inp_{theme}')
             inp.setPlaceholderText(_translate('MainWindow', f'{theme} theme'))

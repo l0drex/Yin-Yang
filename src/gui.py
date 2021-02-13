@@ -108,13 +108,13 @@ class MainWindow(QtWidgets.QMainWindow):
                         config.update("kdeEnabled", False)
 
                     # set the index
-                    index_dark = children[0].findText(
-                        kde.get_kde_theme_short(config.get("Dark_Theme", plugin='kde')))
-                    children[0].setCurrentIndex(index_dark)
-
-                    index_light = children[1].findText(
+                    index_light = children[0].findText(
                         kde.get_kde_theme_short(config.get("Light_Theme", plugin='kde')))
-                    children[1].setCurrentIndex(index_light)
+                    children[0].setCurrentIndex(index_light)
+
+                    index_dark = children[1].findText(
+                        kde.get_kde_theme_short(config.get("Dark_Theme", plugin='kde')))
+                    children[1].setCurrentIndex(index_dark)
                 else:
                     # make the widget invisible
                     widget.setChecked(False)
@@ -129,12 +129,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
                 if plugin.name == 'Wallpaper':
                     children = widget.findChildren(QtWidgets.QPushButton)
-                    children[0].clicked.connect(self.set_wallpaper_dark)
-                    children[1].clicked.connect(self.set_wallpaper_light)
+                    children[0].clicked.connect(self.set_wallpaper_light)
+                    children[1].clicked.connect(self.set_wallpaper_dark)
 
                 children = widget.findChildren(QtWidgets.QLineEdit)
-                children[0].setText(config.get("dark_theme", plugin=plugin.name))
-                children[1].setText(config.get("light_theme", plugin=plugin.name))
+                children[0].setText(config.get("light_theme", plugin=plugin.name))
+                children[1].setText(config.get("dark_theme", plugin=plugin.name))
 
     def register_handlers(self):
         # set sunrise and sunset times if mode is set to followSun or coordinates changed
@@ -210,8 +210,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 children = widget.findChildren(QtWidgets.QComboBox)
 
                 config.update("enabled", widget.isChecked(), plugin='kde')
-                kde_dark_short = children[0].currentText()
-                kde_light_short = children[1].currentText()
+                kde_light_short = children[0].currentText()
+                kde_dark_short = children[1].currentText()
                 config.update("dark_theme", kde.get_kde_theme_long(kde_dark_short), plugin='kde')
                 config.update("light_theme", kde.get_kde_theme_long(kde_light_short), plugin='kde')
 
@@ -220,16 +220,16 @@ class MainWindow(QtWidgets.QMainWindow):
             children = widget.findChildren(QtWidgets.QLineEdit)
 
             config.update("enabled", widget.isChecked(), plugin=plugin.name)
-            config.update("dark_theme", children[0].text(), plugin=plugin.name)
-            config.update("light_theme", children[1].text(), plugin=plugin.name)
+            config.update("light_theme", children[0].text(), plugin=plugin.name)
+            config.update("dark_theme", children[1].text(), plugin=plugin.name)
 
     def set_wallpaper(self, dark: bool):
         file_name, _ = QFileDialog.getOpenFileName(self, f"Open Wallpaper {'dark' if dark else 'light'}", "")
 
         group_wallpaper = self.ui.plugins_scroll_content.findChild(QtWidgets.QGroupBox, 'groupWallpaper')
-        buttons_wallpaper = group_wallpaper.findChildren(QtWidgets.QLineEdit)
-        i = 0 if dark else 1
-        buttons_wallpaper[i].setText(file_name)
+        inputs_wallpaper = group_wallpaper.findChildren(QtWidgets.QLineEdit)
+        i = 1 if dark else 0
+        inputs_wallpaper[i].setText(file_name)
 
     def set_wallpaper_light(self):
         self.set_wallpaper(False)
