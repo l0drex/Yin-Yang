@@ -1,6 +1,7 @@
 from typing import Optional
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QGroupBox, QHBoxLayout, QLineEdit
 
 
 class Plugin:
@@ -33,17 +34,17 @@ class Plugin:
         """Set a specific theme"""
         raise NotImplementedError('Function set_theme has not been implemented!')
 
-    def get_widget(self, area):
+    def get_widget(self, area) -> QGroupBox:
         """Returns a widget for the settings menu
         area: scrollAreaWidgetContents
         """
 
-        widget = QtWidgets.QGroupBox(area)
+        widget = QGroupBox(area)
         widget.setCheckable(True)
         widget.setTitle(self.name)
         widget.setObjectName('group' + self.name)
 
-        horizontal_layout = QtWidgets.QHBoxLayout(widget)
+        horizontal_layout = QHBoxLayout(widget)
 
         for inp in self.get_input(widget):
             horizontal_layout.addWidget(inp)
@@ -56,7 +57,7 @@ class Plugin:
         widgets = []
 
         for theme in ['dark', 'light']:
-            inp = QtWidgets.QLineEdit(widget)
+            inp = QLineEdit(widget)
             inp.setObjectName(f'inp_{theme}')
             inp.setPlaceholderText(_translate('MainWindow', f'{theme} theme'))
             widgets.append(inp)
