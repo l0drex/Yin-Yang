@@ -148,12 +148,6 @@ class MainWindow(QtWidgets.QMainWindow):
         # connect dialog buttons
         self.ui.btn_box.clicked.connect(self.save_config)
 
-        # wallpaper buttons
-        group_wallpaper = self.ui.plugins_scroll_content.findChild(QtWidgets.QGroupBox, 'groupWallpaper')
-        buttons_wallpaper = group_wallpaper.findChildren(QtWidgets.QPushButton)
-        buttons_wallpaper[1].clicked.connect(self.set_wallpaper_light)
-        buttons_wallpaper[0].clicked.connect(self.set_wallpaper_dark)
-
     def set_config(self):
         """Sets the values to the config object, but does not save them"""
 
@@ -224,7 +218,6 @@ class MainWindow(QtWidgets.QMainWindow):
             config.update("dark_theme", children[1].text(), plugin=plugin.name)
 
     def set_wallpaper(self, dark: bool):
-        # FIXME dialog is opened twice
         file_name, _ = QFileDialog.getOpenFileName(self, f"Open Wallpaper {'dark' if dark else 'light'}", "")
 
         group_wallpaper = self.ui.plugins_scroll_content.findChild(QtWidgets.QGroupBox, 'groupWallpaper')
