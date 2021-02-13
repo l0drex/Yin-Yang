@@ -78,12 +78,11 @@ class MainWindow(QtWidgets.QMainWindow):
     def get_plugins(self):
         widget: QtWidgets.QWidget
         for plugin in PLUGINS:
-            widget = plugin.get_widget(self.ui.plugins_scroll_content)
-            # FIXME widgets get added to the ui again when pressing reset
-            if not self.ui.plugins_scroll_content.findChildren(QtWidgets.QGroupBox, widget.objectName()):
+            widget = self.ui.plugins_scroll_content.findChild(QtWidgets.QGroupBox, 'group'+plugin.name)
+            if widget is None:
+                widget = plugin.get_widget(self.ui.plugins_scroll_content)
                 self.ui.plugins_scroll_content_layout.addWidget(widget)
 
-            widget = self.ui.plugins_scroll_content.findChild(QtWidgets.QGroupBox, widget.objectName())
             assert widget is not None, f'No widget for plugin {plugin.name} found'
 
             widget.setChecked(config.get("Enabled", plugin=plugin.name))
