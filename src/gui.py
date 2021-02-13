@@ -224,6 +224,7 @@ class MainWindow(QtWidgets.QMainWindow):
             config.update("dark_theme", children[1].text(), plugin=plugin.name)
 
     def set_wallpaper(self, dark: bool):
+        # FIXME dialog is opened twice
         file_name, _ = QFileDialog.getOpenFileName(self, f"Open Wallpaper {'dark' if dark else 'light'}", "")
 
         group_wallpaper = self.ui.plugins_scroll_content.findChild(QtWidgets.QGroupBox, 'groupWallpaper')
@@ -245,8 +246,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.set_config()
             return config.write()
         elif button == QDialogButtonBox.Reset:
-            # TODO check if this is necessary
-            #self.set_config()
             config.load()
             self.get_config()
         elif button == QDialogButtonBox.RestoreDefaults:
