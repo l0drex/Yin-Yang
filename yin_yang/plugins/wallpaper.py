@@ -16,11 +16,11 @@ class Wallpaper(Plugin):
         # theme is actually the wallpaper
 
         if theme == '':
-            subprocess.run(["notify-send", "looks like no light wallpaper is set"])
+            subprocess.run(["notify-send", "looks like no wallpaper is set"])
         else:
             if config.get_desktop() == "kde":
                 subprocess.run(
-                    ["sh", "/opt/yin-yang/yin-yang/change_wallpaper.sh", theme])
+                    ["sh", "./scripts/change_wallpaper.sh", theme])
             if config.get_desktop() == "gtk":
                 # noinspection SpellCheckingInspection
                 subprocess.run(["gsettings", "set", "org.gnome.desktop.background",

@@ -7,12 +7,13 @@ from typing import Optional, Union
 
 import requests
 from suntime import Sun, SunTimeException
+from yin_yang.plugins.plugin import Plugin
 from yin_yang.plugins import kde, gnome, gtk, kvantum, wallpaper, vscode, atom, sound, notify, konsole
 
 ConfigValue = Union[str, float, bool, tuple]
 
 # default objects
-PLUGINS = [kde.Kde(), gnome.Gnome(), gtk.Gtk(), kvantum.Kvantum(), wallpaper.Wallpaper(),
+PLUGINS: [Plugin] = [kde.Kde(), gnome.Gnome(), gtk.Gtk(), kvantum.Kvantum(), wallpaper.Wallpaper(),
            vscode.Vscode(), atom.Atom(), konsole.Konsole(),
            sound.Sound(), notify.Notification()]
 
@@ -78,6 +79,11 @@ class ConfigParser:
         if self.get("mode") == Modes.followSun:
             self.update('coordinates', get_current_location())
             self.set_sun_time()
+
+        # set plugin themes
+        for plugin in PLUGINS:
+            plugin.theme_bright = self.get('light_theme', plugin.name)
+            plugin.theme_dark = self.get('dark_theme', plugin.name)
 
         # save the config
         self.write()
