@@ -91,47 +91,35 @@ class MainWindow(QtWidgets.QMainWindow):
 
             widget.setChecked(config.get("Enabled", plugin=plugin.name))
 
-            if plugin.name == 'KDE':
-                if config.get("desktop") == "kde":
-                    # use combobox instead of line edit
-                    children = widget.findChildren(QtWidgets.QComboBox)
-                    # append the names to the combobox
-                    if config.get("desktop") == "kde":
-                        if children[0].count() == 0 and children[1].count() == 0:
-                            kde_themes = kde.get_kde_theme_names()
+            if plugin.name == 'KDE' and config.get("desktop") != "kde":
+                # make the widget invisible
+                widget.setChecked(False)
+                widget.setVisible(False)
+                config.update("Enabled", False, plugin='kde')
 
-                            for name, theme in kde_themes.items():
-                                for child in children:
-                                    child.addItem(name)
-                    else:
-                        widget.setChecked(False)
-                        config.update("kdeEnabled", False)
+            if plugin.name == 'Gnome' and config.get("desktop") != "gnome":
+                # make the widget invisible
+                widget.setChecked(False)
+                widget.setVisible(False)
+                config.update("Enabled", False, plugin='gnome')
 
-                    # set the index
-                    index_light = children[0].findText(
-                        kde.get_kde_theme_short(config.get("Light_Theme", plugin='kde')))
-                    children[0].setCurrentIndex(index_light)
+            if plugin.name == 'Wallpaper':
+                children = widget.findChildren(QtWidgets.QPushButton)
+                children[0].clicked.connect(self.set_wallpaper_light)
+                children[1].clicked.connect(self.set_wallpaper_dark)
 
-                    index_dark = children[1].findText(
-                        kde.get_kde_theme_short(config.get("Dark_Theme", plugin='kde')))
-                    children[1].setCurrentIndex(index_dark)
-                else:
-                    # make the widget invisible
-                    widget.setChecked(False)
-                    widget.setVisible(False)
-                    config.update("Enabled", False, plugin='kde')
+            if plugin.get_themes_available():
+                # uses combobox instead of line edit
+                # set the index
+                for child in widget.findChildren(QtWidgets.QComboBox):
+                    theme = 'light' if widget.findChildren(QtWidgets.QComboBox).index(child) == 0 else 'dark'
+                    index = child.findText(
+                        plugin.get_themes_available()[
+                            config.get(f'{theme}_theme', plugin=plugin.name)
+                        ]
+                    )
+                    child.setCurrentIndex(index)
             else:
-                if plugin.name == 'Gnome' and config.get("desktop") != "gnome":
-                    # make the widget invisible
-                    widget.setChecked(False)
-                    widget.setVisible(False)
-                    config.update("Enabled", False, plugin='gnome')
-
-                if plugin.name == 'Wallpaper':
-                    children = widget.findChildren(QtWidgets.QPushButton)
-                    children[0].clicked.connect(self.set_wallpaper_light)
-                    children[1].clicked.connect(self.set_wallpaper_dark)
-
                 children = widget.findChildren(QtWidgets.QLineEdit)
                 children[0].setText(config.get("light_theme", plugin=plugin.name))
                 children[1].setText(config.get("dark_theme", plugin=plugin.name))
@@ -199,23 +187,18 @@ class MainWindow(QtWidgets.QMainWindow):
 
             widget = self.ui.plugins_scroll_content.findChild(QtWidgets.QGroupBox, f'group{plugin.name}')
 
-            if plugin.name == 'KDE':
+            config.update("enabled", widget.isChecked(), plugin=plugin.name)
+            if plugin.get_themes_available():
                 # extra behaviour for combobox
                 children = widget.findChildren(QtWidgets.QComboBox)
-
-                config.update("enabled", widget.isChecked(), plugin='kde')
-                kde_light_short = children[0].currentText()
-                kde_dark_short = children[1].currentText()
-                config.update("dark_theme", kde.get_kde_theme_long(kde_dark_short), plugin='kde')
-                config.update("light_theme", kde.get_kde_theme_long(kde_light_short), plugin='kde')
-
-                continue
-
-            children = widget.findChildren(QtWidgets.QLineEdit)
-
-            config.update("enabled", widget.isChecked(), plugin=plugin.name)
-            config.update("light_theme", children[0].text(), plugin=plugin.name)
-            config.update("dark_theme", children[1].text(), plugin=plugin.name)
+                for child in children:
+                    theme = 'light' if children.index(child) == 0 else 'dark'
+                    theme_name: str = list(plugin.get_themes_available().keys())[child.currentIndex()]
+                    config.update(f'{theme}_theme', theme_name, plugin=plugin.name)
+            else:
+                children = widget.findChildren(QtWidgets.QLineEdit)
+                config.update("light_theme", children[0].text(), plugin=plugin.name)
+                config.update("dark_theme", children[1].text(), plugin=plugin.name)
 
     def set_wallpaper(self, dark: bool):
         file_name, _ = QFileDialog.getOpenFileName(self, f"Open Wallpaper {'dark' if dark else 'light'}", "")

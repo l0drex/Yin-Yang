@@ -1,8 +1,7 @@
 import os
 import pwd
 import subprocess
-
-from PyQt5 import QtWidgets
+from typing import Dict
 
 from src.plugins.plugin import Plugin
 
@@ -15,12 +14,12 @@ class Kde(Plugin):
     theme_bright = 'org.kde.breeze.desktop'
     theme_dark = 'org.kde.breezedark.desktop'
 
+    def get_themes_available(self) -> Dict[str, str]:
+        return get_kde_theme_names()
+
     def set_theme(self, theme: str):
         # uses a kde api to switch to a light theme
         subprocess.run(["lookandfeeltool", "-a", theme])
-
-    def get_input(self, widget):
-        return [QtWidgets.QComboBox(widget), QtWidgets.QComboBox(widget)]
 
 
 def get_short_name(file) -> str:
@@ -65,42 +64,16 @@ def get_kde_theme_names():
         try:
             # load the name from the metadata.desktop file
             with open('/usr/share/plasma/look-and-feel/{long_name}/metadata.desktop'.format(**locals()), 'r') as file:
-                translations[get_short_name(file)] = long_name
+                translations[long_name] = get_short_name(file)
         except OSError:
             # check the next path if the themes exist there
             try:
                 # load the name from the metadata.desktop file
                 with open('{path}{long_name}/metadata.desktop'.format(**locals()), 'r') as file:
                     # search for the name
-                    translations[get_short_name(file)] = long_name
+                    translations[long_name] = get_short_name(file)
             except OSError:
                 # if no file exist lets just use the long name
                 translations[long_name] = long_name
 
     return translations
-
-
-def get_kde_theme_long(short: str):
-    """
-    Translates short names to long names.
-    :param short: short name
-    :return: long name
-    """
-    if short == '' or short is None:
-        return
-    themes = get_kde_theme_names()
-    return themes[short]
-
-
-def get_kde_theme_short(long: str):
-    """
-    Translates long names to short names.
-    :param long: long name
-    :return: short name
-    """
-    if long == '' or long is None:
-        return
-    themes = get_kde_theme_names()
-    short_names = list(themes.keys())
-    long_names = list(themes.values())
-    return short_names[long_names.index(long)]

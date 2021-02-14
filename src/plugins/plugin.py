@@ -1,7 +1,7 @@
-from typing import Optional
+from typing import Optional, Dict
 
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QGroupBox, QHBoxLayout, QLineEdit
+from PyQt5.QtWidgets import QGroupBox, QHBoxLayout, QLineEdit, QComboBox
 
 
 class Plugin:
@@ -20,6 +20,12 @@ class Plugin:
             self.theme_dark = theme_dark
         if theme_dark is not None and theme_bright != self.theme_bright:
             self.theme_bright = theme_bright
+
+    def get_themes_available(self) -> Dict[str, str]:
+        """Return a list of available themes
+        :return: Dict[intern_name, readable_name]
+        """
+        return {}
 
     def set_mode(self, dark: bool):
         """Set the theme"""
@@ -53,13 +59,23 @@ class Plugin:
 
     def get_input(self, widget):
         _translate = QtCore.QCoreApplication.translate
+        inputs = []
 
-        widgets = []
+        if self.get_themes_available():
+            # use a combobox
+            inputs = [QComboBox(widget), QComboBox(widget)]
+
+            # add all theme names
+            for inp in inputs:
+                for theme in self.get_themes_available().values():
+                    inp.addItem(theme)
+
+            return inputs
 
         for theme in ['light', 'dark']:
             inp = QLineEdit(widget)
             inp.setObjectName(f'inp_{theme}')
             inp.setPlaceholderText(_translate('MainWindow', f'{theme} theme'))
-            widgets.append(inp)
+            inputs.append(inp)
 
-        return widgets
+        return inputs
