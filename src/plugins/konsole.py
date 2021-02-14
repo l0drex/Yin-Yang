@@ -1,4 +1,7 @@
 from configparser import ConfigParser
+from os import listdir
+from os.path import isfile, join
+from pathlib import Path
 
 from src.plugins.plugin import Plugin
 
@@ -8,15 +11,27 @@ class Konsole(Plugin):
     theme_dark = 'Breeze'
     theme_bright = 'Breath2-light'
     config = ConfigParser()
-    config_file = '/home/lorenzh/.local/share/konsole/Fish.profile'
+    config_file: str
 
     def __init__(self):
         super().__init__()
         self.config.optionxform = str
+        self.config_file = self.get_file()
         self.config.read(self.config_file)
 
-    def set_theme(self, theme: str):
+    def get_file(self) -> str:
+        # noinspection SpellCheckingInspection
+        path = str(Path.home()) + '/.local/share/konsole/'
 
+        # copied from https://stackoverflow.com/questions/3207219/how-do-i-list-all-files-of-a-directory
+        files = [f for f in listdir(path) if isfile(join(path, f))]
+        if len(files) == 1:
+            return files[0]
+        else:
+            # TODO either return all profiles or return the standard profile
+            return path + 'Fish.profile'
+
+    def set_theme(self, theme: str):
         for section in self.config.sections():
             print(section)
 
