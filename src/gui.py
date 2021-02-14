@@ -4,7 +4,6 @@ from PyQt5.QtWidgets import QFileDialog, QMessageBox, QDialogButtonBox
 
 from src.ui.mainwindow import Ui_main_window
 from src.config import config, Modes, get_current_location, PLUGINS
-from src.plugins import kde
 
 
 class MainWindow(QtWidgets.QMainWindow):
