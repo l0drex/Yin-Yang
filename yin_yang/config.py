@@ -214,7 +214,7 @@ class ConfigParser:
         :param value: The value to set the setting to
         :param plugin: Name of the plugin you may want to change
 
-        :returns: old value
+        :returns: new value
         """
 
         try:
@@ -227,7 +227,7 @@ class ConfigParser:
             # new unsaved changes
             self.changed = True
 
-            return old
+            return self.get(key, plugin)
         except KeyError as e:
             print(f'Error while updating {key}')
             raise e
