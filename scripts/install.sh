@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-YIN_YANG_HOME=${1-${HOME}}
+HOME=${HOME}
 
 if test ${EUID} -ne 0; then
     echo enter password in order to install Yin-Yang correctly
@@ -11,8 +11,7 @@ if test ${EUID} -ne 0; then
 fi
 
 echo "removing old Yin-Yang files if they exist"
-echo "your home here is" ${YIN_YANG_HOME}
-./uninstall.sh ${YIN_YANG_HOME}
+./scripts/uninstall.sh "${HOME}"
 
 echo "Installing Yin-Yang ..."
 echo ""
@@ -32,30 +31,21 @@ fi
 if [ ! -d /opt/yin-yang/ ]; then
     mkdir -p /opt/yin-yang/
 fi
-# check directories for extension
-if [ ! -d /usr/lib/mozilla ]; then
-    mkdir -p /usr/lib/mozilla
-fi
-if [ ! -d /usr/lib/mozilla/native-messaging-hosts/ ]; then
-    mkdir -p /usr/lib/mozilla/native-messaging-hosts/
-fi
-if [ ! -d "${YIN_YANG_HOME}/.local/share/applications/" ]; then
-    mkdir -p "${YIN_YANG_HOME}/.local/share/applications/"
+if [ ! -d "${HOME}/.local/share/applications/" ]; then
+    mkdir -p "${HOME}/.local/share/applications/"
 fi
 echo ""
 echo "done"
 echo ""
-echo "Installin yin-yang for Commandline usage"
+echo "Installing yin-yang for command line usage"
 # copy files
 cp -r ./* /opt/yin-yang/
-# copy manifest for firefox extension
-cp ./assets/yin_yang.json /usr/lib/mozilla/native-messaging-hosts/
-#copy terminal executive
-cp ./src/yin-yang /usr/bin/
+# copy terminal executive
+cp ./scripts/yin-yang.sh /usr/bin/
 chmod +x /usr/bin/yin-yang
-echo "Creating .desktop file for native enviroment execution"
-#create .desktop file
-cat > "${YIN_YANG_HOME}/.local/share/applications/Yin-Yang.desktop" <<EOF
+echo "Creating .desktop file for native environment execution"
+# create .desktop file
+cat > "${HOME}/.local/share/applications/Yin-Yang.desktop" <<EOF
 [Desktop Entry]
 # The type as listed above
 Type=Application
@@ -81,6 +71,33 @@ Categories=Utility; System; Settings;
 Keywords=night;dark;day;bright;color;theme;
 EOF
 
+echo "Creating systemd job"
+cat > "/usr/lib/systemd/system/yin-yang.service" <<EOF
+[Unit]
+Description=Switch the theme between light and dark automatically
+
+[Service]
+ExecStart=yin-yang -t
+EOF
+
+cat > "/usr/lib/systemd/system/yin-yang.timer" <<EOF
+[Unit]
+Description=Switch the theme between light and dark automatically
+
+[Timer]
+OnBootSec=5
+# these values will be changed by the config
+OnCalendar=*-*-* 07:00:00
+OnCalendar=*-*-* 20:00:00
+
+[Install]
+# enable on boot
+WantedBy=timers.target
+EOF
+
+systemctl enable yin-yang.timer
+systemctl start yin-yang.timer
+
 cat << "EOF"
  __     ___          __     __
  \ \   / (_)         \ \   / /
@@ -92,7 +109,7 @@ cat << "EOF"
                                        |___/
 EOF
 echo ""
-echo "Yin-Yang brings Auto Nightmode for KDE and VSCode"
+echo "Yin-Yang brings automatic dark mode for KDE and VSCode"
 echo ""
 cat << "EOF"
        _..oo8"""Y8b.._

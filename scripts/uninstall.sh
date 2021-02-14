@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-YIN_YANG_HOME=${1-${HOME}}
+home=${HOME}
 
 # check, if sudo
 if test ${EUID} -ne 0; then
@@ -14,14 +14,14 @@ if test ${EUID} -ne 0; then
 fi
 
 echo "Removing config and .desktop file"
-rm -rf ${YIN_YANG_HOME}/.local/share/applications/Yin-Yang.desktop
-rm -rf ${YIN_YANG_HOME}/.config/yin_yang
+rm -rf "${home}"/.local/share/applications/Yin-Yang.desktop
+rm -rf "${home}"/.config/yin_yang
 
 echo "Removing program and terminal execution"
-rm -rf /opt/yin-yang /usr/bin/yin-yang
-
-echo "Removing manifest"
-rm -f /usr/lib/mozilla/native-messaging-hosts/yin_yang.json
+rm -rf /opt/yin-yang /usr/bin/yin-yang.sh
+systemctl disable yin-yang.timer
+rm /usr/lib/systemd/system/yin-yang.timer
+rm /usr/lib/systemd/system/yin-yang.service
 
 echo Yin-Yang uninstalled succesfully
 echo have a nice day ...
