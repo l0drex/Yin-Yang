@@ -8,23 +8,24 @@ from yin_yang.ui import gui
 from yin_yang.config import Modes, config
 
 
+# using ArgumentParser for parsing arguments
+parser = ArgumentParser()
+parser.add_argument("-t", "--toggle",
+                    help="toggles Yin-Yang",
+                    action="store_true")
+parser.add_argument("-s", "--schedule",
+                    help="schedule theme toggle, starts daemon in bg",
+                    action="store_true")
+parser.add_argument('-d', '--debugging',
+                    help='enables debugging mode',
+                    action='store_true')
+
 # fix HiDpi scaling
 QtWidgets.QApplication.setAttribute(
     QtCore.Qt.AA_EnableHighDpiScaling, True)
 
 
 def main():
-    # using ArgumentParser for parsing arguments
-    parser = ArgumentParser()
-    parser.add_argument("-t", "--toggle",
-                        help="toggles Yin-Yang",
-                        action="store_true")
-    parser.add_argument("-s", "--schedule",
-                        help="schedule theme toggle, starts daemon in bg",
-                        action="store_true")
-    parser.add_argument('-d', '--debugging',
-                        help='enables debugging mode',
-                        action='store_true')
     args = parser.parse_args()
 
     config.debugging = args.debugging
