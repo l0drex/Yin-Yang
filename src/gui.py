@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QTime
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QDialogButtonBox
@@ -104,8 +106,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
             if plugin.name == 'Wallpaper':
                 children = widget.findChildren(QtWidgets.QPushButton)
-                children[0].clicked.connect(self.set_wallpaper_light)
-                children[1].clicked.connect(self.set_wallpaper_dark)
+                children[0].clicked.connect(lambda: self.set_wallpaper(False))
+                children[1].clicked.connect(lambda: self.set_wallpaper(True))
 
             if plugin.get_themes_available():
                 # uses combobox instead of line edit
@@ -200,18 +202,14 @@ class MainWindow(QtWidgets.QMainWindow):
                 config.update("dark_theme", children[1].text(), plugin=plugin.name)
 
     def set_wallpaper(self, dark: bool):
-        file_name, _ = QFileDialog.getOpenFileName(self, f"Open Wallpaper {'dark' if dark else 'light'}", "")
+        file_name, _ = QFileDialog.getOpenFileName(
+            self, f"Open Wallpaper {'dark' if dark else 'light'}",
+            str(Path.home()), "Images (*.png *.jpg *.jpeg *.JPG *.JPEG)")
 
         group_wallpaper = self.ui.plugins_scroll_content.findChild(QtWidgets.QGroupBox, 'groupWallpaper')
         inputs_wallpaper = group_wallpaper.findChildren(QtWidgets.QLineEdit)
         i = 1 if dark else 0
         inputs_wallpaper[i].setText(file_name)
-
-    def set_wallpaper_light(self):
-        self.set_wallpaper(False)
-
-    def set_wallpaper_dark(self):
-        self.set_wallpaper(True)
 
     def save_config(self, button):
         """Saves the config to the file or restores values"""
