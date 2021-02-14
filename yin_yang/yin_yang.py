@@ -9,10 +9,8 @@ license: MIT
 """
 
 import datetime
-import threading
-import time
 
-from yin_yang.config import config, PLUGINS, Modes
+from yin_yang.config import config, PLUGINS
 
 
 dark_mode: bool = config.get('dark_mode')
@@ -30,36 +28,6 @@ def set_mode(dark: bool):
         if config.get('enabled', plugin=p.name):
             p.set_mode(dark)
     config.write()
-
-
-class Daemon(threading.Thread):
-    terminate = False
-
-    def __init__(self, thread_id):
-        threading.Thread.__init__(self)
-        self.thread_id = thread_id
-
-    def run(self):
-        while True:
-            if self.terminate:
-                config.update("running", False)
-                config.write()
-                break
-
-            if config.get('mode') == Modes.manual.value:
-                config.update("running", False)
-                config.write()
-                break
-
-            # check if dark mode should be enabled and switch if necessary
-            set_mode(should_be_dark())
-
-            time.sleep(30)
-
-
-def start_daemon():
-    daemon = Daemon(1)
-    daemon.start()
 
 
 def should_be_dark():
@@ -82,4 +50,4 @@ def should_be_dark():
 
 def toggle_theme():
     """Switch themes"""
-    set_mode(not config.get('dark_mode'))
+    set_mode(should_be_dark())
