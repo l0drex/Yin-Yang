@@ -24,8 +24,8 @@ def set_mode(dark: bool):
     if dark == dark_mode:
         return
 
-    dark_mode = dark
     config.update('dark_mode', dark)
+    dark_mode = config.get('dark_mode')
     for p in PLUGINS:
         if config.get('enabled', plugin=p.name):
             p.set_mode(dark)

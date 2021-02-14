@@ -29,12 +29,10 @@ class Plugin:
 
     def set_mode(self, dark: bool):
         """Set the theme"""
-        if dark:
-            print(f'Switching theme to {self.theme_dark} in {self.name}')
-            self.set_theme(self.theme_dark)
-        else:
-            print(f'Switching theme to {self.theme_bright} in {self.name}')
-            self.set_theme(self.theme_bright)
+
+        theme = self.theme_dark if dark else self.theme_bright
+        print(f'Switching theme to {theme} in {self.name}')
+        self.set_theme(theme)
 
     def set_theme(self, theme: str):
         """Set a specific theme"""

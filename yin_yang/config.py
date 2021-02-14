@@ -55,20 +55,24 @@ def get_default() -> dict:
 
 class ConfigParser:
     _config: dict = None
+    _version: float
     debugging: bool = False
     changed: bool = False
 
     def __init__(self, version: float):
+        self._version = version
+
         # load config from file
-        if not self.load():
+        self.config = self.load()
+
+        if self.config is None:
             # use default values if something went wrong
             self.set_default()
-            self.update("version", version)
 
         # check if config needs an update
         # if the default values are set, the version number is below 0
         if 0 < self.config["version"] < version:
-            self.update_config()
+            self.config = self.update_config()
 
         # update times for sunset and sunrise
         if self.get("mode") == Modes.followSun:
@@ -81,6 +85,7 @@ class ConfigParser:
     def set_default(self):
         print('Setting default values.')
         self.config = get_default()
+        self.update("version", self._version)
 
     def update_config(self):
         """Update old config files
@@ -94,7 +99,7 @@ class ConfigParser:
 
         # replace current config with defaults
         config_old = self.config.copy()
-        self.config = get_default()
+        config_new = get_default()
 
         # replace default values with old ones
         if config_old["version"] < 0:
@@ -107,10 +112,10 @@ class ConfigParser:
                 mode = Modes.followSun.value
             else:
                 mode = Modes.manual.value
-            self.config["mode"] = mode
+            config_new["mode"] = mode
 
             # determine theme
-            self.config["dark_mode"] = config_old["theme"] == "dark"
+            config_new["dark_mode"] = config_old["theme"] == "dark"
 
             # put settings for PLUGINS into sections
             for plugin in PLUGINS:
@@ -118,9 +123,9 @@ class ConfigParser:
                     key_old = key[0].upper() + key[1:]
                     self.config[plugin.name][key] = config_old[plugin.name.casefold() + key_old]
         self.changed = True
-        return config_old
+        return config_new
 
-    def load(self) -> bool:
+    def load(self) -> Optional[dict]:
         """Load config from file"""
 
         print('Loading config file')
@@ -128,22 +133,22 @@ class ConfigParser:
         # generate path for yin-yang if there is none this will be skipped
         pathlib.Path(path + "/yin_yang").mkdir(parents=True, exist_ok=True)
 
-        conf = {}
+        config_loaded = {}
 
         # check if conf exists
         if os.path.isfile(path + "/yin_yang/yin_yang.json"):
             # load conf
-            with open(path + "/yin_yang/yin_yang.json", "r") as conf:
-                conf = json.load(conf)
+            with open(path + "/yin_yang/yin_yang.json", "r") as config_file:
+                config_loaded = json.load(config_file)
 
-        if conf is None or conf == {}:
+        if config_loaded is None or config_loaded == {}:
             print('Could not load config file.')
-            return False
+            return None
         else:
             # no unsaved changes yet
             self.changed = False
-            self.config = conf
-            return True
+            self.config = config_loaded
+            return config_loaded
 
     def write(self) -> bool:
         """Write configuration

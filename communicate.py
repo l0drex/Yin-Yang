@@ -5,9 +5,7 @@
 import sys
 import json
 import struct
-from src import config
-
-configParser = config.ConfigParser()
+from yin_yang import config as configParser
 
 
 def parse_time(time: str):
