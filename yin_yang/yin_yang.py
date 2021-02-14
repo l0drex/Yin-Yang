@@ -8,11 +8,27 @@ date: 21.12.2018
 license: MIT
 """
 
-import datetime
+from yin_yang.config import config, PLUGINS, Modes
+from yin_yang.toggle_checker.checker import Checker
+from yin_yang.toggle_checker.manual import Manual
+from yin_yang.toggle_checker.sun import Sun
+from yin_yang.toggle_checker.time import Time
 
-from yin_yang.config import config, PLUGINS
+
+def get_checker():
+    """Specify a mode in which the theme to be used is determined"""
+    mode = config.get('mode')
+    if mode == Modes.manual.value:
+        return Manual()
+    elif mode == Modes.scheduled.value:
+        return Time()
+    elif mode == Modes.followSun.value:
+        return Sun()
+    else:
+        raise ValueError('Unknown mode specified!')
 
 
+checker: Checker = get_checker()
 dark_mode: bool = config.get('dark_mode')
 
 
@@ -20,6 +36,7 @@ def set_mode(dark: bool):
     global dark_mode
 
     if dark == dark_mode:
+        print('No changes needed')
         return
 
     config.update('dark_mode', dark)
@@ -30,24 +47,6 @@ def set_mode(dark: bool):
     config.write()
 
 
-def should_be_dark():
-    """
-    Determines whether dark mode should be enabled or not
-    """
-
-    d_hour = int(config.get("switch_To_Dark").split(":")[0])
-    d_minute = int(config.get("switch_To_Dark").split(":")[1])
-    l_hour = int(config.get("switch_To_Light").split(":")[0])
-    l_minute = int(config.get("switch_To_Light").split(":")[1])
-    hour = datetime.datetime.now().time().hour
-    minute = datetime.datetime.now().time().minute
-
-    if l_hour <= hour < d_hour:
-        return hour == l_hour and minute <= l_minute
-    else:
-        return not (hour == d_hour and minute <= d_minute)
-
-
 def toggle_theme():
     """Switch themes"""
-    set_mode(should_be_dark())
+    set_mode(checker.should_be_dark())

@@ -30,7 +30,7 @@ def main():
     # set settings via terminal
     if args.toggle:
         # toggle theme
-        yin_yang.set_mode(yin_yang.should_be_dark())
+        yin_yang.toggle_theme()
     else:
         # load GUI to apply settings or set theme manually
         app = QtWidgets.QApplication(sys.argv)
