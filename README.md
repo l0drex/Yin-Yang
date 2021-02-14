@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="Yin-Yang" title="Yin & Yang" src="./src/ui/assets/icon.png" height="120">
+  <img alt="Yin-Yang" title="Yin & Yang" src="yin_yang/ui/assets/icon.png" height="120">
 
 
 <h1 align="center"> Yin-Yang </h1> <br>
@@ -15,7 +15,7 @@
   
 
 <p align="center">
-  <img alt="Yin-Yang" title="Yin & Yang" src="assets/header.png">
+  <img alt="Yin-Yang" title="Yin & Yang" src="resources/header.png">
 
 
 ## Features
@@ -41,7 +41,7 @@ You will need some dependencies for the installation process to work correctly c
 [![Generic badge](https://img.shields.io/badge/see-Wiki-BLUE.svg)](<https://github.com/daehruoydeef/Yin-Yang/wiki>)
 
 <p align="center" >
-  <img alt="Yin-Yang" title="Yin & Yang" src="assets/settings.png" height="400">
+  <img alt="Yin-Yang" title="Yin & Yang" src="resources/settings.png" height="400">
 
 ## Documentation
 

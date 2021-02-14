@@ -1,5 +1,5 @@
 import subprocess
-from src.plugins.plugin import Plugin
+from yin_yang.plugins.plugin import Plugin
 
 
 class Notification(Plugin):

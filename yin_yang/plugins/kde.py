@@ -3,7 +3,7 @@ import pwd
 import subprocess
 from typing import Dict
 
-from src.plugins.plugin import Plugin
+from yin_yang.plugins.plugin import Plugin
 
 
 translations = {}

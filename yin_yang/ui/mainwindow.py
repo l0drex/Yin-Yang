@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui/mainwindow.ui'
+# Form implementation generated from reading ui file 'designer/mainwindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.2
 #
@@ -30,7 +30,7 @@ class Ui_main_window(object):
         self.logo_layout.setSpacing(6)
         self.logo_layout.setObjectName("logo_layout")
         self.logo = QtWidgets.QLabel(self.central_widget)
-        self.logo.setPixmap(QtGui.QPixmap(":/icons/assets/yin-yang.svg"))
+        self.logo.setPixmap(QtGui.QPixmap(":/icons/resources/yin-yang.svg"))
         self.logo.setScaledContents(True)
         self.logo.setAlignment(QtCore.Qt.AlignCenter)
         self.logo.setObjectName("logo")
@@ -132,6 +132,7 @@ class Ui_main_window(object):
         self.plugins_scroll.setWidgetResizable(True)
         self.plugins_scroll.setObjectName("plugins_scroll")
         self.plugins_scroll_content = QtWidgets.QWidget()
+        self.plugins_scroll_content.setGeometry(QtCore.QRect(0, 0, 100, 30))
         self.plugins_scroll_content.setObjectName("plugins_scroll_content")
         self.plugins_scroll_content_layout = QtWidgets.QVBoxLayout(self.plugins_scroll_content)
         self.plugins_scroll_content_layout.setContentsMargins(11, 11, 11, 11)
@@ -175,4 +176,4 @@ class Ui_main_window(object):
         self.toggle_notification.setText(_translate("main_window", "send a notification"))
         self.tab_widget.setTabText(self.tab_widget.indexOf(self.settings), _translate("main_window", "Settings"))
         self.tab_widget.setTabText(self.tab_widget.indexOf(self.plugins), _translate("main_window", "Plugins"))
-import resources_rc
+import yin_yang.ui.resources_rc

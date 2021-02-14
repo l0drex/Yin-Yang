@@ -3,8 +3,8 @@ import subprocess
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QDialogButtonBox, QVBoxLayout
 
-from src import config
-from src.plugins.plugin import Plugin
+from yin_yang import config
+from yin_yang.plugins.plugin import Plugin
 
 
 class Wallpaper(Plugin):
@@ -20,7 +20,7 @@ class Wallpaper(Plugin):
         else:
             if config.get_desktop() == "kde":
                 subprocess.run(
-                    ["sh", "/opt/yin-yang/src/change_wallpaper.sh", theme])
+                    ["sh", "/opt/yin-yang/yin-yang/change_wallpaper.sh", theme])
             if config.get_desktop() == "gtk":
                 # noinspection SpellCheckingInspection
                 subprocess.run(["gsettings", "set", "org.gnome.desktop.background",

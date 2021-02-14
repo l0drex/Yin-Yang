@@ -4,8 +4,8 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import QTime
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QDialogButtonBox
 
-from src.ui.mainwindow import Ui_main_window
-from src.config import config, Modes, get_current_location, PLUGINS
+from yin_yang.ui.mainwindow import Ui_main_window
+from yin_yang.config import config, Modes, get_current_location, PLUGINS
 
 
 class MainWindow(QtWidgets.QMainWindow):

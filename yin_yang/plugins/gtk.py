@@ -4,7 +4,7 @@ import re
 import subprocess
 from typing import Optional
 
-from src.plugins.plugin import Plugin
+from yin_yang.plugins.plugin import Plugin
 
 # aliases for path to use later on
 user = pwd.getpwuid(os.getuid())[0]

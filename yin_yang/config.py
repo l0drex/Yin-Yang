@@ -7,7 +7,7 @@ from typing import Optional, Union
 
 import requests
 from suntime import Sun, SunTimeException
-from src.plugins import kde, gnome, gtk, kvantum, wallpaper, vscode, atom, sound, notify, konsole
+from yin_yang.plugins import kde, gnome, gtk, kvantum, wallpaper, vscode, atom, sound, notify, konsole
 
 ConfigValue = Union[str, float, bool, tuple]
 

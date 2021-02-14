@@ -1,10 +1,12 @@
 import sys
 from argparse import ArgumentParser
-from src import yin_yang
-from src.config import config, Modes
-from src import gui
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
+
+from yin_yang import yin_yang
+from yin_yang.ui import gui
+from yin_yang.config import Modes, config
+
 
 # fix HiDpi scaling
 QtWidgets.QApplication.setAttribute(

@@ -12,7 +12,7 @@ import datetime
 import threading
 import time
 
-from src.config import config, PLUGINS, Modes
+from yin_yang.config import config, PLUGINS, Modes
 
 
 dark_mode: bool = config.get('dark_mode')

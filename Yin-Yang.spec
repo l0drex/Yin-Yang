@@ -1,17 +1,12 @@
-# -*- mode: python -*-
+# -*- mode: python ; coding: utf-8 -*-
 
 block_cipher = None
 
 
 a = Analysis(['main.py'],
-             pathex=['/home/daeh/Application/Yin-Yang-Build'],
+             pathex=['/home/lorenzh/Projekte/Yin Yang/core'],
              binaries=[],
-             datas=[
-		("assets/yin-yang.svg", "assets"),
-		("assets/dark.wav", "assets"),
-		("assets/light.wav", "assets"),
-		("assets/change_wallpaper.sh", "assets")	
-			],
+             datas=[],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -24,14 +19,19 @@ pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 exe = EXE(pyz,
           a.scripts,
-          a.binaries,
-          a.zipfiles,
-          a.datas,
           [],
-          name='yin-yang',
+          exclude_binaries=True,
+          name='Yin-Yang',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
-          runtime_tmpdir=None,
-          console=True )
+          console=False )
+coll = COLLECT(exe,
+               a.binaries,
+               a.zipfiles,
+               a.datas,
+               strip=False,
+               upx=True,
+               upx_exclude=[],
+               name='Yin-Yang')

@@ -1,7 +1,7 @@
 import os
 import pwd
 import json
-from src.plugins.plugin import Plugin
+from yin_yang.plugins.plugin import Plugin
 
 # aliases for path to use later on
 user = pwd.getpwuid(os.getuid())[0]

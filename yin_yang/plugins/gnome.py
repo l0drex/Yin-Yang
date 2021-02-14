@@ -1,5 +1,5 @@
 import subprocess
-from src.plugins.plugin import Plugin
+from yin_yang.plugins.plugin import Plugin
 
 # WIP: Potential Check  for https://gist.github.com/atiensivu/fcc3183e9a6fd74ec1a283e3b9ad05f0 to reduce common issues, or write it in the FAQ
 

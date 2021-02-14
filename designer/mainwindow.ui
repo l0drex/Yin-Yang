@@ -23,7 +23,7 @@
    <string>Yin &amp; Yang</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../resources.qrc">
+   <iconset>
     <normaloff>:/icons/assets/yin-yang.svg</normaloff>:/icons/assets/yin-yang.svg</iconset>
   </property>
   <widget class="QWidget" name="central_widget">
@@ -33,7 +33,7 @@
       <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
        <widget class="QLabel" name="logo">
         <property name="pixmap">
-         <pixmap resource="../../resources.qrc">:/icons/assets/yin-yang.svg</pixmap>
+         <pixmap resource="../resources.qrc">:/icons/resources/yin-yang.svg</pixmap>
         </property>
         <property name="scaledContents">
          <bool>true</bool>
@@ -247,6 +247,14 @@
            <bool>true</bool>
           </property>
           <widget class="QWidget" name="plugins_scroll_content">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>100</width>
+             <height>30</height>
+            </rect>
+           </property>
            <layout class="QVBoxLayout" name="plugins_scroll_content_layout"/>
           </widget>
          </widget>
@@ -268,6 +276,7 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
+  <include location="../resources.qrc"/>
   <include location="../../resources.qrc"/>
  </resources>
  <connections>

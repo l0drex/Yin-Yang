@@ -2,7 +2,7 @@ import os
 import subprocess
 import sys
 
-from src.plugins.plugin import Plugin
+from yin_yang.plugins.plugin import Plugin
 
 
 def resource_path(relative_path):
@@ -18,8 +18,8 @@ def resource_path(relative_path):
 
 class Sound(Plugin):
     name = 'Sound'
-    theme_bright = './assets/light.wav'
-    theme_dark = './assets/dark.wav'
+    theme_bright = './resources/light.wav'
+    theme_dark = './resources/dark.wav'
 
     def set_theme(self, theme: str):
         subprocess.run(["paplay", resource_path(theme)])

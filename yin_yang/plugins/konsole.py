@@ -3,7 +3,7 @@ from os import listdir
 from os.path import isfile, join
 from pathlib import Path
 
-from src.plugins.plugin import Plugin
+from yin_yang.plugins.plugin import Plugin
 
 
 class Konsole(Plugin):
