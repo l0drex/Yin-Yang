@@ -1,3 +1,4 @@
+# noinspection SpellCheckingInspection
 """
 title: yin_yang
 description: yin_yang provides a easy way to toggle between light and dark
@@ -9,26 +10,10 @@ license: MIT
 """
 
 from yin_yang.config import config, PLUGINS, Modes
-from yin_yang.toggle_checker.checker import Checker
-from yin_yang.toggle_checker.manual import Manual
-from yin_yang.toggle_checker.sun import Sun
-from yin_yang.toggle_checker.time import Time
+from yin_yang.checker import Checker
 
 
-def get_checker():
-    """Specify a mode in which the theme to be used is determined"""
-    mode = config.get('mode')
-    if mode == Modes.manual.value:
-        return Manual()
-    elif mode == Modes.scheduled.value:
-        return Time()
-    elif mode == Modes.followSun.value:
-        return Sun()
-    else:
-        raise ValueError('Unknown mode specified!')
-
-
-checker: Checker = get_checker()
+checker: Checker = Checker(config.get('mode'))
 dark_mode: bool = config.get('dark_mode')
 
 
