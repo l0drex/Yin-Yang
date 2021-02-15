@@ -55,9 +55,11 @@ def get_default() -> dict:
     return conf_default
 
 
-def update_systemd_timer():
+def update_systemd_timer() -> bool:
     """Runs a simple bash script that updates the systemd timer"""
-    subprocess.run(['./scripts/update_systemd_timer.sh', config.get('switch_to_light'), config.get('switch_to_dark')])
+    completed = subprocess.run(['./scripts/update_systemd_timer.sh', config.get('switch_to_light'), config.get('switch_to_dark')])
+
+    return completed.returncode == 0
 
 
 class ConfigParser:
@@ -179,7 +181,10 @@ class ConfigParser:
             return False
 
         if self.time_changed:
-            update_systemd_timer()
+            if not update_systemd_timer():
+                raise ValueError('An error happened while changing the systemd timer. '
+                                 'Try to run /scripts/update-systemd-timer.sh manually. '
+                                 'If the error persists, leave an issue in the repo on github.')
 
         print("Saving the config")
         try:
