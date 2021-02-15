@@ -16,7 +16,7 @@ class Checker:
         elif mode == Modes.followSun.value:
             self._mode = Sun()
         else:
-            raise ValueError('Unknown mode for getting mode to be used.')
+            raise ValueError('Unknown mode for determining theme.')
 
     def should_be_dark(self) -> bool:
         return self._mode.should_be_dark()

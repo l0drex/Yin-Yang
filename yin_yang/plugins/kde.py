@@ -11,7 +11,9 @@ translations = {}
 
 class Kde(Plugin):
     name = 'KDE'
+    # noinspection SpellCheckingInspection
     theme_bright = 'org.kde.breeze.desktop'
+    # noinspection SpellCheckingInspection
     theme_dark = 'org.kde.breezedark.desktop'
 
     def get_themes_available(self) -> Dict[str, str]:
@@ -19,6 +21,7 @@ class Kde(Plugin):
 
     def set_theme(self, theme: str):
         # uses a kde api to switch to a light theme
+        # noinspection SpellCheckingInspection
         subprocess.run(["lookandfeeltool", "-a", theme])
 
 

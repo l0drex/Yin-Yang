@@ -27,9 +27,8 @@ def get_old_theme(settings):
 
 class Atom(Plugin):
     name = 'Atom'
-    # TODO set default themes
-    theme_dark = ''
-    theme_bright = ''
+    theme_dark = "one-dark"
+    theme_bright = "one-light"
 
     def set_theme(self, theme: str):
         # getting the old theme first
