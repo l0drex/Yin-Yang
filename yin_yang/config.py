@@ -271,9 +271,6 @@ class ConfigParser:
             today_sr = sun.get_local_sunrise_time()
             today_ss = sun.get_local_sunset_time()
 
-            print('Today the sun raised at {} and get down at {}'.
-                  format(today_sr.strftime('%H:%M'), today_ss.strftime('%H:%M')))
-
             # Get today's sunrise and sunset in UTC
             self.update("switch_to_light", today_sr.strftime('%H:%M'))
             self.update("switch_to_dark", today_ss.strftime('%H:%M'))
