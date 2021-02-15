@@ -33,9 +33,6 @@ class Konsole(Plugin):
         self.config.read(self.config_file)
 
     def set_theme(self, theme: str):
-        for section in self.config.sections():
-            print(section)
-
         self.config['Appearance']['ColorScheme'] = theme
 
         with open(self.config_file, 'w') as file:
