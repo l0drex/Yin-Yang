@@ -21,7 +21,7 @@ class Checker:
             config.set_sun_time()
             print(message + 'at ' + config.get('switch_to_dark'))
         else:
-            raise ValueError('Unknown mode for determining theme.')
+            raise ValueError('Unsupported mode for determining theme.')
 
     def should_be_dark(self) -> bool:
         return self._mode.should_be_dark()

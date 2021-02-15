@@ -1,4 +1,4 @@
-# Contributing
+# Changing the theme in your application
 
 If you want to write code that changes the theme of an application,
 you have two possible ways to do so:
@@ -54,7 +54,6 @@ Currently, it might be pretty outdated since the only plugin that needed this wa
 - [ ] Optimize the building process to include
   - creating `yin_yang/ui/mainwindow.py` from `design/mainwindow.ui`
   - creating `yin_yang/ui/resources_rc.py` from `resources.qrc`
-- [ ] optimize `scripts/install.sh` and `uninstall.sh`
 - [ ] optimize installation process
 - [ ] add an option to only change the theme when pc is awakening from suspend
 - [ ] add an option to automatically update the location
