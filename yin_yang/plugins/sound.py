@@ -22,4 +22,5 @@ class Sound(Plugin):
     theme_dark = './resources/dark.wav'
 
     def set_theme(self, theme: str):
+        # noinspection SpellCheckingInspection
         subprocess.run(["paplay", resource_path(theme)])

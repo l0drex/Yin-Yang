@@ -9,7 +9,7 @@ date: 21.12.2018
 license: MIT
 """
 
-from yin_yang.config import config, PLUGINS, Modes
+from yin_yang.config import config, PLUGINS
 from yin_yang.checker import Checker
 
 

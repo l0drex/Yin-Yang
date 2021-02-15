@@ -284,6 +284,7 @@ class ConfigParser:
 def get_desktop():
     """Return the current desktops name or 'unknown' if can't determine it"""
     # just to get all possible implementations of desktop variables
+    # noinspection SpellCheckingInspection
     env = str(os.getenv("GDMSESSION")).lower()
     second_env = str(os.getenv("XDG_CURRENT_DESKTOP")).lower()
     third_env = str(os.getenv("XDG_CURRENT_DESKTOP")).lower()

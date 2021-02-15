@@ -5,7 +5,7 @@ from PyQt5 import QtCore
 
 from yin_yang import yin_yang
 from yin_yang.ui import gui
-from yin_yang.config import Modes, config
+from yin_yang.config import config
 
 
 # using ArgumentParser for parsing arguments

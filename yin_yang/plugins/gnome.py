@@ -12,5 +12,6 @@ class Gnome(Plugin):
 
     def set_theme(self, theme: str):
         # Shell theme
+        # noinspection SpellCheckingInspection
         subprocess.run(["gsettings", "set", "org.gnome.shell.extensions.user-theme", "name",
                         '"{}"'.format(theme)])

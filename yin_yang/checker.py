@@ -9,11 +9,11 @@ class Checker:
 
     def __init__(self, mode: Modes):
         # set the strategy
-        if mode == Modes.manual:
+        if mode == Modes.manual.value:
             self._mode = Manual()
-        elif mode == Modes.scheduled:
+        elif mode == Modes.scheduled.value:
             self._mode = Time()
-        elif mode == Modes.followSun:
+        elif mode == Modes.followSun.value:
             self._mode = Sun()
         else:
             raise ValueError('Unknown mode for getting mode to be used.')
