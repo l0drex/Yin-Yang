@@ -9,6 +9,8 @@ from yin_yang.config import Modes, config
 
 
 # using ArgumentParser for parsing arguments
+from yin_yang.yin_yang import Setter
+
 parser = ArgumentParser()
 parser.add_argument("-t", "--toggle",
                     help="toggles Yin-Yang",
@@ -43,7 +45,8 @@ def main():
     elif args.toggle:
         # toggle theme manually
         config.update("mode", Modes.manual.value)
-        yin_yang.toggle_theme()
+        setter = Setter()
+        setter.toggle_theme()
     else:
         # load GUI to apply settings or set theme manually
         app = QtWidgets.QApplication(sys.argv)

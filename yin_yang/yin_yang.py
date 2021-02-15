@@ -9,7 +9,6 @@ date: 21.12.2018
 license: MIT
 """
 
-import datetime
 import threading
 import time
 
@@ -17,23 +16,28 @@ from yin_yang.config import config, PLUGINS, Modes
 from yin_yang.checker import Checker
 
 
-checker: Checker = Checker(config.get('mode'))
-dark_mode: bool = config.get('dark_mode')
+class Setter:
+    dark_mode: bool = config.get('dark_mode')
+    checker: Checker
 
+    def __init__(self):
+        self.checker = Checker(config.get('mode'))
 
-def set_mode(dark: bool):
-    global dark_mode
+    def set_mode(self, dark: bool):
+        if dark == self.dark_mode:
+            return
 
-    if dark == dark_mode:
-        return
+        print(f'Switching to {"dark" if dark else "light"} mode.')
+        config.update('dark_mode', dark)
+        dark_mode = config.get('dark_mode')
+        for p in PLUGINS:
+            if config.get('enabled', plugin=p.name):
+                p.set_mode(dark)
+        config.write()
 
-    print(f'Switching to {"dark" if dark else "light"} mode.')
-    config.update('dark_mode', dark)
-    dark_mode = config.get('dark_mode')
-    for p in PLUGINS:
-        if config.get('enabled', plugin=p.name):
-            p.set_mode(dark)
-    config.write()
+    def toggle_theme(self):
+        """Switch themes"""
+        self.set_mode(self.checker.should_be_dark())
 
 
 class Daemon(threading.Thread):
@@ -42,6 +46,7 @@ class Daemon(threading.Thread):
     def __init__(self, thread_id):
         threading.Thread.__init__(self)
         self.thread_id = thread_id
+        self.setter = Setter()
 
     def run(self):
         while True:
@@ -51,7 +56,7 @@ class Daemon(threading.Thread):
                 break
 
             # check if dark mode should be enabled and switch if necessary
-            toggle_theme()
+            self.setter.toggle_theme()
 
             time.sleep(60)
 
@@ -59,8 +64,3 @@ class Daemon(threading.Thread):
 def start_daemon():
     daemon = Daemon(1)
     daemon.start()
-
-
-def toggle_theme():
-    """Switch themes"""
-    set_mode(checker.should_be_dark())
