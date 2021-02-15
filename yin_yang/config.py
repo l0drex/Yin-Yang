@@ -2,6 +2,7 @@ import json
 import os
 import pathlib
 import re
+import subprocess
 from enum import Enum
 from typing import Optional, Union
 
@@ -14,8 +15,8 @@ ConfigValue = Union[str, float, bool, tuple]
 
 # default objects
 PLUGINS: [Plugin] = [kde.Kde(), gnome.Gnome(), gtk.Gtk(), kvantum.Kvantum(), wallpaper.Wallpaper(),
-           vscode.Vscode(), atom.Atom(), konsole.Konsole(),
-           sound.Sound(), notify.Notification()]
+                     vscode.Vscode(), atom.Atom(), konsole.Konsole(),
+                     sound.Sound(), notify.Notification()]
 
 
 class Modes(Enum):
@@ -54,11 +55,18 @@ def get_default() -> dict:
     return conf_default
 
 
+def update_systemd_timer():
+    """Runs a simple bash script that updates the systemd timer"""
+    subprocess.run(['./scripts/update_systemd_timer.sh', config.get('switch_to_light'), config.get('switch_to_dark')])
+
+
 class ConfigParser:
     _config: dict = None
     _version: float
     debugging: bool = False
     changed: bool = False
+    # needed because editing systemd timer needs sudo
+    time_changed: bool = False
 
     def __init__(self, version: float):
         self._version = version
@@ -162,13 +170,16 @@ class ConfigParser:
         :returns: whether save was successful
         """
 
+        if not self.changed:
+            print('No changes were made, skipping save')
+            return False
+
         if self.debugging:
             print('Saving the config in debug mode is disabled!')
             return False
 
-        if not self.changed:
-            print('No changes were made, skipping save')
-            return False
+        if self.time_changed:
+            update_systemd_timer()
 
         print("Saving the config")
         try:
@@ -218,8 +229,12 @@ class ConfigParser:
         """
 
         try:
-            old = self.get(key, plugin)
             if plugin is None:
+                # if time values changed
+                if ((not self.time_changed) and
+                        (key.casefold() == 'switch_to_dark' and value != config.get('switch_to_dark')) or
+                        (key.casefold() == 'switch_to_light' and value != config.get('switch_to_light'))):
+                    self.time_changed = True
                 self.config[key.casefold()] = value
             else:
                 self.config[plugin.casefold()][key.casefold()] = value
@@ -272,20 +287,20 @@ def get_desktop():
     plasma_re = re.compile(r'plasma')
     plasma5_re = re.compile(r'plasma5')
 
-    if(gnome_re.search(env) or
-       gnome_re.search(second_env) or gnome_re.search(third_env)):
+    if (gnome_re.search(env) or
+            gnome_re.search(second_env) or gnome_re.search(third_env)):
         return "gtk"
-    if(budgie_re.search(env) or
-       budgie_re.search(second_env) or budgie_re.search(third_env)):
+    if (budgie_re.search(env) or
+            budgie_re.search(second_env) or budgie_re.search(third_env)):
         return "gtk"
-    if(kde_re.search(env) or
-       kde_re.search(second_env) or kde_re.search(third_env)):
+    if (kde_re.search(env) or
+            kde_re.search(second_env) or kde_re.search(third_env)):
         return "kde"
-    if(plasma_re.search(env) or
-       plasma_re.search(second_env) or plasma_re.search(third_env)):
+    if (plasma_re.search(env) or
+            plasma_re.search(second_env) or plasma_re.search(third_env)):
         return "kde"
-    if(plasma5_re.search(env) or
-       plasma5_re.search(second_env) or plasma5_re.search(third_env)):
+    if (plasma5_re.search(env) or
+            plasma5_re.search(second_env) or plasma5_re.search(third_env)):
         return "kde"
     return "unknown"
 
