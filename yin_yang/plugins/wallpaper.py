@@ -15,16 +15,12 @@ class Wallpaper(Plugin):
     def set_theme(self, theme: str):
         # theme is actually the wallpaper
 
-        if theme == '':
-            subprocess.run(["notify-send", "looks like no wallpaper is set"])
-        else:
-            if config.get_desktop() == "kde":
-                subprocess.run(
-                    ["sh", "./scripts/change_wallpaper.sh", theme])
-            if config.get_desktop() == "gtk":
-                # noinspection SpellCheckingInspection
-                subprocess.run(["gsettings", "set", "org.gnome.desktop.background",
-                                "picture-uri", "file://" + theme])
+        if config.get_desktop() == "kde":
+            subprocess.run(["./scripts/change_wallpaper.sh", theme])
+        if config.get_desktop() == "gtk":
+            # noinspection SpellCheckingInspection
+            subprocess.run(["gsettings", "set", "org.gnome.desktop.background",
+                            "picture-uri", "file://" + theme])
 
     def get_input(self, widget):
         _translate = QtCore.QCoreApplication.translate

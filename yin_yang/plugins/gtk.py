@@ -1,5 +1,6 @@
 import re
 import subprocess
+from configparser import ConfigParser
 from pathlib import Path
 from typing import Optional
 
@@ -44,11 +45,11 @@ class Kde(Plugin):
     theme_dark = 'Breeze'
 
     def set_theme(self, theme: str):
-        # aliases for path to use later on
-        path = str(Path.home()) + "/.config/gtk-3.0"
+        config = ConfigParser()
+        config_file = str(Path.home()) + "/.config/gtk-3.0/settings.ini"
+        config.read(config_file)
 
-        with open(path + "/settings.ini", "r") as file:
-            # search for the theme section and change it
-            current_theme = re.findall(
-                'gtk-theme-name=[A-z -]*', str(file.readlines()))[0][:-2]
-            inplace_change(path + "/settings.ini", current_theme, "gtk-theme-name=" + theme)
+        config['Settings']['gtk-theme-name'] = theme
+
+        with open(config_file, "r") as file:
+            config.write(file)

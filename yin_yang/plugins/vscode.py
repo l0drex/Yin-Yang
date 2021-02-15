@@ -26,7 +26,6 @@ class Vscode(Plugin):
             path + "/Code - OSS/User/settings.json",
             path + "/Code/User/settings.json",
             path + "/Code - Insiders/User/settings.json",
-
         ]
 
         for editor in possible_editors:
@@ -37,11 +36,6 @@ class Vscode(Plugin):
                         settings = json.load(sett)
                     except json.decoder.JSONDecodeError:
                         settings = {"workbench.colorTheme": ""}
-                        write_new_settings(settings, editor)
-                    try:
-                        old_theme = settings["workbench.colorTheme"]
-                    except KeyError:
-                        # happens when the default theme in vscode is used
-                        write_new_settings(settings, editor)
-                inplace_change(editor,
-                               old_theme, theme)
+                settings['workbench.colorTheme'] = theme
+                with open(editor, 'w') as sett:
+                    json.dump(settings, sett)

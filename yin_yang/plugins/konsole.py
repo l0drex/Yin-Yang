@@ -23,17 +23,14 @@ class Konsole(Plugin):
     name = 'Konsole'
     theme_dark = 'Breeze'
     theme_bright = 'Breath2-light'
-    config = ConfigParser()
-    config_file: str
-
-    def __init__(self):
-        super().__init__()
-        self.config.optionxform = str
-        self.config_file = get_file()
-        self.config.read(self.config_file)
 
     def set_theme(self, theme: str):
-        self.config['Appearance']['ColorScheme'] = theme
+        config = ConfigParser()
+        # leave casing as is
+        config.optionxform = str
+        config_file = get_file()
+        config.read(config_file)
 
-        with open(self.config_file, 'w') as file:
-            self.config.write(file)
+        config['Appearance']['ColorScheme'] = theme
+        with open(config_file, 'w') as file:
+            config.write(file)

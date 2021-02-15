@@ -25,6 +25,7 @@ class Atom(Plugin):
     theme_bright = "one-light"
 
     def set_theme(self, theme: str):
+        # noinspection SpellCheckingInspection
         path = str(Path.home()) + "/.atom/config.cson"
 
         # getting the old theme first

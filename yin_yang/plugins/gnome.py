@@ -1,7 +1,8 @@
 import subprocess
 from yin_yang.plugins.plugin import Plugin
 
-# WIP: Potential Check  for https://gist.github.com/atiensivu/fcc3183e9a6fd74ec1a283e3b9ad05f0 to reduce common issues, or write it in the FAQ
+# WIP: Potential Check for https://gist.github.com/atiensivu/fcc3183e9a6fd74ec1a283e3b9ad05f0
+# to reduce common issues, or write it in the FAQ
 
 
 class Gnome(Plugin):
