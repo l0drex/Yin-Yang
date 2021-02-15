@@ -185,6 +185,8 @@ class ConfigParser:
                 raise ValueError('An error happened while changing the systemd timer. '
                                  'Try to run /scripts/update-systemd-timer.sh manually. '
                                  'If the error persists, leave an issue in the repo on github.')
+            else:
+                self.time_changed = False
 
         print("Saving the config")
         try:
