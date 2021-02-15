@@ -1,3 +1,5 @@
+#!/bin/python
+
 import sys
 from argparse import ArgumentParser
 from PyQt5 import QtWidgets
