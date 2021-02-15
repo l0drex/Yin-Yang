@@ -78,16 +78,12 @@ class ConfigParser:
         self._version = version
 
         # load config from file
-        self.config = self.load()
+        self._config = self.load()
 
-        if self.config is None:
+        if self._config is None:
             # use default values if something went wrong
-            self.set_default()
-
-        # check if config needs an update
-        # if the default values are set, the version number is below 0
-        if 0 < self.config["version"] < version:
-            self.config = self.update_config()
+            self._config = get_default()
+            self.update('version', self._version)
 
         # update times for sunset and sunrise
         if self.get("mode") == Modes.followSun:
@@ -104,10 +100,10 @@ class ConfigParser:
 
     def set_default(self):
         print('Setting default values.')
-        self.config = get_default()
+        self._config = get_default()
         self.update("version", self._version)
 
-    def update_config(self):
+    def update_config(self, config_old):
         """Update old config files
         Adds keys or restructures the config if an old config was loaded from the config file.
         Sets the new config directly to the dict in this class.
@@ -118,7 +114,6 @@ class ConfigParser:
         print('Attempt to update the config file')
 
         # replace current config with defaults
-        config_old = self.config.copy()
         config_new = get_default()
 
         # replace default values with old ones
@@ -141,7 +136,7 @@ class ConfigParser:
             for plugin in PLUGINS:
                 for key in get_default()[plugin.name].keys():
                     key_old = key[0].upper() + key[1:]
-                    self.config[plugin.name][key] = config_old[plugin.name.casefold() + key_old]
+                    config_new[plugin.name][key] = config_old[plugin.name.casefold() + key_old]
         self.changed = True
         return config_new
 
@@ -164,11 +159,15 @@ class ConfigParser:
         if config_loaded is None or config_loaded == {}:
             print('Could not load config file.')
             return None
-        else:
-            # no unsaved changes yet
-            self.changed = False
-            self.config = config_loaded
-            return config_loaded
+
+        # check if config needs an update
+        # if the default values are set, the version number is below 0
+        if 0 < config_loaded["version"] < self._version:
+            return self.update_config(config_loaded)
+
+        # no unsaved changes yet
+        self.changed = False
+        return config_loaded
 
     def write(self) -> bool:
         """Write configuration
@@ -195,7 +194,7 @@ class ConfigParser:
         print("Saving the config")
         try:
             with open(path + "/yin_yang/yin_yang.json", 'w') as conf_file:
-                json.dump(self.config, conf_file, indent=4)
+                json.dump(self._config, conf_file, indent=4)
 
             # no unsaved changes anymore
             self.changed = False
@@ -216,9 +215,9 @@ class ConfigParser:
 
         try:
             if plugin is None:
-                return self.config[key.casefold()]
+                return self._config[key.casefold()]
             else:
-                return self.config[plugin.casefold()][key.casefold()]
+                return self._config[plugin.casefold()][key.casefold()]
         except KeyError as e:
             print(f"Unknown key {key}")
             if plugin is None:
@@ -246,9 +245,9 @@ class ConfigParser:
                         (key.casefold() == 'switch_to_dark' and value != config.get('switch_to_dark')) or
                         (key.casefold() == 'switch_to_light' and value != config.get('switch_to_light'))):
                     self.time_changed = True
-                self.config[key.casefold()] = value
+                self._config[key.casefold()] = value
             else:
-                self.config[plugin.casefold()][key.casefold()] = value
+                self._config[plugin.casefold()][key.casefold()] = value
 
             # new unsaved changes
             self.changed = True
@@ -261,7 +260,7 @@ class ConfigParser:
     def get_config(self) -> dict:
         """returns the config"""
 
-        return self.config
+        return self._config
 
     def set_sun_time(self):
         """Sets the sunrise and sunset to config based on location"""
