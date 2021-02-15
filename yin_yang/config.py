@@ -57,6 +57,8 @@ def get_default() -> dict:
 
 def update_systemd_timer() -> bool:
     """Runs a simple bash script that updates the systemd timer"""
+
+    return True
     completed = subprocess.run(['./scripts/update_systemd_timer.sh',
                                 config.get('switch_to_light'),
                                 config.get('switch_to_dark')])

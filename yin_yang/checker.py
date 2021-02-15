@@ -8,6 +8,7 @@ class Checker:
     """Checker with strategy design pattern"""
 
     def __init__(self, mode: Modes):
+        print(f'Using mode {mode}')
         # set the strategy
         if mode == Modes.manual.value:
             self._mode = Manual()

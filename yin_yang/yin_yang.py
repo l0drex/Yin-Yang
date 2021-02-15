@@ -27,6 +27,7 @@ def set_mode(dark: bool):
     if dark == dark_mode:
         return
 
+    print('Switching to dark mode.')
     config.update('dark_mode', dark)
     dark_mode = config.get('dark_mode')
     for p in PLUGINS:
@@ -44,43 +45,20 @@ class Daemon(threading.Thread):
 
     def run(self):
         while True:
-            if self.terminate:
-                config.update("running", False)
-                config.write()
-                break
-
-            if config.get('mode') == Modes.manual.value:
+            if self.terminate or config.get('mode') == Modes.manual.value:
                 config.update("running", False)
                 config.write()
                 break
 
             # check if dark mode should be enabled and switch if necessary
-            set_mode(should_be_dark())
+            toggle_theme()
 
-            time.sleep(30)
+            time.sleep(60)
 
 
 def start_daemon():
     daemon = Daemon(1)
     daemon.start()
-
-
-def should_be_dark():
-    """
-    Determines whether dark mode should be enabled or not
-    """
-
-    d_hour = int(config.get("switch_To_Dark").split(":")[0])
-    d_minute = int(config.get("switch_To_Dark").split(":")[1])
-    l_hour = int(config.get("switch_To_Light").split(":")[0])
-    l_minute = int(config.get("switch_To_Light").split(":")[1])
-    hour = datetime.datetime.now().time().hour
-    minute = datetime.datetime.now().time().minute
-
-    if l_hour <= hour < d_hour:
-        return hour == l_hour and minute <= l_minute
-    else:
-        return not (hour == d_hour and minute <= d_minute)
 
 
 def toggle_theme():
