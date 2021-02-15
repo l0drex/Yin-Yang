@@ -27,7 +27,7 @@ def set_mode(dark: bool):
     if dark == dark_mode:
         return
 
-    print('Switching to dark mode.')
+    print(f'Switching to {"dark" if dark else "light"} mode.')
     config.update('dark_mode', dark)
     dark_mode = config.get('dark_mode')
     for p in PLUGINS:
