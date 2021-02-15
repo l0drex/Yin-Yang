@@ -4,33 +4,11 @@ import re
 import subprocess
 from typing import Optional
 
-from yin_yang.plugins.plugin import Plugin
+from yin_yang.plugins.plugin import Plugin, inplace_change
 
 # aliases for path to use later on
 user = pwd.getpwuid(os.getuid())[0]
 path = "/home/"+user+"/.config/gtk-3.0"
-
-
-def inplace_change(filename, old_string, new_string):
-    """@params: config - config to be written into file
-               path - the path where the config is will be written into
-                defaults to the default path
-
-    """
-    # Safely read the input filename using 'with'
-    with open(filename) as f:
-        s = f.read()
-        if old_string not in s:
-            print('"{old_string}" not found in {filename}.'.format(**locals()))
-            return
-
-    # Safely write the changed content, if found in the file
-    with open(filename, 'w') as f:
-        print(
-            'Changing "{old_string}" to "{new_string}" in {filename}'
-            .format(**locals()))
-        s = s.replace(old_string, new_string)
-        f.write(s)
 
 
 class Gtk(Plugin):
@@ -40,6 +18,7 @@ class Gtk(Plugin):
 
     # these subclasses are called instead of the actual class to change behaviour in different environments
     # while keeping consistency with other plugins
+    # TODO use strategy pattern here
 
     class Standard(Plugin):
         # TODO set default theme names
@@ -59,8 +38,7 @@ class Gtk(Plugin):
                 # search for the theme section and change it
                 current_theme = re.findall(
                     'gtk-theme-name=[A-z -]*', str(file.readlines()))[0][:-2]
-                inplace_change(path + "/settings.ini",
-                               current_theme, "gtk-theme-name=" + theme)
+                inplace_change(path + "/settings.ini", current_theme, "gtk-theme-name=" + theme)
 
     def __init__(self, theme_dark: Optional[str] = None, theme_bright: Optional[str] = None):
         super().__init__(theme_dark, theme_bright)

@@ -1,10 +1,11 @@
+from abc import ABC, abstractmethod
 from typing import Optional, Dict
 
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QGroupBox, QHBoxLayout, QLineEdit, QComboBox
 
 
-class Plugin:
+class Plugin(ABC):
     name = ''
     # default themes
     theme_dark = None
@@ -34,6 +35,7 @@ class Plugin:
         print(f'Switching theme to {theme} in {self.name}')
         self.set_theme(theme)
 
+    @abstractmethod
     def set_theme(self, theme: str):
         """Set a specific theme"""
         raise NotImplementedError('Function set_theme has not been implemented!')
@@ -77,3 +79,24 @@ class Plugin:
             inputs.append(inp)
 
         return inputs
+
+
+def inplace_change(filename, old_string, new_string):
+    """@params: config - config to be written into file
+                path - the path where the config is will be written into.
+                    Defaults to the default path
+    """
+    # Safely read the input filename using 'with'
+    with open(filename) as f:
+        s = f.read()
+        if old_string not in s:
+            print('"{old_string}" not found in {filename}.'.format(**locals()))
+            return
+
+    # Safely write the changed content, if found in the file
+    with open(filename, 'w') as f:
+        print(
+            'Changing "{old_string}" to "{new_string}" in {filename}'
+                .format(**locals()))
+        s = s.replace(old_string, new_string)
+        f.write(s)
