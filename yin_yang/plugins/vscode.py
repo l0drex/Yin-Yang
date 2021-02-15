@@ -1,11 +1,8 @@
 import os
-import pwd
 import json
-from yin_yang.plugins.plugin import Plugin, inplace_change
+from pathlib import Path
 
-# aliases for path to use later on
-user = pwd.getpwuid(os.getuid())[0]
-path = "/home/"+user+"/.config"
+from yin_yang.plugins.plugin import Plugin, inplace_change
 
 
 def write_new_settings(settings, path):
@@ -22,6 +19,8 @@ class Vscode(Plugin):
     theme_dark = 'Default Dark+'
 
     def set_theme(self, theme: str):
+        path = str(Path.home()) + "/.config"
+
         possible_editors = [
             path + "/VSCodium/User/settings.json",
             path + "/Code - OSS/User/settings.json",

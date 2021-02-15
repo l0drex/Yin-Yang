@@ -1,11 +1,7 @@
-import os
-import pwd
 import re
-from yin_yang.plugins.plugin import Plugin, inplace_change
+from pathlib import Path
 
-# aliases for path to use later on
-user = pwd.getpwuid(os.getuid())[0]
-path = "/home/" + user + "/.atom/config.cson"
+from yin_yang.plugins.plugin import Plugin, inplace_change
 
 
 def get_old_theme(settings):
@@ -16,12 +12,10 @@ def get_old_theme(settings):
     """
     with open(settings, "r") as file:
         string = file.read()
-        # themes = re.findall(r'themes: \[[\s]*"([A-Za-z0-9\-]*)"[\s]*"([A-Za-z0-9\-]*)"', string)
         themes = re.findall(r'themes: \[[\s]*"([A-Za-z0-9\-]*)"[\s]*"([A-Za-z0-9\-]*)"', string)
         if len(themes) >= 1:
-            ui_theme, syntax_theme = themes[0]
+            ui_theme, _ = themes[0]
             used_theme = re.findall("([A-z\-A-z]*)\-", ui_theme)[0]
-            print(used_theme)
             return used_theme
 
 
@@ -31,6 +25,8 @@ class Atom(Plugin):
     theme_bright = "one-light"
 
     def set_theme(self, theme: str):
+        path = str(Path.home()) + "/.atom/config.cson"
+
         # getting the old theme first
         current_theme = get_old_theme(path)
 

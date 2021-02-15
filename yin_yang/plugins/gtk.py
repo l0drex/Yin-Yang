@@ -1,14 +1,9 @@
-import os
-import pwd
 import re
 import subprocess
+from pathlib import Path
 from typing import Optional
 
 from yin_yang.plugins.plugin import Plugin, inplace_change
-
-# aliases for path to use later on
-user = pwd.getpwuid(os.getuid())[0]
-path = "/home/"+user+"/.config/gtk-3.0"
 
 
 class Gtk(Plugin):
@@ -19,7 +14,7 @@ class Gtk(Plugin):
     def __init__(self, theme_dark: Optional[str] = None, theme_bright: Optional[str] = None):
         super().__init__(theme_dark, theme_bright)
 
-        self._strategy = Standard()
+        self._strategy = Gnome()
 
         # FIXME themes are not set correctly
         self.theme_bright = self._strategy.theme_bright
@@ -32,7 +27,7 @@ class Gtk(Plugin):
         self._strategy.set_theme(theme)
 
 
-class Standard(Plugin):
+class Gnome(Plugin):
     # TODO set default theme names
     theme_dark = ''
     theme_bright = ''
@@ -44,10 +39,14 @@ class Standard(Plugin):
 
 
 class Kde(Plugin):
+    # Breeze theme uses qt color scheme
     theme_bright = 'Breeze'
     theme_dark = 'Breeze'
 
     def set_theme(self, theme: str):
+        # aliases for path to use later on
+        path = str(Path.home()) + "/.config/gtk-3.0"
+
         with open(path + "/settings.ini", "r") as file:
             # search for the theme section and change it
             current_theme = re.findall(
