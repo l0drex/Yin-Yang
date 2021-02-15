@@ -95,9 +95,6 @@ OnCalendar=*-*-* 20:00:00
 WantedBy=timers.target
 EOF
 
-systemctl enable yin-yang.timer
-systemctl start yin-yang.timer
-
 cat << "EOF"
  __     ___          __     __
  \ \   / (_)         \ \   / /
