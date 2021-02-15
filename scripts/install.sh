@@ -42,7 +42,7 @@ echo "Installing yin-yang for command line usage"
 cp -r ./* /opt/yin-yang/
 # copy terminal executive
 cp ./scripts/yin-yang.sh /usr/bin/
-chmod +x /usr/bin/yin-yang
+chmod +x /usr/bin/yin-yang.sh
 echo "Creating .desktop file for native environment execution"
 # create .desktop file
 cat > "${HOME}/.local/share/applications/Yin-Yang.desktop" <<EOF
