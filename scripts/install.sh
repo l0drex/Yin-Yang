@@ -85,7 +85,7 @@ cat > "/usr/lib/systemd/system/yin-yang.timer" <<EOF
 Description=Switch the theme between light and dark automatically
 
 [Timer]
-OnBootSec=5
+OnActiveSec=2s
 # these values will be changed by the config
 OnCalendar=*-*-* 07:00:00
 OnCalendar=*-*-* 20:00:00
