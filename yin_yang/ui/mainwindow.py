@@ -30,7 +30,7 @@ class Ui_main_window(object):
         self.logo_layout.setSpacing(6)
         self.logo_layout.setObjectName("logo_layout")
         self.logo = QtWidgets.QLabel(self.central_widget)
-        self.logo.setPixmap(QtGui.QPixmap(":/icons/resources/yin-yang.svg"))
+        self.logo.setPixmap(QtGui.QPixmap(":/icons/resources/icon.svg"))
         self.logo.setScaledContents(True)
         self.logo.setAlignment(QtCore.Qt.AlignCenter)
         self.logo.setObjectName("logo")

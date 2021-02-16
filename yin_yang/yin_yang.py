@@ -29,7 +29,7 @@ class Setter:
 
         print(f'Switching to {"dark" if dark else "light"} mode.')
         config.update('dark_mode', dark)
-        dark_mode = config.get('dark_mode')
+        self.dark_mode = config.get('dark_mode')
         for p in PLUGINS:
             if config.get('enabled', plugin=p.name):
                 p.set_mode(dark)
