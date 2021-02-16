@@ -36,31 +36,6 @@ def set_mode(dark: bool):
     config.write()
 
 
-class Daemon(threading.Thread):
-    terminate = False
-
-    def __init__(self, thread_id):
-        threading.Thread.__init__(self)
-        self.thread_id = thread_id
-
-    def run(self):
-        while True:
-            if self.terminate or config.get('mode') == Modes.manual.value:
-                config.update("running", False)
-                config.write()
-                break
-
-            # check if dark mode should be enabled and switch if necessary
-            toggle_theme()
-
-            time.sleep(60)
-
-
-def start_daemon():
-    daemon = Daemon(1)
-    daemon.start()
-
-
 def toggle_theme():
     """Switch themes"""
     set_mode(checker.should_be_dark())
