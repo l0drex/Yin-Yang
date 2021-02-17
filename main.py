@@ -42,7 +42,6 @@ def main():
             print(f"Using mode {mode}")
     elif args.toggle:
         # toggle theme manually
-        config.update("mode", Modes.manual.value)
         yin_yang.toggle_theme()
     else:
         # load GUI to apply settings or set theme manually
