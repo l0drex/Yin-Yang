@@ -8,14 +8,18 @@ class Checker:
     """Checker with strategy design pattern"""
 
     def __init__(self, mode: Modes):
-        print(f'Using mode {mode}')
+        message = 'Dark mode will be activated '
         # set the strategy
         if mode == Modes.manual.value:
             self._mode = Manual()
+            print(message + 'manually.')
         elif mode == Modes.scheduled.value:
             self._mode = Time()
+            print(message + 'at ' + config.get('switch_to_dark'))
         elif mode == Modes.followSun.value:
             self._mode = Sun()
+            config.set_sun_time()
+            print(message + 'at ' + config.get('switch_to_dark'))
         else:
             raise ValueError('Unknown mode for determining theme.')
 

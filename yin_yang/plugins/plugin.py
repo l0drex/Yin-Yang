@@ -95,8 +95,5 @@ def inplace_change(filename, old_string, new_string):
 
     # Safely write the changed content, if found in the file
     with open(filename, 'w') as f:
-        print(
-            'Changing "{old_string}" to "{new_string}" in {filename}'
-                .format(**locals()))
         s = s.replace(old_string, new_string)
         f.write(s)

@@ -19,9 +19,6 @@ rm -rf "${home}"/.config/yin_yang
 
 echo "Removing program and terminal execution"
 rm -rf /opt/yin-yang /usr/bin/yin-yang.sh
-systemctl disable yin-yang.timer
-rm /usr/lib/systemd/system/yin-yang.timer
-rm /usr/lib/systemd/system/yin-yang.service
 
 echo Yin-Yang uninstalled succesfully
 echo have a nice day ...

@@ -9,7 +9,6 @@ date: 21.12.2018
 license: MIT
 """
 
-import datetime
 import threading
 import time
 
@@ -17,23 +16,24 @@ from yin_yang.config import config, PLUGINS, Modes
 from yin_yang.checker import Checker
 
 
-checker: Checker = Checker(config.get('mode'))
-dark_mode: bool = config.get('dark_mode')
+class Setter:
+    dark_mode: bool = config.get('dark_mode')
+    checker: Checker
 
+    def __init__(self):
+        self.checker = Checker(config.get('mode'))
 
-def set_mode(dark: bool):
-    global dark_mode
+    def set_mode(self, dark: bool):
+        if dark == self.dark_mode:
+            return
 
-    if dark == dark_mode:
-        return
-
-    print('Switching to dark mode.')
-    config.update('dark_mode', dark)
-    dark_mode = config.get('dark_mode')
-    for p in PLUGINS:
-        if config.get('enabled', plugin=p.name):
-            p.set_mode(dark)
-    config.write()
+        print(f'Switching to {"dark" if dark else "light"} mode.')
+        config.update('dark_mode', dark)
+        self.dark_mode = config.get('dark_mode')
+        for p in PLUGINS:
+            if config.get('enabled', plugin=p.name):
+                p.set_mode(dark)
+        config.write()
 
 
 def toggle_theme():
