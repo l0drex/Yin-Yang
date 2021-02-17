@@ -9,10 +9,7 @@ date: 21.12.2018
 license: MIT
 """
 
-import threading
-import time
-
-from yin_yang.config import config, PLUGINS, Modes
+from yin_yang.config import config, PLUGINS
 from yin_yang.checker import Checker
 
 
@@ -35,7 +32,6 @@ class Setter:
                 p.set_mode(dark)
         config.write()
 
-
-def toggle_theme():
-    """Switch themes"""
-    set_mode(checker.should_be_dark())
+    def toggle_theme(self):
+        """Switch themes"""
+        self.set_mode(self.checker.should_be_dark())

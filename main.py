@@ -5,10 +5,9 @@ from argparse import ArgumentParser
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 
-from yin_yang import yin_yang
 from yin_yang.ui import gui
 from yin_yang.config import config
-
+from yin_yang.yin_yang import Setter
 
 # using ArgumentParser for parsing arguments
 parser = ArgumentParser()
@@ -30,8 +29,8 @@ def main():
     config.debugging = args.debugging
 
     if args.toggle:
-        # toggle theme manually
-        yin_yang.toggle_theme()
+        setter = Setter()
+        setter.toggle_theme()
     else:
         # load GUI to apply settings or set theme manually
         app = QtWidgets.QApplication(sys.argv)
