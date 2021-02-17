@@ -55,12 +55,13 @@ def get_default() -> dict:
     return conf_default
 
 
-def update_systemd_timer() -> bool:
+def update_systemd_timer(needed: bool, time_light: str, time_dark: str) -> bool:
     """Runs a simple bash script that updates the systemd timer"""
 
     completed = subprocess.run(['./scripts/update_systemd_timer.sh',
-                                config.get('switch_to_light') + ':00',
-                                config.get('switch_to_dark') + ':00'])
+                                '1' if needed else 0,
+                                time_light + ':00',
+                                time_dark + ':00'])
 
     return completed.returncode == 0
 
@@ -70,7 +71,7 @@ class ConfigParser:
     _version: float
     debugging: bool = False
     changed: bool = False
-    # needed because editing systemd timer needs sudo
+    # needed because editing systemd timer needs sudo and we dont want to ask for the password after every change
     time_changed: bool = False
 
     def __init__(self, version: float):
@@ -85,7 +86,7 @@ class ConfigParser:
             self.update('version', self._version)
 
         # update times for sunset and sunrise
-        if self.get("mode") == Modes.followSun:
+        if self.get("mode") == Modes.followSun.value:
             self.update('coordinates', get_current_location())
             self.set_sun_time()
 
@@ -182,8 +183,14 @@ class ConfigParser:
             print('Saving the config in debug mode is disabled!')
             return False
 
-        if self.time_changed:
-            if not update_systemd_timer():
+        if self._config['mode'] == Modes.manual.value:
+            # disable the timer
+            subprocess.run(['./scripts/update-timer.sh', '0'])
+        elif self.time_changed:
+            # update the timer
+            if not update_systemd_timer(self._config['mode'] != Modes.manual,
+                                        self.get('switch_to_light'),
+                                        self.get('switch_to_dark')):
                 raise ValueError('An error happened while changing the systemd timer. '
                                  'Try to run /scripts/update-systemd-timer.sh manually. '
                                  'If the error persists, leave an issue in the repo on github.')
@@ -241,8 +248,8 @@ class ConfigParser:
             if plugin is None:
                 # if time values changed
                 if ((not self.time_changed) and
-                        (key.casefold() == 'switch_to_dark' and value != config.get('switch_to_dark')) or
-                        (key.casefold() == 'switch_to_light' and value != config.get('switch_to_light'))):
+                        (key.casefold() == 'switch_to_dark' and value != self._config.get('switch_to_dark')) or
+                        (key.casefold() == 'switch_to_light' and value != self._config.get('switch_to_light'))):
                     self.time_changed = True
                 self._config[key.casefold()] = value
             else:

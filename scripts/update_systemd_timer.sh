@@ -9,6 +9,15 @@ fi
 echo number of  arguments: $#
 echo "$1"
 echo "$2"
+echo "$3"
+
+# disable timer, if it isn't needed
+if [ "$1" == "0" ]; then
+  echo "Timer is not needed, disabling it now"
+  systemctl stop yin-yang.timer
+  systemctl disable yin-yang.timer
+  exit 0
+fi
 
 cat > "/usr/lib/systemd/system/yin-yang.timer" <<EOF
 [Unit]
@@ -17,8 +26,8 @@ Description=Switch the theme between light and dark automatically
 [Timer]
 OnActiveSec=2s
 # these values will be changed by the config
-OnCalendar=*-*-* $1
 OnCalendar=*-*-* $2
+OnCalendar=*-*-* $3
 
 [Install]
 # enable on boot
@@ -26,4 +35,5 @@ WantedBy=timers.target
 EOF
 
 systemctl daemon-reload
+systemctl enable yin-yang.timer
 systemctl start yin-yang.timer
