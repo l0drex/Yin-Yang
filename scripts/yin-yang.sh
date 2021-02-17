@@ -1,2 +1,4 @@
 #!/bin/sh
-python3 /opt/yin-yang/main.py $@
+
+cd /opt/yin-yang || exit
+python3 main.py "$@"
