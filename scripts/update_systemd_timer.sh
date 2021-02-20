@@ -25,7 +25,7 @@ Description=Switch the theme between light and dark automatically
 
 [Timer]
 OnActiveSec=2s
-# these values will be changed by the config
+OnBootSec=5s
 OnCalendar=*-*-* $2
 OnCalendar=*-*-* $3
 
