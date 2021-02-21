@@ -21,10 +21,11 @@ class Checker:
             logger.info(message + 'manually.')
             self._mode = ManualMode()
         elif mode == Modes.scheduled.value:
-            logger.info(message + 'at ' + config.get('switch_to_dark'))
+            logger.info(message + f'between {config.get("switch_to_dark")} and {config.get("switch_to_light")}.')
             self._mode = TimeMode()
         elif mode == Modes.followSun.value:
-            logger.info(message + 'at ' + config.get('switch_to_dark'))
+            time_dark, time_light = get_sun_time()
+            logger.info(message + f'between {time_dark.strftime("%H:%M")} and {time_light.strftime("%H:%M")}.')
             self._mode = SunMode()
         else:
             logger.error('Mode could not be specified.')
