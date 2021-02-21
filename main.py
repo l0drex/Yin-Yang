@@ -1,5 +1,5 @@
 #!/bin/python
-
+import logging
 import sys
 from argparse import ArgumentParser
 from PyQt5 import QtWidgets
@@ -8,11 +8,15 @@ from PyQt5 import QtCore
 from yin_yang import yin_yang
 from yin_yang.ui import gui
 from yin_yang.config import Modes, config
-
-
-# using ArgumentParser for parsing arguments
 from yin_yang.yin_yang import Setter
 
+
+# logger to see what happens when application is running in background
+logging.basicConfig(filename='./yin_yang.log', level=logging.INFO,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+# using ArgumentParser for parsing arguments
 parser = ArgumentParser()
 parser.add_argument("-t", "--toggle",
                     help="toggles Yin-Yang",
@@ -61,5 +65,5 @@ if __name__ == "__main__":
     main()
     if not config.debugging and config.get("mode") != Modes.manual.value:
         config.update("running", False)
-        print("START thread listener")
+        logger.info('Demon started')
         yin_yang.start_daemon()

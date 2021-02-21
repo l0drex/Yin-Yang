@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import pathlib
 import re
@@ -10,6 +11,7 @@ import requests
 from yin_yang.plugins.plugin import Plugin
 from yin_yang.plugins import kde, gnome, gtk, kvantum, wallpaper, vscode, atom, sound, notify, konsole
 
+logger = logging.getLogger(__name__)
 ConfigValue = Union[str, float, bool, tuple]
 
 # default objects
@@ -57,6 +59,8 @@ def get_default() -> dict:
 def update_systemd_timer() -> bool:
     """Runs a simple bash script that updates the systemd timer"""
 
+    logger.info('Updating systemd timer')
+
     return True
     completed = subprocess.run(['./scripts/update_systemd_timer.sh',
                                 config.get('switch_to_light'),
@@ -81,6 +85,7 @@ class ConfigParser:
 
         if self._config is None:
             # use default values if something went wrong
+            logger.warning('Using default configuration values.')
             self._config = get_default()
             self.update('version', self._version)
 
@@ -93,7 +98,7 @@ class ConfigParser:
         self.write()
 
     def set_default(self):
-        print('Setting default values.')
+        logger.info('Setting default values.')
         self._config = get_default()
         self.update("version", self._version)
 
@@ -105,7 +110,7 @@ class ConfigParser:
         :returns: the old config
         """
 
-        print('Attempt to update the config file')
+        logger.debug('Attempt to update the config file')
 
         # replace current config with defaults
         config_new = get_default()
@@ -137,7 +142,7 @@ class ConfigParser:
     def load(self) -> Optional[dict]:
         """Load config from file"""
 
-        print('Loading config file')
+        logger.debug('Loading config file')
 
         # generate path for yin-yang if there is none this will be skipped
         pathlib.Path(path + "/yin_yang").mkdir(parents=True, exist_ok=True)
@@ -151,7 +156,7 @@ class ConfigParser:
                 config_loaded = json.load(config_file)
 
         if config_loaded is None or config_loaded == {}:
-            print('Could not load config file.')
+            logger.warning('Could not load config file.')
             return None
 
         # check if config needs an update
@@ -170,11 +175,11 @@ class ConfigParser:
         """
 
         if not self.changed:
-            print('No changes were made, skipping save')
+            logger.debug('No changes were made, skipping save')
             return False
 
         if self.debugging:
-            print('Saving the config in debug mode is disabled!')
+            logger.warning('Saving the config in debug mode is disabled!')
             return False
 
         if self.time_changed:
@@ -185,7 +190,7 @@ class ConfigParser:
             else:
                 self.time_changed = False
 
-        print("Saving the config")
+        logger.debug("Saving the config")
         try:
             with open(path + "/yin_yang/yin_yang.json", 'w') as conf_file:
                 json.dump(self._config, conf_file, indent=4)
@@ -195,7 +200,7 @@ class ConfigParser:
 
             return True
         except IOError as e:
-            print(f"Error while writing the file: {e}")
+            logger.error(f"Error while writing the file: {e}")
             return False
 
     def get(self, key, plugin: Optional[str] = None) -> ConfigValue:
@@ -213,11 +218,11 @@ class ConfigParser:
             else:
                 return self._config[plugin.casefold()][key.casefold()]
         except KeyError as e:
-            print(f"Unknown key {key}")
+            logger.warning(f"Unknown key {key}")
             if plugin is None:
                 for p in PLUGINS:
                     if p.name.casefold() in key:
-                        print("Key is deprecated. Use plugin option instead")
+                        logger.warning("Key is deprecated. Use plugin option instead")
                         return self.get(key.replace(p.name, ''), plugin=p.name)
             else:
                 raise e
@@ -248,7 +253,7 @@ class ConfigParser:
 
             return self.get(key, plugin)
         except KeyError as e:
-            print(f'Error while updating {key}')
+            logger.error(f'Error while updating {key}')
             raise e
 
     def get_config(self) -> dict:

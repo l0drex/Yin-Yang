@@ -1,4 +1,5 @@
 import datetime
+import logging
 from datetime import time
 from abc import ABC, abstractmethod
 from typing import Tuple
@@ -6,6 +7,8 @@ from typing import Tuple
 from suntime import Sun, SunTimeException
 
 from yin_yang.config import Modes, config
+
+logger = logging.getLogger(__name__)
 
 
 class Checker:
@@ -15,15 +18,16 @@ class Checker:
         message = 'Dark mode will be activated '
         # set the strategy
         if mode == Modes.manual.value:
+            logger.info(message + 'manually.')
             self._mode = ManualMode()
-            print(message + 'manually.')
         elif mode == Modes.scheduled.value:
+            logger.info(message + 'at ' + config.get('switch_to_dark'))
             self._mode = TimeMode()
-            print(message + 'at ' + config.get('switch_to_dark'))
         elif mode == Modes.followSun.value:
+            logger.info(message + 'at ' + config.get('switch_to_dark'))
             self._mode = SunMode()
-            print(message + 'at ' + config.get('switch_to_dark'))
         else:
+            logger.error('Mode could not be specified.')
             raise ValueError('Unknown mode for determining theme.')
 
     def should_be_dark(self) -> bool:
@@ -70,7 +74,7 @@ def get_sun_time() -> Tuple[time, time]:
         return today_sr.time(), today_ss.time()
 
     except SunTimeException as e:
-        print("Error: {0}.".format(e))
+        logger.error("Error: {0}.".format(e))
 
 
 def compare_time(time_current: time, time_light: time, time_dark: time) -> bool:

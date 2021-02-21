@@ -11,3 +11,5 @@ setup.py
 .idea/
 venv/
 .venv/
+
+yin_yang.log
