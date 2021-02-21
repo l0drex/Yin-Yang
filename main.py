@@ -13,7 +13,7 @@ from yin_yang.yin_yang import Setter
 
 # logger to see what happens when application is running in background
 logging.basicConfig(filename='./yin_yang.log', level=logging.INFO,
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+                    format='%(asctime)s %(levelname)s - %(name)s: %(message)s')
 logger = logging.getLogger(__name__)
 
 # using ArgumentParser for parsing arguments
