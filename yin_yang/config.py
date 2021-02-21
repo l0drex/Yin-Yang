@@ -3,12 +3,10 @@ import os
 import pathlib
 import re
 import subprocess
-from datetime import time
 from enum import Enum
-from typing import Optional, Union, Tuple
+from typing import Optional, Union
 
 import requests
-from suntime import Sun, SunTimeException
 from yin_yang.plugins.plugin import Plugin
 from yin_yang.plugins import kde, gnome, gtk, kvantum, wallpaper, vscode, atom, sound, notify, konsole
 
@@ -268,20 +266,6 @@ class ConfigParser:
         """returns the config"""
 
         return self._config
-
-    def get_sun_time(self) -> Tuple[time, time]:
-        """Sets the sunrise and sunset to config based on location"""
-        latitude, longitude = self.get('coordinates')
-        sun = Sun(latitude, longitude)
-
-        try:
-            today_sr = sun.get_local_sunrise_time()
-            today_ss = sun.get_local_sunset_time()
-
-            return today_sr.time(), today_ss.time()
-
-        except SunTimeException as e:
-            print("Error: {0}.".format(e))
 
 
 def get_desktop():
