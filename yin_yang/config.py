@@ -84,11 +84,6 @@ class ConfigParser:
             self._config = get_default()
             self.update('version', self._version)
 
-        # update times for sunset and sunrise
-        if self.get("mode") == Modes.followSun.value:
-            self.update('coordinates', get_current_location())
-            self.set_sun_time()
-
         # set plugin themes
         for plugin in PLUGINS:
             plugin.theme_bright = self.get('light_theme', plugin.name)
