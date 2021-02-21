@@ -45,16 +45,3 @@ If you want to provide a combobox instead, you can simply override the `get_avai
 
 If you need to update the theme with an extension of your program, you can call `communicate.py`.
 Currently, it might be pretty outdated since the only plugin that needed this was removed.
-
-
-# What needs to be done?
-
-- [ ] Separate the gui for configuration from the daemon,
-      so that the command line tool doesn't run endlessly in after exiting the gui
-- [ ] Optimize the building process to include
-  - creating `yin_yang/ui/mainwindow.py` from `design/mainwindow.ui`
-  - creating `yin_yang/ui/resources_rc.py` from `resources.qrc`
-- [ ] optimize `scripts/install.sh` and `uninstall.sh`
-- [ ] optimize installation process
-- [ ] add an option to only change the theme when pc is awakening from suspend
-- [ ] add an option to automatically update the location
