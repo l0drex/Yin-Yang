@@ -1,6 +1,9 @@
 import datetime
 from datetime import time
 from abc import ABC, abstractmethod
+from typing import Tuple
+
+from suntime import Sun, SunTimeException
 
 from yin_yang.config import Modes, config
 
@@ -12,13 +15,13 @@ class Checker:
         message = 'Dark mode will be activated '
         # set the strategy
         if mode == Modes.manual.value:
-            self._mode = Manual()
+            self._mode = ManualMode()
             print(message + 'manually.')
         elif mode == Modes.scheduled.value:
-            self._mode = Time()
+            self._mode = TimeMode()
             print(message + 'at ' + config.get('switch_to_dark'))
         elif mode == Modes.followSun.value:
-            self._mode = Sun()
+            self._mode = SunMode()
             print(message + 'at ' + config.get('switch_to_dark'))
         else:
             raise ValueError('Unknown mode for determining theme.')
@@ -33,12 +36,12 @@ class Mode(ABC):
         raise NotImplementedError('Method should_be_dark() is not implemented')
 
 
-class Manual(Mode):
+class ManualMode(Mode):
     def should_be_dark(self) -> bool:
         return not config.get('dark_mode')
 
 
-class Time(Mode):
+class TimeMode(Mode):
     def should_be_dark(self) -> bool:
         time_current = datetime.datetime.now().time()
         time_light = time.fromisoformat(config.get('switch_to_light'))
@@ -47,12 +50,27 @@ class Time(Mode):
         return compare_time(time_current, time_light, time_dark)
 
 
-class Sun(Mode):
+class SunMode(Mode):
     def should_be_dark(self) -> bool:
         time_current = datetime.datetime.now().time()
-        time_light, time_dark = config.get_sun_time()
+        time_light, time_dark = get_sun_time()
 
         return compare_time(time_current, time_light, time_dark)
+
+
+def get_sun_time() -> Tuple[time, time]:
+    """Sets the sunrise and sunset to config based on location"""
+    latitude, longitude = config.get('coordinates')
+    sun = Sun(latitude, longitude)
+
+    try:
+        today_sr = sun.get_local_sunrise_time()
+        today_ss = sun.get_local_sunset_time()
+
+        return today_sr.time(), today_ss.time()
+
+    except SunTimeException as e:
+        print("Error: {0}.".format(e))
 
 
 def compare_time(time_current: time, time_light: time, time_dark: time) -> bool:
