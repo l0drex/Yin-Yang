@@ -67,7 +67,6 @@ class MainWindow(QtWidgets.QMainWindow):
             return
 
         self.set_location()
-        config.set_sun_time()
         self.get_time()
 
     def get_location(self):
@@ -160,12 +159,10 @@ class MainWindow(QtWidgets.QMainWindow):
         """Sets the time set in the ui to the config"""
 
         # update config if time has changed
-        l_hour, l_minute = str(self.ui.inp_time_light.time().hour()), str(
-            self.ui.inp_time_light.time().minute())
-        d_hour, d_minute = str(self.ui.inp_time_dark.time().hour()), str(
-            self.ui.inp_time_dark.time().minute())
-        config.update("switch_To_Light", l_hour + ":" + l_minute)
-        config.update("switch_To_Dark", d_hour + ":" + d_minute)
+        time_light = self.ui.inp_time_light.time()
+        time_dark = self.ui.inp_time_dark.time()
+        config.update("switch_To_Light", time_light.toString()[0:5])
+        config.update("switch_To_Dark", time_dark.toString()[0:5])
 
     def set_location(self):
         coordinates = [
