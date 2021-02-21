@@ -3,8 +3,9 @@ import os
 import pathlib
 import re
 import subprocess
+from datetime import time
 from enum import Enum
-from typing import Optional, Union
+from typing import Optional, Union, Tuple
 
 import requests
 from suntime import Sun, SunTimeException
@@ -84,11 +85,6 @@ class ConfigParser:
             # use default values if something went wrong
             self._config = get_default()
             self.update('version', self._version)
-
-        # update times for sunset and sunrise
-        if self.get("mode") == Modes.followSun:
-            self.update('coordinates', get_current_location())
-            self.set_sun_time()
 
         # set plugin themes
         for plugin in PLUGINS:
@@ -262,7 +258,7 @@ class ConfigParser:
 
         return self._config
 
-    def set_sun_time(self):
+    def get_sun_time(self) -> Tuple[time, time]:
         """Sets the sunrise and sunset to config based on location"""
         latitude, longitude = self.get('coordinates')
         sun = Sun(latitude, longitude)
@@ -271,9 +267,7 @@ class ConfigParser:
             today_sr = sun.get_local_sunrise_time()
             today_ss = sun.get_local_sunset_time()
 
-            # Get today's sunrise and sunset in UTC
-            self.update("switch_to_light", today_sr.strftime('%H:%M'))
-            self.update("switch_to_dark", today_ss.strftime('%H:%M'))
+            return today_sr.time(), today_ss.time()
 
         except SunTimeException as e:
             print("Error: {0}.".format(e))
