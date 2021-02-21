@@ -11,11 +11,6 @@ from yin_yang.config import Modes, config
 from yin_yang.yin_yang import Setter
 
 
-# logger to see what happens when application is running in background
-logging.basicConfig(filename='./yin_yang.log', level=logging.INFO,
-                    format='%(asctime)s %(levelname)s - %(name)s: %(message)s')
-logger = logging.getLogger(__name__)
-
 # using ArgumentParser for parsing arguments
 parser = ArgumentParser()
 parser.add_argument("-t", "--toggle",
@@ -33,13 +28,11 @@ QtWidgets.QApplication.setAttribute(
     QtCore.Qt.AA_EnableHighDpiScaling, True)
 
 
-def main():
-    args = parser.parse_args()
-
-    config.debugging = args.debugging
+def main(arguments):
+    config.debugging = arguments.debugging
 
     # set settings via terminal
-    if args.schedule:
+    if arguments.schedule:
         mode = config.get("mode")
         if mode == Modes.manual.value:
             print("looks like you did not specified a time")
@@ -48,7 +41,7 @@ def main():
             print("You need to set schedule to True and edit the time to toggles")
         else:
             print(f"Using mode {mode}")
-    elif args.toggle:
+    elif arguments.toggle:
         # toggle theme manually
         config.update("mode", Modes.manual.value)
         setter = Setter()
@@ -62,7 +55,19 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    args = parser.parse_args()
+
+    if args.debugging:
+        print('Debug mode enabled.')
+        logging.basicConfig(level=logging.DEBUG,
+                            format='%(asctime)s %(levelname)s - %(name)s: %(message)s')
+    else:
+        # logger to see what happens when application is running in background
+        logging.basicConfig(filename='./yin_yang.log', level=logging.WARNING,
+                            format='%(asctime)s %(levelname)s - %(name)s: %(message)s')
+    logger = logging.getLogger(__name__)
+
+    main(args)
     if not config.debugging and config.get("mode") != Modes.manual.value:
         config.update("running", False)
         logger.info('Demon started')
