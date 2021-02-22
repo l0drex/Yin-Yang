@@ -1,5 +1,5 @@
 #!/bin/python
-
+import logging
 import sys
 from argparse import ArgumentParser
 from PyQt5 import QtWidgets
@@ -23,12 +23,10 @@ QtWidgets.QApplication.setAttribute(
     QtCore.Qt.AA_EnableHighDpiScaling, True)
 
 
-def main():
-    args = parser.parse_args()
+def main(arguments):
+    config.debugging = arguments.debugging
 
-    config.debugging = args.debugging
-
-    if args.toggle:
+    if arguments.toggle:
         setter = Setter()
         setter.toggle_theme()
     else:
@@ -40,4 +38,16 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    args = parser.parse_args()
+
+    if args.debugging:
+        print('Debug mode enabled.')
+        logging.basicConfig(level=logging.DEBUG,
+                            format='%(asctime)s %(levelname)s - %(name)s: %(message)s')
+    else:
+        # logger to see what happens when application is running in background
+        logging.basicConfig(filename='./yin_yang.log', level=logging.WARNING,
+                            format='%(asctime)s %(levelname)s - %(name)s: %(message)s')
+    logger = logging.getLogger(__name__)
+
+    main(args)

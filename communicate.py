@@ -5,7 +5,7 @@
 import sys
 import json
 import struct
-from yin_yang import config as configParser
+from yin_yang.config import config as configParser
 
 
 def parse_time(time: str):
@@ -14,7 +14,7 @@ def parse_time(time: str):
     return [hour, minute]
 
 
-def encode_message(message_content: str):
+def encode_message(message_content: dict):
     """
     Encode a message for transmission, given its content.
     :param message_content: a message
@@ -33,7 +33,7 @@ def encode_message(message_content: str):
 def send_message(encoded_message):
     """
     Send a message.
-    :param message: message as json
+    :param encoded_message: message as json
     """
     sys.stdout.buffer.write(encoded_message['length'])
     sys.stdout.buffer.write(encoded_message['content'])

@@ -40,7 +40,7 @@ class MainWindow(QtWidgets.QMainWindow):
         elif config.get("mode") == Modes.followSun.value:
             self.ui.btn_sun.setChecked(True)
         else:
-            self.ui.btn_manual.setChecked(True)
+            self.ui.btn_enable.setChecked(False)
 
         self.ui.toggle_sound.setChecked(config.get('enabled', plugin='sound'))
         self.ui.toggle_notification.setChecked(config.get('enabled', plugin='notification'))
@@ -215,12 +215,11 @@ class MainWindow(QtWidgets.QMainWindow):
         if button == QDialogButtonBox.Apply:
             self.set_config()
             return config.write()
-        elif button == QDialogButtonBox.Reset:
-            config.load()
-            self.get_config()
         elif button == QDialogButtonBox.RestoreDefaults:
             config.set_default()
             self.get_config()
+        elif button == QDialogButtonBox.Cancel:
+            self.close()
         else:
             raise ValueError(f'Unknown button {button}')
 
@@ -238,10 +237,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 return False
         return True
 
-    def close_event(self, event):
+    def close(self):
         """Overwrite the function that gets called when window is closed"""
 
         if self.should_close():
-            event.accept()
+            super().close()
         else:
-            event.ignore()
+            pass
