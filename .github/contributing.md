@@ -18,7 +18,7 @@ Write your code to set any theme by overwriting the `set_theme()` function.
 
 ### Default themes
 
-If you want to provide default values for light and darkt themes,
+If you want to provide default values for light and dark themes,
 you can set the class attributes `theme_light` and `theme_dark`.
 
 
