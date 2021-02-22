@@ -2,6 +2,8 @@
 import logging
 import sys
 from argparse import ArgumentParser
+from pathlib import Path
+
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 
@@ -46,8 +48,7 @@ if __name__ == "__main__":
                             format='%(asctime)s %(levelname)s - %(name)s: %(message)s')
     else:
         # logger to see what happens when application is running in background
-        logging.basicConfig(filename='./yin_yang.log', level=logging.WARNING,
+        logging.basicConfig(filename=str(Path.home()) + '/.local/share/yin_yang.log', level=logging.WARNING,
                             format='%(asctime)s %(levelname)s - %(name)s: %(message)s')
-    logger = logging.getLogger(__name__)
 
     main(args)
