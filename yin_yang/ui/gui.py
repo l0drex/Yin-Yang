@@ -140,12 +140,12 @@ class MainWindow(QtWidgets.QMainWindow):
         """Sets the values to the config object, but does not save them"""
 
         # determine the mode to use
-        if self.ui.btn_schedule.isChecked():
+        if not self.ui.btn_enable.isChecked():
+            config.update('mode', Modes.manual.value)
+        elif self.ui.btn_schedule.isChecked():
             config.update('mode', Modes.scheduled.value)
         elif self.ui.btn_sun.isChecked():
             config.update('mode', Modes.followSun.value)
-        else:
-            config.update('mode', Modes.manual.value)
 
         config.update('enabled', self.ui.toggle_sound.isChecked(), plugin='sound')
         config.update('enabled', self.ui.toggle_notification.isChecked(), plugin='notification')
