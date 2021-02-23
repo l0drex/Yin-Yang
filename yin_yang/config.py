@@ -4,10 +4,13 @@ import os
 import pathlib
 import re
 import subprocess
+from datetime import time
 from enum import Enum
-from typing import Optional, Union
+from typing import Optional, Union, Tuple
 
 import requests
+from suntime import SunTimeException, Sun
+
 from yin_yang.plugins.plugin import Plugin
 from yin_yang.plugins import kde, gnome, gtk, kvantum, wallpaper, vscode, atom, sound, notify, konsole
 
@@ -182,17 +185,30 @@ class ConfigParser:
             logger.warning('Saving the config in debug mode is disabled!')
             return False
 
-        if self._config['mode'] == Modes.manual.value:
+        mode = self.get('mode')
+        if mode == Modes.manual.value:
             # disable the timer
             subprocess.run(['./scripts/update-timer.sh', '0'])
-        elif self.time_changed:
+        elif self.time_changed or mode == Modes.followSun.value:
             # update the timer
-            if not update_systemd_timer(self._config['mode'] != Modes.manual,
-                                        self.get('switch_to_light'),
-                                        self.get('switch_to_dark')):
-                raise ValueError('An error happened while changing the systemd timer. '
-                                 'Try to run /scripts/update-systemd-timer.sh manually. '
-                                 'If the error persists, leave an issue in the repo on github.')
+            time_light: str
+            time_dark: str
+            if mode == Modes.scheduled.value:
+                time_light = self.get('switch_to_light')
+                time_dark = self.get('switch_to_dark')
+            elif mode == Modes.followSun.value:
+                time_light_time, time_dark_time = get_sun_time()
+                time_light = time_light_time.strftime('%H:%M')
+                time_dark = time_dark_time.strftime('%H:%M')
+            else:
+                raise ValueError('Unknown mode!')
+
+            if not update_systemd_timer(mode != Modes.manual, time_light, time_dark):
+                error = ValueError('An error happened while changing the systemd timer. '
+                                   'Try to run /scripts/update-systemd-timer.sh manually. '
+                                   'If the error persists, leave an issue in the repo on github.')
+                logger.error('An error happened while trying to update systemd.timer: ' + str(error))
+                raise error
             else:
                 self.time_changed = False
 
@@ -308,6 +324,21 @@ def get_current_location() -> tuple:
     """
     loc = requests.get('http://www.ipinfo.io/loc').text.split(',')
     return float(loc[0]), float(loc[1])
+
+
+def get_sun_time() -> Tuple[time, time]:
+    """Sets the sunrise and sunset to config based on location"""
+    latitude, longitude = config.get('coordinates')
+    sun = Sun(latitude, longitude)
+
+    try:
+        today_sr = sun.get_local_sunrise_time()
+        today_ss = sun.get_local_sunset_time()
+
+        return today_sr.time(), today_ss.time()
+
+    except SunTimeException as e:
+        logger.error("Error: {0}.".format(e))
 
 
 # create global object with current version
