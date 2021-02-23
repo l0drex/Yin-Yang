@@ -188,7 +188,7 @@ class ConfigParser:
         mode = self.get('mode')
         if mode == Modes.manual.value:
             # disable the timer
-            subprocess.run(['./scripts/update-timer.sh', '0'])
+            subprocess.run(['./scripts/update_systemd_timer.sh', '0'])
         elif self.time_changed or mode == Modes.followSun.value:
             # update the timer
             time_light: str
