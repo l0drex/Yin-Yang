@@ -77,7 +77,9 @@ cat > "/usr/lib/systemd/system/yin-yang.service" <<EOF
 Description=Switch the theme between light and dark automatically
 
 [Service]
-ExecStart=yin-yang -t
+User=$USER
+Group=$USER
+ExecStart=/bin/python /opt/yin-yang/main.py -t
 EOF
 
 cat > "/usr/lib/systemd/system/yin-yang.timer" <<EOF
