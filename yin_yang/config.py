@@ -4,7 +4,7 @@ import os
 import pathlib
 import re
 from enum import Enum
-from typing import Optional, Union
+from typing import Optional, Union, Tuple
 
 import requests
 from yin_yang.plugins.plugin import Plugin
@@ -233,7 +233,7 @@ class ConfigParser:
         return self._config
 
 
-def get_desktop():
+def get_desktop() -> str:
     """Return the current desktops name or 'unknown' if can't determine it"""
     # just to get all possible implementations of desktop variables
     # noinspection SpellCheckingInspection
@@ -267,7 +267,7 @@ def get_desktop():
     return "unknown"
 
 
-def get_current_location() -> tuple:
+def get_current_location() -> Tuple[float, float]:
     """
     Returns the current location as a tuple (latitude, longitude)
     """
