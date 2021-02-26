@@ -73,5 +73,5 @@ if __name__ == "__main__":
     main(args)
     if not config.debugging and config.get("mode") != Modes.manual.value:
         config.update("running", False)
-        logger.info('Demon started')
+        logger.info('Daemon started')
         yin_yang.start_daemon()
