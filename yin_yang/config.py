@@ -172,31 +172,12 @@ class ConfigParser:
             logger.warning('Saving the config in debug mode is disabled!')
             return False
 
-        mode = self.get('mode')
-        if mode == Modes.manual.value:
-            # disable the timer
-            self.update_systemd_timer(False, '', '')
-        elif self.time_changed or mode == Modes.followSun.value:
-            # update the timer
-            time_light: str
-            time_dark: str
-            if mode == Modes.scheduled.value:
-                time_light = self.get('switch_to_light')
-                time_dark = self.get('switch_to_dark')
-            elif mode == Modes.followSun.value:
-                time_light_time, time_dark_time = get_sun_time()
-                time_light = time_light_time.strftime('%H:%M')
-                time_dark = time_dark_time.strftime('%H:%M')
-            else:
-                raise ValueError('Unknown mode!')
-
-            self.update_systemd_timer(mode != Modes.manual, time_light, time_dark)
-            self.time_changed = False
-
         logger.debug("Saving the config")
         try:
             with open(path + "/yin_yang/yin_yang.json", 'w') as conf_file:
                 json.dump(self._config, conf_file, indent=4)
+
+            self.update_systemd_timer()
 
             # no unsaved changes anymore
             self.changed = False
@@ -264,20 +245,29 @@ class ConfigParser:
 
         return self._config
 
-    def update_systemd_timer(self, needed: bool, time_light: str, time_dark: str):
+    def update_systemd_timer(self):
         """Runs a simple bash script that updates the systemd timer"""
+
+        logger.info('Updating systemd timer')
+
+        mode = self.get('mode')
+        needed = mode != Modes.manual.value
 
         if not needed and not self.get('running'):
             return True
 
-        logger.info('Updating systemd timer')
+        time_light: str = self.get('switch_to_light')
+        time_dark: str = self.get('switch_to_dark')
+
+        if mode == Modes.followSun.value:
+            time_light_time, time_dark_time = get_sun_time()
+            time_light = time_light_time.strftime('%H:%M')
+            time_dark = time_dark_time.strftime('%H:%M')
 
         completed = subprocess.run(['./scripts/update_systemd_timer.sh',
                                     '1' if needed else '0',
                                     time_light + ':00',
                                     time_dark + ':00'])
-
-        self.update('running', needed and (completed.returncode == 0))
 
         if not completed.returncode == 0:
             error = ValueError('An error happened while changing the systemd timer. \n'
@@ -286,6 +276,9 @@ class ConfigParser:
             logger.error('An error happened while trying to update systemd.timer: ' + str(error))
             logger.error(completed.stdout)
             raise error
+
+        self.update('running', needed and (completed.returncode == 0))
+        self.time_changed = False
 
 
 def get_desktop():
