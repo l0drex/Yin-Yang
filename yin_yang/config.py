@@ -3,7 +3,6 @@ import logging
 import os
 import pathlib
 import re
-import subprocess
 from enum import Enum
 from typing import Optional, Union
 
@@ -56,26 +55,11 @@ def get_default() -> dict:
     return conf_default
 
 
-def update_systemd_timer() -> bool:
-    """Runs a simple bash script that updates the systemd timer"""
-
-    logger.info('Updating systemd timer')
-
-    return True
-    completed = subprocess.run(['./scripts/update_systemd_timer.sh',
-                                config.get('switch_to_light'),
-                                config.get('switch_to_dark')])
-
-    return completed.returncode == 0
-
-
 class ConfigParser:
     _config: dict = None
     _version: float
     debugging: bool = False
     changed: bool = False
-    # needed because editing systemd timer needs sudo
-    time_changed: bool = False
 
     def __init__(self, version: float):
         self._version = version
@@ -182,14 +166,6 @@ class ConfigParser:
             logger.warning('Saving the config in debug mode is disabled!')
             return False
 
-        if self.time_changed:
-            if not update_systemd_timer():
-                raise ValueError('An error happened while changing the systemd timer. '
-                                 'Try to run /scripts/update-systemd-timer.sh manually. '
-                                 'If the error persists, leave an issue in the repo on github.')
-            else:
-                self.time_changed = False
-
         logger.debug("Saving the config")
         try:
             with open(path + "/yin_yang/yin_yang.json", 'w') as conf_file:
@@ -239,11 +215,6 @@ class ConfigParser:
 
         try:
             if plugin is None:
-                # if time values changed
-                if ((not self.time_changed) and
-                        (key.casefold() == 'switch_to_dark' and value != config.get('switch_to_dark')) or
-                        (key.casefold() == 'switch_to_light' and value != config.get('switch_to_light'))):
-                    self.time_changed = True
                 self._config[key.casefold()] = value
             else:
                 self._config[plugin.casefold()][key.casefold()] = value
