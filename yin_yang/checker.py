@@ -67,7 +67,4 @@ def compare_time(time_current: time, time_light: time, time_dark: time) -> bool:
     :param time_light: time light
     :return: False if current time between time light and time dark, otherwise true"""
 
-    if time_light.hour <= time_current.hour < time_dark.hour:
-        return time_current.hour == time_light.hour and time_current.minute <= time_light.minute
-    else:
-        return not (time_current.hour == time_dark.hour and time_current.minute <= time_dark.minute)
+    return time_current < time_light or time_current >= time_dark
