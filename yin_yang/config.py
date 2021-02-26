@@ -267,7 +267,7 @@ class ConfigParser:
     def update_systemd_timer(self, needed: bool, time_light: str, time_dark: str):
         """Runs a simple bash script that updates the systemd timer"""
 
-        if self.get('running') == needed:
+        if not needed and not self.get('running'):
             return True
 
         logger.info('Updating systemd timer')
