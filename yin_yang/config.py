@@ -59,19 +59,6 @@ def get_default() -> dict:
     return conf_default
 
 
-def update_systemd_timer(needed: bool, time_light: str, time_dark: str) -> bool:
-    """Runs a simple bash script that updates the systemd timer"""
-
-    logger.info('Updating systemd timer')
-
-    completed = subprocess.run(['./scripts/update_systemd_timer.sh',
-                                '1' if needed else 0,
-                                time_light + ':00',
-                                time_dark + ':00'])
-
-    return completed.returncode == 0
-
-
 class ConfigParser:
     _config: dict = None
     _version: float
@@ -188,7 +175,7 @@ class ConfigParser:
         mode = self.get('mode')
         if mode == Modes.manual.value:
             # disable the timer
-            subprocess.run(['./scripts/update_systemd_timer.sh', '0'])
+            self.update_systemd_timer(False, '', '')
         elif self.time_changed or mode == Modes.followSun.value:
             # update the timer
             time_light: str
@@ -203,14 +190,8 @@ class ConfigParser:
             else:
                 raise ValueError('Unknown mode!')
 
-            if not update_systemd_timer(mode != Modes.manual, time_light, time_dark):
-                error = ValueError('An error happened while changing the systemd timer. '
-                                   'Try to run /scripts/update-systemd-timer.sh manually. '
-                                   'If the error persists, leave an issue in the repo on github.')
-                logger.error('An error happened while trying to update systemd.timer: ' + str(error))
-                raise error
-            else:
-                self.time_changed = False
+            self.update_systemd_timer(mode != Modes.manual, time_light, time_dark)
+            self.time_changed = False
 
         logger.debug("Saving the config")
         try:
@@ -282,6 +263,29 @@ class ConfigParser:
         """returns the config"""
 
         return self._config
+
+    def update_systemd_timer(self, needed: bool, time_light: str, time_dark: str):
+        """Runs a simple bash script that updates the systemd timer"""
+
+        if self.get('running') == needed:
+            return True
+
+        logger.info('Updating systemd timer')
+
+        completed = subprocess.run(['./scripts/update_systemd_timer.sh',
+                                    '1' if needed else '0',
+                                    time_light + ':00',
+                                    time_dark + ':00'])
+
+        self.update('running', needed and (completed.returncode == 0))
+
+        if not completed.returncode == 0:
+            error = ValueError('An error happened while changing the systemd timer. \n'
+                               'Try to run /scripts/update-systemd-timer.sh manually. \n'
+                               'If the error persists, leave an issue in the repo on github.')
+            logger.error('An error happened while trying to update systemd.timer: ' + str(error))
+            logger.error(completed.stdout)
+            raise error
 
 
 def get_desktop():
