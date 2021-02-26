@@ -6,11 +6,6 @@ if test ${EUID} -ne 0; then
     exit 0
 fi
 
-echo number of  arguments: $#
-echo "$1"
-echo "$2"
-echo "$3"
-
 # disable timer, if it isn't needed
 if [ "$1" == "0" ]; then
   echo "Timer is not needed, disabling it now"
