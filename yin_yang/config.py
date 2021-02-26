@@ -346,4 +346,5 @@ def get_sun_time() -> Tuple[time, time]:
 
 
 # create global object with current version
+# NOTE change the version here if the structure of the config file has been modified
 config = ConfigParser(2.2)
