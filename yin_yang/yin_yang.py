@@ -11,8 +11,8 @@ license: MIT
 
 import logging
 
-from yin_yang.config import config, PLUGINS, Modes
 from yin_yang.checker import Checker
+from yin_yang.config import config, PLUGINS
 
 logger = logging.getLogger(__name__)
 
