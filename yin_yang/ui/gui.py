@@ -37,6 +37,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # set the correct mode
         if config.get("mode") == Modes.scheduled.value:
             self.ui.btn_schedule.setChecked(True)
+            self.ui.location.setVisible(False)
         elif config.get("mode") == Modes.followSun.value:
             self.ui.btn_sun.setChecked(True)
         else:

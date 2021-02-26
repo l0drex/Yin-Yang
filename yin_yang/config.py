@@ -22,7 +22,7 @@ PLUGINS: [Plugin] = [kde.Kde(), gnome.Gnome(), gtk.Gtk(), kvantum.Kvantum(), wal
 class Modes(Enum):
     manual = "manual"
     scheduled = "manual time"
-    followSun = "sunset and sunrise"
+    followSun = "sunset to sunrise"
 
 
 # aliases for path to use later on
