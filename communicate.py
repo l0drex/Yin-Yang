@@ -5,7 +5,7 @@
 import sys
 import json
 import struct
-from src import config
+from yin_yang.config import config as configParser
 
 
 def parse_time(time: str):
@@ -14,7 +14,7 @@ def parse_time(time: str):
     return [hour, minute]
 
 
-def encode_message(message_content: str):
+def encode_message(message_content: dict):
     """
     Encode a message for transmission, given its content.
     :param message_content: a message
@@ -33,7 +33,7 @@ def encode_message(message_content: str):
 def send_message(encoded_message):
     """
     Send a message.
-    :param message: message as json
+    :param encoded_message: message as json
     """
     sys.stdout.buffer.write(encoded_message['length'])
     sys.stdout.buffer.write(encoded_message['content'])
@@ -55,12 +55,13 @@ def get_message():
 while True:
     message_received = get_message()
     if message_received == 'GetSettings':
-        message_send: dict = {}
-        message_send['schedule'] = config.get("schedule")
-        message_send['theme_dark'] = config.get("firefoxDarkTheme")
-        message_send['theme_light'] = config.get("firefoxLightTheme")
-        message_send['theme_active'] = config.get("firefoxActiveTheme")
-        message_send['time_day'] = parse_time(config.get("switchToLight"))
-        message_send['time_night'] = parse_time(config.get("switchToDark"))
+        message_send: dict = {
+            'schedule': configParser.get("schedule"),
+            'theme_dark': configParser.get("firefoxDarkTheme"),
+            'theme_light': configParser.get("firefoxLightTheme"),
+            'theme_active': configParser.get("firefoxActiveTheme"),
+            'time_day': parse_time(configParser.get("switchToLight")),
+            'time_night': parse_time(configParser.get("switchToDark"))
+        }
 
         send_message(encode_message(message_send))

@@ -2,9 +2,14 @@
 __pycache__
 build-test*
 build-ui-*
+build/
+dist/
 .vscode
-src/build.py
+yin_yang/build.py
 setup.py
 
 .idea/
 venv/
+.venv/
+
+yin_yang.log

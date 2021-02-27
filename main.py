@@ -1,81 +1,77 @@
+#!/bin/python
+import logging
 import sys
 from argparse import ArgumentParser
-from src import yin_yang
-from src import config
-from src import gui
+from pathlib import Path
+
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 
-assembly_version = 2.1
+from yin_yang import yin_yang
+from yin_yang.ui import gui
+from yin_yang.config import Modes, config
+from yin_yang.yin_yang import Setter
+
+
+# using ArgumentParser for parsing arguments
+parser = ArgumentParser()
+parser.add_argument("-t", "--toggle",
+                    help="toggles Yin-Yang",
+                    action="store_true")
+parser.add_argument("-s", "--schedule",
+                    help="schedule theme toggle, starts daemon in bg",
+                    action="store_true")
+parser.add_argument('-d', '--debugging',
+                    help='enables debugging mode',
+                    action='store_true')
 
 # fix HiDpi scaling
 QtWidgets.QApplication.setAttribute(
     QtCore.Qt.AA_EnableHighDpiScaling, True)
 
 
-def toggle_theme():
-    """Switch themes"""
-    theme = config.get_theme()
-    if theme == "dark":
-        yin_yang.switch_to_light()
-    elif theme == "light":
-        yin_yang.switch_to_dark()
+def main(arguments):
+    config.debugging = arguments.debugging
 
-
-def main():
-    # using ArgumentParser for parsing arguments
-    parser = ArgumentParser()
-    parser.add_argument("-t", "--toggle",
-                        help="toggles Yin-Yang",
-                        action="store_true")
-    parser.add_argument("-s", "--schedule",
-                        help="schedule theme toggle, starts daemon in bg",
-                        action="store_true")
-    args = parser.parse_args()
-
-    # Check and see if there are new keys we need to add to the config.
-    should_update_config = assembly_version != config.get_version()
-    if should_update_config:
-        update_config()
-
-    # checks whether $ yin-yang is ran without args
-    if len(sys.argv) == 1 and not args.toggle:
-        # load GUI
-        app = QtWidgets.QApplication(sys.argv)
-        window = gui.MainWindow()
-        window.show()
-        sys.exit(app.exec_())
-
-    # checks whether the script should be ran as a daemon
-    if args.schedule:
-        config.update("running", False)
-        print("START thread listener")
-
-        if config.get("followSun"):
-            # calculate time if needed
-            config.set_sun_time()
-
-        if config.get("schedule"):
-            yin_yang.start_daemon()
-        else:
+    # set settings via terminal
+    if arguments.schedule:
+        mode = config.get("mode")
+        if mode == Modes.manual.value:
             print("looks like you did not specified a time")
             print("You can use the gui with yin-yang -gui")
             print("Or edit the config found in ~/.config/yin_yang/yin_yang.json")
             print("You need to set schedule to True and edit the time to toggles")
-
-    # gui is set as parameter
-    if args.toggle:
-        toggle_theme()
-
-
-# This method is called to add keys to the config
-# which have been added since version 1.0
-def update_config():
-    if not "soundEnabled" in config.config:
-        config.config["soundEnabled"] = True
-
-    config.update("version", assembly_version)
+        else:
+            print(f"Using mode {mode}")
+    elif arguments.toggle:
+        # toggle theme manually
+        config.update("mode", Modes.manual.value)
+        setter = Setter()
+        setter.toggle_theme()
+    else:
+        # load GUI to apply settings or set theme manually
+        app = QtWidgets.QApplication(sys.argv)
+        window = gui.MainWindow()
+        window.show()
+        app.exec_()
 
 
 if __name__ == "__main__":
-    main()
+    args = parser.parse_args()
+
+    if args.debugging:
+        print('Debug mode enabled.')
+        logging.basicConfig(level=logging.DEBUG,
+                            format='%(asctime)s %(levelname)s - %(name)s: %(message)s')
+    else:
+        # logger to see what happens when application is running in background
+        logging.basicConfig(filename=str(Path.home()) + '/.local/share/yin_yang.log', level=logging.WARNING,
+                            format='%(asctime)s %(levelname)s - %(name)s: %(message)s')
+
+    logger = logging.getLogger(__name__)
+
+    main(args)
+    if not config.debugging and config.get("mode") != Modes.manual.value:
+        config.update("running", False)
+        logger.info('Daemon started')
+        yin_yang.start_daemon()
