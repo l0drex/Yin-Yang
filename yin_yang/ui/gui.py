@@ -35,13 +35,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.status_bar.showMessage("yin-yang: v" + str(config.get("version")))
 
         # set the correct mode
-        if config.get("mode") == Modes.scheduled.value:
-            self.ui.btn_schedule.setChecked(True)
-            self.ui.location.setVisible(False)
-        elif config.get("mode") == Modes.followSun.value:
+        mode = config.get("mode")
+        self.ui.btn_enable.setChecked(mode != Modes.manual.value)
+
+        if mode == Modes.followSun.value:
+            self.ui.time.setVisible(False)
             self.ui.btn_sun.setChecked(True)
         else:
-            self.ui.btn_enable.setChecked(False)
+            # fix for both settings for follow sun and scheduled showing up when changing enabling
+            self.ui.btn_schedule.setChecked(True)
+            self.ui.location.setVisible(False)
 
         self.ui.toggle_sound.setChecked(config.get('enabled', plugin='sound'))
         self.ui.toggle_notification.setChecked(config.get('enabled', plugin='notification'))
