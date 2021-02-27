@@ -2,7 +2,7 @@ import unittest
 
 from PyQt5.QtWidgets import QGroupBox
 
-from yin_yang.config import PLUGINS
+from yin_yang.config import PLUGINS, config
 from yin_yang.plugins.plugin import Plugin
 
 
@@ -17,6 +17,12 @@ class PluginsTest(unittest.TestCase):
                                 'If your plugin does not support any default themes, use empty strings.')
                 self.assertIsInstance(pl.get_themes_available(), dict,
                                       'Available themes always should be a dict.')
+
+    def test_set_theme_works(self):
+        for pl in PLUGINS:
+            with self.subTest(plugin=pl.name):
+                if config.get('enabled', pl.name):
+                    pl.set_mode(config.get('dark_mode'))
 
 
 if __name__ == '__main__':
