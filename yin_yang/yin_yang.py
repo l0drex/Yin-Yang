@@ -30,8 +30,7 @@ class Setter:
             return
 
         logger.info(f'Switching to {"dark" if dark else "light"} mode.')
-        config.update('dark_mode', dark)
-        self.dark_mode = config.get('dark_mode')
+        self.dark_mode = config.update('dark_mode', dark)
         for p in PLUGINS:
             if config.get('enabled', plugin=p.name):
                 p.set_mode(dark)
@@ -49,6 +48,7 @@ class Daemon(threading.Thread):
         threading.Thread.__init__(self)
         self.thread_id = thread_id
         self.setter = Setter()
+        self.name = 'Yin-Yang'
 
     def run(self):
         while True:
