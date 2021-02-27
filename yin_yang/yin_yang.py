@@ -64,5 +64,7 @@ class Daemon(threading.Thread):
 
 
 def start_daemon():
+    if config.get('running'):
+        return
     daemon = Daemon(1)
     daemon.start()
