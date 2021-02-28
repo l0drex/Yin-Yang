@@ -217,3 +217,5 @@ class Ui_main_window(object):
         self.toggle_notification.setText(_translate("main_window", "Send a notification"))
         self.tab_widget.setTabText(self.tab_widget.indexOf(self.settings), _translate("main_window", "Settings"))
         self.tab_widget.setTabText(self.tab_widget.indexOf(self.plugins), _translate("main_window", "Plugins"))
+
+from yin_yang.ui import resources_rc
