@@ -26,7 +26,7 @@ PLUGINS: [Plugin] = [kde.Kde(), gnome.Gnome(), gtk.Gtk(), kvantum.Kvantum(), wal
 class Modes(Enum):
     manual = "manual"
     scheduled = "manual time"
-    followSun = "sunset and sunrise"
+    followSun = "sunset to sunrise"
 
 
 # aliases for path to use later on
@@ -281,7 +281,7 @@ class ConfigParser:
         self.time_changed = False
 
 
-def get_desktop():
+def get_desktop() -> str:
     """Return the current desktops name or 'unknown' if can't determine it"""
     # just to get all possible implementations of desktop variables
     # noinspection SpellCheckingInspection
@@ -315,7 +315,7 @@ def get_desktop():
     return "unknown"
 
 
-def get_current_location() -> tuple:
+def get_current_location() -> Tuple[float, float]:
     """
     Returns the current location as a tuple (latitude, longitude)
     """
