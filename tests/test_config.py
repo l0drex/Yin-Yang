@@ -9,6 +9,7 @@ from yin_yang.config import ConfigParser, PLUGINS
 class ConfigTest(unittest.TestCase):
     def setUp(self) -> None:
         self.config = ConfigParser(2.2)
+        self.config.set_default()
 
     def test_get_value(self):
         message = 'All general config values must have the correct type.'
@@ -17,7 +18,7 @@ class ConfigTest(unittest.TestCase):
         self.assertIsInstance(self.config.get('running'), bool, message)
         self.assertIsInstance(self.config.get('desktop'), str, message)
         self.assertIsInstance(self.config.get('mode'), str, message)
-        self.assertIsInstance(self.config.get('coordinates'), list, message)
+        self.assertIsInstance(self.config.get('coordinates'), tuple, message)
 
         message = 'Times for switching must be strings in iso format.'
         time_light = self.config.get('switch_to_light')
@@ -36,8 +37,6 @@ class ConfigTest(unittest.TestCase):
                 self.assertIsInstance(self.config.get('dark_theme', p.name), str)
 
     def test_update_value(self):
-        self.config.set_default()
-
         self.assertTrue(self.config.update('dark_mode', True),
                         'Method should update the key and return the new value.')
         self.assertTrue(self.config.get('dark_mode'),
