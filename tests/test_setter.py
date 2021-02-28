@@ -6,11 +6,11 @@ from yin_yang.yin_yang import Setter
 
 class SetterTest(unittest.TestCase):
     def test_update_dark_value(self):
-        setter = Setter()
-
         mode_used = config.get('mode')
         config.update('mode', Modes.manual.value)
         dark_mode_active = config.get('dark_mode')
+
+        setter = Setter()
 
         setter.set_mode(not dark_mode_active)
         self.assertEqual(not dark_mode_active, config.get('dark_mode'))

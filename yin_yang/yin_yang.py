@@ -19,11 +19,12 @@ logger = logging.getLogger(__name__)
 
 
 class Setter:
-    dark_mode: bool = config.get('dark_mode')
+    dark_mode: bool
     checker: Checker
 
     def __init__(self):
         self.checker = Checker(config.get('mode'))
+        self.dark_mode = config.get('dark_mode')
 
     def set_mode(self, dark: bool):
         if dark == self.dark_mode:
