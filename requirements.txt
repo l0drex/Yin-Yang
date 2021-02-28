@@ -1,5 +1,4 @@
 PyQt5~=5.15.2
 QtPy~=1.9.0
-PySide2~=5.15.2
 requests~=2.25.1
 suntime~=1.2.5
