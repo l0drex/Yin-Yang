@@ -15,7 +15,7 @@ def get_old_theme(settings):
         themes = re.findall(r'themes: \[[\s]*"([A-Za-z0-9\-]*)"[\s]*"([A-Za-z0-9\-]*)"', string)
         if len(themes) >= 1:
             ui_theme, _ = themes[0]
-            used_theme = re.findall("([A-z\-A-z]*)\-", ui_theme)[0]
+            used_theme = re.findall('([A-z-A-z]*)-', ui_theme)[0]
             return used_theme
 
 
