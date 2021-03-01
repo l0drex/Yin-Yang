@@ -56,7 +56,7 @@ Name=Yin & Yang
 # Generic name of the application, for example "Web Browser"
 GenericName=Theme Switcher
 # A comment which can/will be used as a tooltip
-Comment=Auto Nightmode for KDE and VSCode
+Comment=Auto dark mode for KDE and VSCode
 # The path to the folder in which the executable is run
 Path=/opt/yin-yang
 # The executable of the application, possibly with arguments.

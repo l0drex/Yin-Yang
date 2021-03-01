@@ -5,7 +5,7 @@
 import sys
 import json
 import struct
-from yin_yang.config import config as configParser
+from yin_yang.config import config
 
 
 def parse_time(time: str):
@@ -56,12 +56,12 @@ while True:
     message_received = get_message()
     if message_received == 'GetSettings':
         message_send: dict = {
-            'schedule': configParser.get("schedule"),
-            'theme_dark': configParser.get("firefoxDarkTheme"),
-            'theme_light': configParser.get("firefoxLightTheme"),
-            'theme_active': configParser.get("firefoxActiveTheme"),
-            'time_day': parse_time(configParser.get("switchToLight")),
-            'time_night': parse_time(configParser.get("switchToDark"))
+            'schedule': config.get("schedule"),
+            'theme_dark': config.get("firefoxDarkTheme"),
+            'theme_light': config.get("firefoxLightTheme"),
+            'theme_active': config.get("firefoxActiveTheme"),
+            'time_day': parse_time(config.get("switchToLight")),
+            'time_night': parse_time(config.get("switchToDark"))
         }
 
         send_message(encode_message(message_send))

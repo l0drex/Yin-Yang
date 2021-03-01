@@ -1,10 +1,9 @@
-import re
 import subprocess
 from configparser import ConfigParser
 from pathlib import Path
 from typing import Optional
 
-from yin_yang.plugins.plugin import Plugin, inplace_change
+from yin_yang.plugins.plugin import Plugin
 
 
 class Gtk(Plugin):

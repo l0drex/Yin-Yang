@@ -1,7 +1,5 @@
 import unittest
 
-from PyQt5.QtWidgets import QGroupBox
-
 from yin_yang.config import PLUGINS, config
 from yin_yang.plugins.plugin import Plugin
 

@@ -62,10 +62,12 @@ if __name__ == "__main__":
 
     if args.debugging:
         print('Debug mode enabled.')
+        # noinspection SpellCheckingInspection
         logging.basicConfig(level=logging.DEBUG,
                             format='%(asctime)s %(levelname)s - %(name)s: %(message)s')
     else:
         # logger to see what happens when application is running in background
+        # noinspection SpellCheckingInspection
         logging.basicConfig(filename=str(Path.home()) + '/.local/share/yin_yang.log', level=logging.WARNING,
                             format='%(asctime)s %(levelname)s - %(name)s: %(message)s')
 

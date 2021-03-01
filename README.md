@@ -40,6 +40,6 @@ Want to know more? Visit the Wiki and read about Installation, Building, Trouble
 
 ## Thanks to all Contributors 
 
-This project exists thanks to all the people who [contribute](./.github/contributing.md).
+This project exists thanks to all the people who [contribute](./.github/CONTRIBUTING.md).
 
 [![](https://opencollective.com/Yin-Yang/contributors.svg?width=890&button=false)](https://github.com/daehruoydeef/Yin-Yang/graphs/contributors)

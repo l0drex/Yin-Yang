@@ -2,7 +2,7 @@ import os
 import json
 from pathlib import Path
 
-from yin_yang.plugins.plugin import Plugin, inplace_change
+from yin_yang.plugins.plugin import Plugin
 
 
 def write_new_settings(settings, path):
