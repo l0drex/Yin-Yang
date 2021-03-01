@@ -9,36 +9,92 @@ date: 21.12.2018
 license: MIT
 """
 import logging
+import time
+from abc import ABC, abstractmethod
 
 from yin_yang.config import config, PLUGINS
-from yin_yang.checker import Checker
-from yin_yang.listener import Listener
+from yin_yang.checker import Checker, ManualMode
 
 logger = logging.getLogger(__name__)
 
 
-class Setter:
-    dark_mode: bool
-    checker: Checker
+class Listener:
+    def __init__(self, listener):
+        if listener == 'native':
+            self._mode = Native(config.get('mode'))
+        elif listener == 'clight':
+            self._mode = Clight()
+
+    def run(self):
+        self._mode.run()
+
+
+class Mode(ABC):
+    terminate = False
 
     def __init__(self):
-        self.checker = Checker(config.get('mode'))
-        self.dark_mode = config.get('dark_mode')
+        pass
 
-    def _set_mode(self, dark: bool):
-        if dark == self.dark_mode:
-            return
+    @abstractmethod
+    def run(self):
+        raise NotImplementedError('Method is not implemented.')
 
-        logger.info(f'Switching to {"dark" if dark else "light"} mode.')
-        self.dark_mode = config.update('dark_mode', dark)
-        for p in PLUGINS:
-            if config.get('enabled', plugin=p.name):
-                p.set_mode(dark)
-        config.write()
 
-    def toggle_theme(self):
-        """Switch themes"""
-        self._set_mode(self.checker.should_be_dark())
+class Native(Mode):
+    def __init__(self, checker: Checker):
+        super(Native, self).__init__()
+        if isinstance(checker, ManualMode):
+            raise ValueError('No notifier needed if mode is manual!')
+        else:
+            self._checker = checker
+
+    def run(self):
+        while True:
+            if self.terminate:
+                config.update("running", False)
+                config.write()
+                break
+
+            # check if dark mode should be enabled and switch if necessary
+            dark_mode = self._checker.should_be_dark()
+            if dark_mode != config.get('dark_mode'):
+                set_mode(dark_mode)
+                config.update('dark_mode', dark_mode)
+            time.sleep(60)
+
+
+class Clight(Mode):
+    # source: https://github.com/FedeDP/Clight/wiki/DE-Automation
+
+    def __init__(self):
+        super().__init__()
+
+        DBusGMainLoop(set_as_default=True)
+        bus = dbus.SessionBus()
+        # noinspection SpellCheckingInspection
+        bus.add_signal_receiver(
+            self.handle_time_change,
+            'PropertiesChanged',
+            'org.freedesktop.DBus.Properties',
+            path='/org/clight/clight'
+        )
+
+    def handle_time_change(self, *args):
+        dark_mode: bool = bool(args[1]['DayTime'])
+        if 'DayTime' in args[1] and config.get('dark_mode') != dark_mode:
+            set_mode(dark_mode)
+            config.update('dark_mode', dark_mode)
+
+    def run(self):
+        GLib.MainLoop().run()
+
+
+def set_mode(dark: bool):
+    logger.info(f'Switching to {"dark" if dark else "light"} mode.')
+    for p in PLUGINS:
+        if config.get('enabled', plugin=p.name):
+            p.set_mode(dark)
+    config.write()
 
 
 def run():
