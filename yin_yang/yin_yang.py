@@ -9,10 +9,8 @@ date: 21.12.2018
 license: MIT
 """
 import logging
-import threading
-import time
 
-from yin_yang.config import config, PLUGINS, Modes
+from yin_yang.config import config, PLUGINS
 from yin_yang.checker import Checker
 from yin_yang.listener import Listener
 
@@ -27,7 +25,7 @@ class Setter:
         self.checker = Checker(config.get('mode'))
         self.dark_mode = config.get('dark_mode')
 
-    def set_mode(self, dark: bool):
+    def _set_mode(self, dark: bool):
         if dark == self.dark_mode:
             return
 
@@ -40,17 +38,8 @@ class Setter:
 
     def toggle_theme(self):
         """Switch themes"""
-        self.set_mode(self.checker.should_be_dark())
+        self._set_mode(self.checker.should_be_dark())
 
-
-class Daemon(threading.Thread):
-    terminate = False
-
-    def __init__(self, thread_id):
-        threading.Thread.__init__(self)
-        self.thread_id = thread_id
-        self.setter = Setter()
-        self.name = 'Yin-Yang'
 
 def run():
     listener = Listener('native')

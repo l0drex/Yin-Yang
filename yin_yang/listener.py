@@ -9,7 +9,7 @@ from dbus.mainloop.glib import DBusGMainLoop
 
 from yin_yang.checker import Checker
 from yin_yang.config import config, Modes
-from yin_yang.yin_yang import set_mode
+from yin_yang.yin_yang import Setter
 
 
 class Listener:
@@ -26,6 +26,9 @@ class Listener:
 class Mode(ABC):
     terminate = False
 
+    def __init__(self):
+        self.setter = Setter()
+
     @abstractmethod
     def run(self):
         raise NotImplementedError('Method is not implemented.')
@@ -33,8 +36,8 @@ class Mode(ABC):
 
 class Native(Mode):
     def __init__(self):
-        super().__init__()
-        self._checker = Checker(config.get('mode'))
+        super(Native, self).__init__()
+        self.name = 'Yin-Yang'
 
     def run(self):
         while True:
@@ -44,19 +47,19 @@ class Native(Mode):
                 break
 
             # check if dark mode should be enabled and switch if necessary
-            dark_mode = self._checker.should_be_dark()
-            if config.get('dark_mode') != dark_mode:
-                set_mode(dark_mode)
+            self.setter.toggle_theme()
 
             time.sleep(60)
 
 
 class Clight(Mode):
     # source: https://github.com/FedeDP/Clight/wiki/DE-Automation
-    _old_time = -1  # 0 -> day, 1 -> night
 
     def __init__(self):
         super().__init__()
+
+        self._dark_mode_current: bool = config.get('dark_mode')  # 0 -> day, 1 -> night
+
         DBusGMainLoop(set_as_default=True)
         bus = dbus.SessionBus()
         # noinspection SpellCheckingInspection
@@ -68,9 +71,10 @@ class Clight(Mode):
         )
 
     def handle_time_change(self, *args):
-        if 'DayTime' in args[1] and self._old_time != args[1]['DayTime']:
-            set_mode(bool(args[1]['DayTime']))
-            self._old_time = args[1]['DayTime']
+        dark_mode: bool = bool(args[1]['DayTime'])
+        if 'DayTime' in args[1] and self._dark_mode_current != dark_mode:
+            self.setter.toggle_theme()
+            self._dark_mode_current = dark_mode
 
     def run(self):
         GLib.MainLoop().run()
