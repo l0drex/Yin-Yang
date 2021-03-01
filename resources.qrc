@@ -1,6 +1,6 @@
 <RCC>
   <qresource prefix="/icons">
-    <file>resources/yin-yang.svg</file>
+    <file>resources/icon.svg</file>
     <file>resources/icon.png</file>
   </qresource>
 </RCC>

@@ -1,16 +1,16 @@
 import json
+import logging
 import os
 import pathlib
 import re
-import subprocess
 from enum import Enum
-from typing import Optional, Union
+from typing import Optional, Union, Tuple
 
 import requests
-from suntime import Sun, SunTimeException
 from yin_yang.plugins.plugin import Plugin
 from yin_yang.plugins import kde, gnome, gtk, kvantum, wallpaper, vscode, atom, sound, notify, konsole
 
+logger = logging.getLogger(__name__)
 ConfigValue = Union[str, float, bool, tuple]
 
 # default objects
@@ -22,7 +22,7 @@ PLUGINS: [Plugin] = [kde.Kde(), gnome.Gnome(), gtk.Gtk(), kvantum.Kvantum(), wal
 class Modes(Enum):
     manual = "manual"
     scheduled = "manual time"
-    followSun = "sunset and sunrise"
+    followSun = "sunset to sunrise"
 
 
 # aliases for path to use later on
@@ -55,24 +55,11 @@ def get_default() -> dict:
     return conf_default
 
 
-def update_systemd_timer() -> bool:
-    """Runs a simple bash script that updates the systemd timer"""
-
-    return True
-    completed = subprocess.run(['./scripts/update_systemd_timer.sh',
-                                config.get('switch_to_light'),
-                                config.get('switch_to_dark')])
-
-    return completed.returncode == 0
-
-
 class ConfigParser:
     _config: dict = None
     _version: float
     debugging: bool = False
     changed: bool = False
-    # needed because editing systemd timer needs sudo
-    time_changed: bool = False
 
     def __init__(self, version: float):
         self._version = version
@@ -82,13 +69,9 @@ class ConfigParser:
 
         if self._config is None:
             # use default values if something went wrong
+            logger.warning('Using default configuration values.')
             self._config = get_default()
             self.update('version', self._version)
-
-        # update times for sunset and sunrise
-        if self.get("mode") == Modes.followSun:
-            self.update('coordinates', get_current_location())
-            self.set_sun_time()
 
         # set plugin themes
         for plugin in PLUGINS:
@@ -99,7 +82,7 @@ class ConfigParser:
         self.write()
 
     def set_default(self):
-        print('Setting default values.')
+        logger.info('Setting default values.')
         self._config = get_default()
         self.update("version", self._version)
 
@@ -111,7 +94,7 @@ class ConfigParser:
         :returns: the old config
         """
 
-        print('Attempt to update the config file')
+        logger.debug('Attempt to update the config file')
 
         # replace current config with defaults
         config_new = get_default()
@@ -143,7 +126,7 @@ class ConfigParser:
     def load(self) -> Optional[dict]:
         """Load config from file"""
 
-        print('Loading config file')
+        logger.debug('Loading config file')
 
         # generate path for yin-yang if there is none this will be skipped
         pathlib.Path(path + "/yin_yang").mkdir(parents=True, exist_ok=True)
@@ -157,7 +140,7 @@ class ConfigParser:
                 config_loaded = json.load(config_file)
 
         if config_loaded is None or config_loaded == {}:
-            print('Could not load config file.')
+            logger.warning('Could not load config file.')
             return None
 
         # check if config needs an update
@@ -176,22 +159,14 @@ class ConfigParser:
         """
 
         if not self.changed:
-            print('No changes were made, skipping save')
+            logger.debug('No changes were made, skipping save')
             return False
 
         if self.debugging:
-            print('Saving the config in debug mode is disabled!')
+            logger.warning('Saving the config in debug mode is disabled!')
             return False
 
-        if self.time_changed:
-            if not update_systemd_timer():
-                raise ValueError('An error happened while changing the systemd timer. '
-                                 'Try to run /scripts/update-systemd-timer.sh manually. '
-                                 'If the error persists, leave an issue in the repo on github.')
-            else:
-                self.time_changed = False
-
-        print("Saving the config")
+        logger.debug("Saving the config")
         try:
             with open(path + "/yin_yang/yin_yang.json", 'w') as conf_file:
                 json.dump(self._config, conf_file, indent=4)
@@ -201,7 +176,7 @@ class ConfigParser:
 
             return True
         except IOError as e:
-            print(f"Error while writing the file: {e}")
+            logger.error(f"Error while writing the file: {e}")
             return False
 
     def get(self, key, plugin: Optional[str] = None) -> ConfigValue:
@@ -219,11 +194,11 @@ class ConfigParser:
             else:
                 return self._config[plugin.casefold()][key.casefold()]
         except KeyError as e:
-            print(f"Unknown key {key}")
+            logger.warning(f"Unknown key {key}")
             if plugin is None:
                 for p in PLUGINS:
                     if p.name.casefold() in key:
-                        print("Key is deprecated. Use plugin option instead")
+                        logger.warning("Key is deprecated. Use plugin option instead")
                         return self.get(key.replace(p.name, ''), plugin=p.name)
             else:
                 raise e
@@ -240,11 +215,6 @@ class ConfigParser:
 
         try:
             if plugin is None:
-                # if time values changed
-                if ((not self.time_changed) and
-                        (key.casefold() == 'switch_to_dark' and value != config.get('switch_to_dark')) or
-                        (key.casefold() == 'switch_to_light' and value != config.get('switch_to_light'))):
-                    self.time_changed = True
                 self._config[key.casefold()] = value
             else:
                 self._config[plugin.casefold()][key.casefold()] = value
@@ -254,7 +224,7 @@ class ConfigParser:
 
             return self.get(key, plugin)
         except KeyError as e:
-            print(f'Error while updating {key}')
+            logger.error(f'Error while updating {key}')
             raise e
 
     def get_config(self) -> dict:
@@ -262,24 +232,8 @@ class ConfigParser:
 
         return self._config
 
-    def set_sun_time(self):
-        """Sets the sunrise and sunset to config based on location"""
-        latitude, longitude = self.get('coordinates')
-        sun = Sun(latitude, longitude)
 
-        try:
-            today_sr = sun.get_local_sunrise_time()
-            today_ss = sun.get_local_sunset_time()
-
-            # Get today's sunrise and sunset in UTC
-            self.update("switch_to_light", today_sr.strftime('%H:%M'))
-            self.update("switch_to_dark", today_ss.strftime('%H:%M'))
-
-        except SunTimeException as e:
-            print("Error: {0}.".format(e))
-
-
-def get_desktop():
+def get_desktop() -> str:
     """Return the current desktops name or 'unknown' if can't determine it"""
     # just to get all possible implementations of desktop variables
     # noinspection SpellCheckingInspection
@@ -313,7 +267,7 @@ def get_desktop():
     return "unknown"
 
 
-def get_current_location() -> tuple:
+def get_current_location() -> Tuple[float, float]:
     """
     Returns the current location as a tuple (latitude, longitude)
     """

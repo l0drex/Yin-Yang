@@ -72,10 +72,10 @@ class Plugin(ABC):
 
             return inputs
 
-        for theme in ['light', 'dark']:
+        for theme in ['Light', 'Dark']:
             inp = QLineEdit(widget)
             inp.setObjectName(f'inp_{theme}')
-            inp.setPlaceholderText(_translate('MainWindow', f'{theme} theme'))
+            inp.setPlaceholderText(_translate('MainWindow', f'{theme} Theme'))
             inputs.append(inp)
 
         return inputs

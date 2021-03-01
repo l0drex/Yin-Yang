@@ -35,12 +35,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.status_bar.showMessage("yin-yang: v" + str(config.get("version")))
 
         # set the correct mode
-        if config.get("mode") == Modes.scheduled.value:
-            self.ui.btn_schedule.setChecked(True)
-        elif config.get("mode") == Modes.followSun.value:
+        mode = config.get("mode")
+        self.ui.btn_enable.setChecked(mode != Modes.manual.value)
+
+        if mode == Modes.followSun.value:
+            self.ui.time.setVisible(False)
             self.ui.btn_sun.setChecked(True)
         else:
-            self.ui.btn_manual.setChecked(True)
+            # fix for both settings for follow sun and scheduled showing up when changing enabling
+            self.ui.btn_schedule.setChecked(True)
+            self.ui.location.setVisible(False)
 
         self.ui.toggle_sound.setChecked(config.get('enabled', plugin='sound'))
         self.ui.toggle_notification.setChecked(config.get('enabled', plugin='notification'))
@@ -67,7 +71,6 @@ class MainWindow(QtWidgets.QMainWindow):
             return
 
         self.set_location()
-        config.set_sun_time()
         self.get_time()
 
     def get_location(self):
@@ -141,12 +144,12 @@ class MainWindow(QtWidgets.QMainWindow):
         """Sets the values to the config object, but does not save them"""
 
         # determine the mode to use
-        if self.ui.btn_schedule.isChecked():
+        if not self.ui.btn_enable.isChecked():
+            config.update('mode', Modes.manual.value)
+        elif self.ui.btn_schedule.isChecked():
             config.update('mode', Modes.scheduled.value)
         elif self.ui.btn_sun.isChecked():
             config.update('mode', Modes.followSun.value)
-        else:
-            config.update('mode', Modes.manual.value)
 
         config.update('enabled', self.ui.toggle_sound.isChecked(), plugin='sound')
         config.update('enabled', self.ui.toggle_notification.isChecked(), plugin='notification')
@@ -160,12 +163,10 @@ class MainWindow(QtWidgets.QMainWindow):
         """Sets the time set in the ui to the config"""
 
         # update config if time has changed
-        l_hour, l_minute = str(self.ui.inp_time_light.time().hour()), str(
-            self.ui.inp_time_light.time().minute())
-        d_hour, d_minute = str(self.ui.inp_time_dark.time().hour()), str(
-            self.ui.inp_time_dark.time().minute())
-        config.update("switch_To_Light", l_hour + ":" + l_minute)
-        config.update("switch_To_Dark", d_hour + ":" + d_minute)
+        time_light = self.ui.inp_time_light.time()
+        time_dark = self.ui.inp_time_dark.time()
+        config.update("switch_To_Light", time_light.toString()[0:5])
+        config.update("switch_To_Dark", time_dark.toString()[0:5])
 
     def set_location(self):
         coordinates = [
@@ -218,12 +219,11 @@ class MainWindow(QtWidgets.QMainWindow):
         if button == QDialogButtonBox.Apply:
             self.set_config()
             return config.write()
-        elif button == QDialogButtonBox.Reset:
-            config.load()
-            self.get_config()
         elif button == QDialogButtonBox.RestoreDefaults:
             config.set_default()
             self.get_config()
+        elif button == QDialogButtonBox.Cancel:
+            self.close()
         else:
             raise ValueError(f'Unknown button {button}')
 
@@ -241,10 +241,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 return False
         return True
 
-    def close_event(self, event):
+    def close(self):
         """Overwrite the function that gets called when window is closed"""
 
         if self.should_close():
-            event.accept()
+            super().close()
         else:
-            event.ignore()
+            pass

@@ -41,8 +41,8 @@ echo "Installing yin-yang for command line usage"
 # copy files
 cp -r ./* /opt/yin-yang/
 # copy terminal executive
-cp ./scripts/yin-yang.sh /usr/bin/
-chmod +x /usr/bin/yin-yang.sh
+cp ./scripts/yin-yang /usr/bin/
+chmod +x /usr/bin/yin-yang
 echo "Creating .desktop file for native environment execution"
 # create .desktop file
 cat > "${HOME}/.local/share/applications/Yin-Yang.desktop" <<EOF
@@ -56,13 +56,13 @@ Name=Yin & Yang
 # Generic name of the application, for example "Web Browser"
 GenericName=Theme Switcher
 # A comment which can/will be used as a tooltip
-Comment=Auto Nightmode for KDE and VSCode
+Comment=Auto dark mode for KDE and VSCode
 # The path to the folder in which the executable is run
 Path=/opt/yin-yang
 # The executable of the application, possibly with arguments.
 Exec=env QT_AUTO_SCREEN_SCALE_FACTOR=1 sh /usr/bin/yin-yang
 # The name of the icon that will be used to display this entry
-Icon=/opt/yin-yang/src/ui/assets/yin-yang.svg
+Icon=/opt/yin-yang/resources/icon.svg
 # Describes whether this application needs to be run in a terminal or not
 Terminal=false
 # Describes the categories in which this entry should be shown
