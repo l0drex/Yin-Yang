@@ -12,10 +12,20 @@ import logging
 import time
 from abc import ABC, abstractmethod
 
+import dbus
+from dbus.mainloop.glib import DBusGMainLoop
+from gi.repository import GLib
+
 from yin_yang.config import config, PLUGINS
 from yin_yang.checker import Checker, ManualMode
 
 logger = logging.getLogger(__name__)
+
+
+def handle_time_change(*args):
+    if 'DayTime' in args[1]:
+        dark_mode: bool = bool(args[1]['DayTime'])
+        set_mode(dark_mode)
 
 
 class Listener:
@@ -56,10 +66,7 @@ class Native(Mode):
                 break
 
             # check if dark mode should be enabled and switch if necessary
-            dark_mode = self._checker.should_be_dark()
-            if dark_mode != config.get('dark_mode'):
-                set_mode(dark_mode)
-                config.update('dark_mode', dark_mode)
+            set_mode(self._checker.should_be_dark())
             time.sleep(60)
 
 
@@ -73,27 +80,26 @@ class Clight(Mode):
         bus = dbus.SessionBus()
         # noinspection SpellCheckingInspection
         bus.add_signal_receiver(
-            self.handle_time_change,
+            handle_time_change,
             'PropertiesChanged',
             'org.freedesktop.DBus.Properties',
             path='/org/clight/clight'
         )
-
-    def handle_time_change(self, *args):
-        dark_mode: bool = bool(args[1]['DayTime'])
-        if 'DayTime' in args[1] and config.get('dark_mode') != dark_mode:
-            set_mode(dark_mode)
-            config.update('dark_mode', dark_mode)
 
     def run(self):
         GLib.MainLoop().run()
 
 
 def set_mode(dark: bool):
+    if dark == config.get('dark_mode'):
+        return
+
     logger.info(f'Switching to {"dark" if dark else "light"} mode.')
     for p in PLUGINS:
         if config.get('enabled', plugin=p.name):
             p.set_mode(dark)
+
+    config.update('dark_mode', dark)
     config.write()
 
 
