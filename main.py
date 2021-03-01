@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/python
 
 import logging
 import sys
@@ -9,12 +9,14 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 
 from yin_yang import yin_yang
+from yin_yang.checker import Checker
 from yin_yang.ui import gui
 from yin_yang.config import Modes, config
-from yin_yang.yin_yang import Setter
 
 
 # using ArgumentParser for parsing arguments
+from yin_yang.yin_yang import set_mode
+
 parser = ArgumentParser()
 parser.add_argument("-t", "--toggle",
                     help="toggles Yin-Yang",
@@ -47,8 +49,8 @@ def main(arguments):
     elif arguments.toggle:
         # toggle theme manually
         config.update("mode", Modes.manual.value)
-        setter = Setter()
-        setter.toggle_theme()
+        checker = Checker(config.get('mode'))
+        set_mode(checker.should_be_dark())
     else:
         # load GUI to apply settings or set theme manually
         app = QtWidgets.QApplication(sys.argv)
