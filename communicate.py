@@ -1,17 +1,37 @@
 #!/usr/bin/env python
 
 # This file enables the extension to communicate with yin-yang.
-
+import logging
 import sys
 import json
 import struct
-from yin_yang.config import config
+from pathlib import Path
+
+from yin_yang.config import config, Modes
+
+logging.basicConfig(filename=str(Path.home()) + '/.local/share/yin_yang.log', level=logging.WARNING,
+                    format='%(asctime)s %(levelname)s - %(name)s: %(message)s')
+logger = logging.getLogger(__name__)
 
 
 def parse_time(time: str):
     hour = int(time.split(":")[0])
     minute = int(time.split(":")[1])
     return [hour, minute]
+
+
+def create_message() -> dict:
+    theme_light = config.get("light_theme", "firefox")
+    theme_dark = config.get("dark_theme", "firefox")
+    theme_active = theme_dark if config.get('dark_mode') else theme_light
+    return {
+        'schedule': config.get("mode") != Modes.manual.value,
+        'theme_dark': theme_dark,
+        'theme_light': theme_light,
+        'theme_active': theme_active,
+        'time_day': parse_time(config.get("switchToLight")),
+        'time_night': parse_time(config.get("switchToDark"))
+    }
 
 
 def encode_message(message_content: dict):
@@ -35,6 +55,7 @@ def send_message(encoded_message):
     Send a message.
     :param encoded_message: message as json
     """
+    logger.debug('Sending message: ' + encoded_message)
     sys.stdout.buffer.write(encoded_message['length'])
     sys.stdout.buffer.write(encoded_message['content'])
     sys.stdout.buffer.flush()
@@ -54,14 +75,10 @@ def get_message():
 
 while True:
     message_received = get_message()
+    if message_received is not None:
+        logger.debug('Message received: ' + message_received)
+
     if message_received == 'GetSettings':
-        message_send: dict = {
-            'schedule': config.get("schedule"),
-            'theme_dark': config.get("firefoxDarkTheme"),
-            'theme_light': config.get("firefoxLightTheme"),
-            'theme_active': config.get("firefoxActiveTheme"),
-            'time_day': parse_time(config.get("switchToLight")),
-            'time_night': parse_time(config.get("switchToDark"))
-        }
+        message_send = create_message()
 
         send_message(encode_message(message_send))
