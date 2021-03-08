@@ -6,7 +6,7 @@ import sys
 import json
 import struct
 import time
-from datetime import date
+from datetime import date, datetime, time as datetimetime
 from pathlib import Path
 
 from yin_yang.config import config, Modes
@@ -17,15 +17,20 @@ logger = logging.getLogger(__name__)
 
 
 def parse_time(time_str: str) -> float:
-    dt = date.fromisoformat(time_str)
-    return time.mktime(dt.timetuple())
+    today = date.today()
+    tm = datetimetime.fromisoformat(time_str)
+    return time.mktime(datetime.combine(today, tm).timetuple())
 
 
 def create_message() -> dict:
     logger.debug('Building message')
 
     enabled = config.get('enabled', 'firefox')
-    message = {'enabled': enabled}
+    message = {
+        'enabled': enabled,
+        'dark_mode': config.get('dark_mode')
+    }
+
     if enabled:
         scheduled = config.get("mode") != Modes.manual.value
         message['scheduled'] = scheduled
@@ -39,8 +44,6 @@ def create_message() -> dict:
                 parse_time(config.get("switch_To_Dark"))
             ]
             message['times'] = times
-        else:
-            message['dark_mode'] = config.get('dark_mode')
 
     return message
 
@@ -87,10 +90,11 @@ def get_message():
     return json.loads(message)
 
 
-while True:
-    message_received = get_message()
-    if message_received is not None:
-        logger.debug('Message received: ' + message_received)
+if __name__ == '__main__':
+    while True:
+        message_received = get_message()
+        if message_received is not None:
+            logger.debug('Message received: ' + message_received)
 
-    if message_received == 'GetSettings':
-        send_message(encode_message(create_message()))
+        if message_received == 'GetSettings':
+            send_message(encode_message(create_message()))
