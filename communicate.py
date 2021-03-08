@@ -5,6 +5,8 @@ import logging
 import sys
 import json
 import struct
+import time
+from datetime import date
 from pathlib import Path
 
 from yin_yang.config import config, Modes
@@ -14,25 +16,31 @@ logging.basicConfig(filename=str(Path.home()) + '/.local/share/yin_yang.log', le
 logger = logging.getLogger(__name__)
 
 
-def parse_time(time: str) -> tuple[int, int]:
-    hour = int(time.split(":")[0])
-    minute = int(time.split(":")[1])
-    return hour, minute
+def parse_time(time_str: str) -> float:
+    dt = date.fromisoformat(time_str)
+    return time.mktime(dt.timetuple())
 
 
 def create_message() -> dict:
     logger.debug('Building message')
-    theme_light = config.get("light_theme", "firefox")
-    theme_dark = config.get("dark_theme", "firefox")
-    theme_active: str = theme_dark if config.get('dark_mode') else theme_light
-    message = {
-        'schedule': config.get("mode") != Modes.manual.value,
-        'theme_dark': theme_dark,
-        'theme_light': theme_light,
-        'theme_active': theme_active,
-        'time_day': parse_time(config.get("switch_To_Light")),
-        'time_night': parse_time(config.get("switch_To_Dark"))
-    }
+
+    enabled = config.get('enabled', 'firefox')
+    message = {'enabled': enabled}
+    if enabled:
+        scheduled = config.get("mode") != Modes.manual.value
+        message['scheduled'] = scheduled
+        message['themes'] = [
+            config.get("light_theme", "firefox"),
+            config.get("dark_theme", "firefox")
+        ]
+        if scheduled:
+            times = [
+                parse_time(config.get("switch_To_Light")),
+                parse_time(config.get("switch_To_Dark"))
+            ]
+            message['times'] = times
+        else:
+            message['dark_mode'] = config.get('dark_mode')
 
     return message
 
