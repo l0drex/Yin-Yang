@@ -64,7 +64,8 @@ class CommunicationTest(unittest.TestCase):
 
         # decode response
         response_length = struct.unpack('=I', response[:4])[0]
-        response_decoded = response[4 : (response_length + 4)].decode('utf-8')
+        response = response[4:]
+        response_decoded = response[:response_length].decode('utf-8')
         response_decoded = json.loads(response_decoded)
 
         # test if correct
