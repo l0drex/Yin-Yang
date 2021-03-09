@@ -28,10 +28,10 @@ def parse_time(time_str: str) -> int:
     return int(unix_time)
 
 
-def create_message() -> dict:
+def create_message(plugin: str) -> dict:
     logger.debug('Building message')
 
-    enabled = config.get('enabled', 'firefox')
+    enabled = config.get('enabled', plugin)
     message = {
         'enabled': enabled,
         'dark_mode': config.get('dark_mode')
@@ -110,7 +110,7 @@ if __name__ == '__main__':
             if message_received is not None:
                 logger.debug('Message received: ' + message_received)
 
-            if message_received == 'GetSettings':
-                send_message(encode_message(create_message()))
+            if message_received == 'Firefox':
+                send_message(encode_message(create_message('firefox')))
         except Exception as e:
             logger.error(e)

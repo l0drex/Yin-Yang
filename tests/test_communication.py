@@ -42,13 +42,13 @@ class CommunicationTest(unittest.TestCase):
                 self.assertTrue(time_dark > datetime.now().timestamp())
 
     def test_encode_decode(self):
-        message = communicate.create_message()
+        message = communicate.create_message('firefox')
 
         process = Popen([sys.executable, '../communicate.py'],
                         stdin=PIPE, stdout=PIPE)
 
         # build call
-        call = 'GetSettings'
+        call = 'Firefox'
         call_encoded = json.dumps(call).encode('utf-8')
         call_encoded = struct.pack(str(len(call_encoded)) + 's',
                                    call_encoded)
