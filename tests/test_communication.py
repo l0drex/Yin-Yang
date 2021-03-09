@@ -23,7 +23,7 @@ class CommunicationTest(unittest.TestCase):
                         'Time should always be in the future')
 
     def test_message_build(self):
-        message = communicate.create_message('firefox')
+        message = communicate.send_config('firefox')
         self.assertNotEqual(message, None,
                             'Message should not be empty')
         self.assertNotEqual(message, {},
@@ -42,7 +42,7 @@ class CommunicationTest(unittest.TestCase):
                 self.assertTrue(time_dark > datetime.now().timestamp())
 
     def test_encode_decode(self):
-        message = communicate.create_message('firefox')
+        message = communicate.send_config('firefox')
 
         process = Popen([sys.executable, '../communicate.py'],
                         stdin=PIPE, stdout=PIPE)

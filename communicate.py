@@ -28,7 +28,7 @@ def parse_time(time_str: str) -> int:
     return int(unix_time)
 
 
-def create_message(plugin: str) -> dict:
+def send_config(plugin: str) -> dict:
     logger.debug('Building message')
 
     enabled = config.get('enabled', plugin)
@@ -106,11 +106,11 @@ def decode_message():
 if __name__ == '__main__':
     while True:
         try:
-            message_received = decode_message()
+            message_received: dict = decode_message()
             if message_received is not None:
-                logger.debug('Message received: ' + message_received)
+                logger.debug('Message received from', message_received['name'])
 
-            if message_received == 'Firefox':
-                send_message(encode_message(create_message('firefox')))
+            if message_received['name'] == 'Firefox':
+                send_message(encode_message(send_config('firefox')))
         except Exception as e:
             logger.error(e)
