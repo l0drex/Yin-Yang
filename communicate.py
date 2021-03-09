@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
-# This file enables the extension to communicate with yin-yang.
+# This file allows external extensions to communicate with yin-yang.
+# It's based on https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Native_messaging,
+# as it was originally used for the firefox plugin only
+
 import logging
 import sys
 import json
@@ -18,6 +21,12 @@ logger = logging.getLogger(__name__)
 
 
 def parse_time(time_str: str) -> int:
+    """
+    Converts a time string to seconds since the epoch for the next time the time is reached.
+    Example: When parse_time('07:00') is called on the 01.01.2021 09:00,
+             the function returns the 02.01.2021 07:00 in unix time in seconds.
+    :param time_str: a time string formatted as %H:%M
+    """
     today = date.today()
     tm = datetimetime.fromisoformat(time_str)
     unix_time: float = time.mktime(datetime.combine(today, tm).timetuple())
@@ -29,6 +38,11 @@ def parse_time(time_str: str) -> int:
 
 
 def send_config(plugin: str) -> dict:
+    """
+    Returns the configuration for the plugin plus some general necessary stuff (scheduled, dark_mode, times)
+    :param plugin: the plugin for which the configuration should be returned
+    :return: a dictionary containing config information
+    """
     logger.debug('Building message')
 
     enabled = config.get('enabled', plugin)
@@ -41,8 +55,8 @@ def send_config(plugin: str) -> dict:
         mode = config.get("mode")
         message['scheduled'] = mode != Modes.manual.value
         message['themes'] = [
-            config.get("light_theme", "firefox"),
-            config.get("dark_theme", "firefox")
+            config.get("light_theme", plugin),
+            config.get("dark_theme", plugin)
         ]
         if mode != Modes.manual.value:
             if mode == Modes.scheduled.value:
@@ -93,6 +107,9 @@ def send_message(encoded_message: dict[str, bytes]):
 
 # Read a message from stdin and decode it.
 def decode_message():
+    """
+    Decodes a message in stdout and returns it.
+    """
     raw_length = sys.stdin.buffer.read(4)
 
     if not raw_length:
@@ -111,6 +128,7 @@ if __name__ == '__main__':
                 logger.debug('Message received from ' + message_received['name'])
 
             if message_received['name'] == 'Firefox':
+                # TODO add information about installed themes
                 send_message(encode_message(send_config('firefox')))
         except Exception as e:
             logger.error(e)
