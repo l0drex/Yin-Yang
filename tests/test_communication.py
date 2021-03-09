@@ -23,7 +23,7 @@ class CommunicationTest(unittest.TestCase):
                         'Time should always be in the future')
 
     def test_message_build(self):
-        message = communicate.create_message()
+        message = communicate.create_message('firefox')
         self.assertNotEqual(message, None,
                             'Message should not be empty')
         self.assertNotEqual(message, {},
