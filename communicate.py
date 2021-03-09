@@ -9,6 +9,7 @@ import time
 from datetime import date, datetime, time as datetimetime
 from pathlib import Path
 
+from yin_yang import checker
 from yin_yang.config import config, Modes
 
 logging.basicConfig(filename=str(Path.home()) + '/.local/share/yin_yang.log', level=logging.DEBUG,
@@ -16,10 +17,15 @@ logging.basicConfig(filename=str(Path.home()) + '/.local/share/yin_yang.log', le
 logger = logging.getLogger(__name__)
 
 
-def parse_time(time_str: str) -> float:
+def parse_time(time_str: str) -> int:
     today = date.today()
     tm = datetimetime.fromisoformat(time_str)
-    return time.mktime(datetime.combine(today, tm).timetuple())
+    unix_time: float = time.mktime(datetime.combine(today, tm).timetuple())
+
+    if unix_time < time.time():
+        unix_time += 60*60*24
+
+    return int(unix_time)
 
 
 def create_message() -> dict:
@@ -32,17 +38,24 @@ def create_message() -> dict:
     }
 
     if enabled:
-        scheduled = config.get("mode") != Modes.manual.value
-        message['scheduled'] = scheduled
+        mode = config.get("mode")
+        message['scheduled'] = mode != Modes.manual.value
         message['themes'] = [
             config.get("light_theme", "firefox"),
             config.get("dark_theme", "firefox")
         ]
-        if scheduled:
-            times = [
-                parse_time(config.get("switch_To_Light")),
-                parse_time(config.get("switch_To_Dark"))
-            ]
+        if mode != Modes.manual.value:
+            if mode == Modes.scheduled.value:
+                times = [
+                    parse_time(config.get("switch_To_Light")),
+                    parse_time(config.get("switch_To_Dark"))
+                ]
+            elif mode == Modes.followSun.value:
+                time_light, time_dark = checker.get_sun_time()
+                times = [
+                    parse_time(time_light.strftime('%H:%M')),
+                    parse_time(time_dark.strftime('%H:%M'))
+                ]
             message['times'] = times
 
     return message
@@ -79,7 +92,7 @@ def send_message(encoded_message: dict[str, bytes]):
 
 
 # Read a message from stdin and decode it.
-def get_message():
+def decode_message():
     raw_length = sys.stdin.buffer.read(4)
 
     if not raw_length:
@@ -92,9 +105,12 @@ def get_message():
 
 if __name__ == '__main__':
     while True:
-        message_received = get_message()
-        if message_received is not None:
-            logger.debug('Message received: ' + message_received)
+        try:
+            message_received = decode_message()
+            if message_received is not None:
+                logger.debug('Message received: ' + message_received)
 
-        if message_received == 'GetSettings':
-            send_message(encode_message(create_message()))
+            if message_received == 'GetSettings':
+                send_message(encode_message(create_message()))
+        except Exception as e:
+            logger.error(e)
