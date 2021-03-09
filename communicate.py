@@ -108,7 +108,7 @@ if __name__ == '__main__':
         try:
             message_received: dict = decode_message()
             if message_received is not None:
-                logger.debug('Message received from', message_received['name'])
+                logger.debug('Message received from ' + message_received['name'])
 
             if message_received['name'] == 'Firefox':
                 send_message(encode_message(send_config('firefox')))
