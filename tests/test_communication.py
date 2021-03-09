@@ -48,7 +48,10 @@ class CommunicationTest(unittest.TestCase):
                         stdin=PIPE, stdout=PIPE)
 
         # build call
-        call = 'Firefox'
+        call = {
+            'name': 'Firefox',
+            'themes': []
+        }
         call_encoded = json.dumps(call).encode('utf-8')
         call_encoded = struct.pack(str(len(call_encoded)) + 's',
                                    call_encoded)
