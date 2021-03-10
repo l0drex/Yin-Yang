@@ -25,6 +25,12 @@ class Modes(Enum):
     followSun = "sunset to sunrise"
 
 
+class Listener(Enum):
+    native = 'native'
+    systemd = 'systemd'
+    clight = 'clight'
+
+
 # aliases for path to use later on
 home = os.getenv("HOME")
 path = home + "/.config"
@@ -39,6 +45,7 @@ def get_default() -> dict:
         "dark_mode": False,
         "desktop": get_desktop(),
         "mode": Modes.manual.value,
+        "listener": Listener.native.value,
         "coordinates": (0, 0),
         "switch_to_dark": "20:00",
         "switch_to_light": "07:00"
@@ -276,4 +283,4 @@ def get_current_location() -> Tuple[float, float]:
 
 
 # create global object with current version
-config = ConfigParser(2.2)
+config = ConfigParser(2.3)

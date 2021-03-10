@@ -108,5 +108,5 @@ def set_mode(dark: bool):
 
 
 def run():
-    listener = Listener('native')
+    listener = Listener(config.get('listener'))
     listener.run()
