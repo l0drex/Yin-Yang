@@ -8,6 +8,7 @@ author: daehruoydeef
 date: 21.12.2018
 license: MIT
 """
+
 import logging
 import time
 from abc import ABC, abstractmethod

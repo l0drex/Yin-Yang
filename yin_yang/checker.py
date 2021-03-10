@@ -2,11 +2,8 @@ import datetime
 import logging
 from datetime import time
 from abc import ABC, abstractmethod
-from typing import Tuple
 
-from suntime import Sun, SunTimeException
-
-from yin_yang.config import Modes, config
+from yin_yang.config import Modes, config, get_sun_time
 
 logger = logging.getLogger(__name__)
 
@@ -61,21 +58,6 @@ class SunMode(Mode):
         time_light, time_dark = get_sun_time()
 
         return compare_time(time_current, time_light, time_dark)
-
-
-def get_sun_time() -> Tuple[time, time]:
-    """Sets the sunrise and sunset to config based on location"""
-    latitude, longitude = config.get('coordinates')
-    sun = Sun(latitude, longitude)
-
-    try:
-        today_sr = sun.get_local_sunrise_time()
-        today_ss = sun.get_local_sunset_time()
-
-        return today_sr.time(), today_ss.time()
-
-    except SunTimeException as e:
-        logger.error("Error: {0}.".format(e))
 
 
 def compare_time(time_current: time, time_light: time, time_dark: time) -> bool:

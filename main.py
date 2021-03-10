@@ -73,8 +73,6 @@ if __name__ == "__main__":
         logging.basicConfig(filename=str(Path.home()) + '/.local/share/yin_yang.log', level=logging.WARNING,
                             format='%(asctime)s %(levelname)s - %(name)s: %(message)s')
 
-    logger = logging.getLogger(__name__)
-
     main(args)
     if not config.debugging and config.get("mode") != Modes.manual.value:
         config.update("running", False)

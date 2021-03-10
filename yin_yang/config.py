@@ -3,6 +3,8 @@ import logging
 import os
 import pathlib
 import re
+import subprocess
+from datetime import time
 from enum import Enum
 from typing import Optional, Union, Tuple
 
@@ -67,6 +69,8 @@ class ConfigParser:
     _version: float
     debugging: bool = False
     changed: bool = False
+    # needed because editing systemd timer needs sudo and we dont want to ask for the password after every change
+    time_changed: bool = False
 
     def __init__(self, version: float):
         self._version = version
@@ -178,6 +182,8 @@ class ConfigParser:
             with open(path + "/yin_yang/yin_yang.json", 'w') as conf_file:
                 json.dump(self._config, conf_file, indent=4)
 
+            self.update_systemd_timer()
+
             # no unsaved changes anymore
             self.changed = False
 
@@ -222,6 +228,11 @@ class ConfigParser:
 
         try:
             if plugin is None:
+                # if time values changed
+                if ((not self.time_changed) and
+                        (key.casefold() == 'switch_to_dark' and value != self._config.get('switch_to_dark')) or
+                        (key.casefold() == 'switch_to_light' and value != self._config.get('switch_to_light'))):
+                    self.time_changed = True
                 self._config[key.casefold()] = value
             else:
                 self._config[plugin.casefold()][key.casefold()] = value
@@ -238,6 +249,41 @@ class ConfigParser:
         """returns the config"""
 
         return self._config
+
+    def update_systemd_timer(self):
+        """Runs a simple bash script that updates the systemd timer"""
+
+        logger.info('Updating systemd timer')
+
+        mode = self.get('mode')
+        needed = mode != Modes.manual.value
+
+        if not needed and not self.get('running'):
+            return True
+
+        time_light: str = self.get('switch_to_light')
+        time_dark: str = self.get('switch_to_dark')
+
+        if mode == Modes.followSun.value:
+            time_light_time, time_dark_time = get_sun_time()
+            time_light = time_light_time.strftime('%H:%M')
+            time_dark = time_dark_time.strftime('%H:%M')
+
+        completed = subprocess.run(['./scripts/update_systemd_timer.sh',
+                                    '1' if needed else '0',
+                                    time_light + ':00',
+                                    time_dark + ':00'])
+
+        if not completed.returncode == 0:
+            error = ValueError('An error happened while changing the systemd timer. \n'
+                               'Try to run /scripts/update-systemd-timer.sh manually. \n'
+                               'If the error persists, leave an issue in the repo on github.')
+            logger.error('An error happened while trying to update systemd.timer: ' + str(error))
+            logger.error(completed.stdout)
+            raise error
+
+        self.update('running', needed and (completed.returncode == 0))
+        self.time_changed = False
 
 
 def get_desktop() -> str:
@@ -283,4 +329,5 @@ def get_current_location() -> Tuple[float, float]:
 
 
 # create global object with current version
-config = ConfigParser(2.3)
+# NOTE change the version here if the structure of the config file has been modified
+config = ConfigParser(2.2)
