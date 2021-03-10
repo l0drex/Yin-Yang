@@ -32,7 +32,7 @@ class Listener:
     def __init__(self, listener):
         if listener == 'native':
             self._mode = InternalMainLoop(Checker(config.get('mode')))
-        elif False and (listener == 'clight'):
+        elif (listener == 'clight'):
             self._mode = Clight()
 
     def run(self):
