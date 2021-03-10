@@ -247,6 +247,9 @@ class ConfigParser:
     def listener(self, listener: Listener):
         self._config_data['listener'] = listener.value
 
+    def set_auto_location(self, enable: bool):
+        self._config_data['update_location'] = enable
+
     @property
     def location(self) -> tuple[float, float]:
         if self._config_data['update_location']:
