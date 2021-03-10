@@ -15,7 +15,6 @@ from abc import ABC, abstractmethod
 
 import dbus
 from dbus.mainloop.glib import DBusGMainLoop
-#from gi.repository import GLib
 
 from yin_yang.config import config, PLUGINS
 from yin_yang.checker import Checker, ManualMode
@@ -73,9 +72,7 @@ class InternalMainLoop(Mode):
 class Clight(Mode):
     # source: https://github.com/FedeDP/Clight/wiki/DE-Automation
 
-    def __init__(self):
-        super().__init__()
-
+    def run(self):
         DBusGMainLoop(set_as_default=True)
         bus = dbus.SessionBus()
         # noinspection SpellCheckingInspection
@@ -85,9 +82,6 @@ class Clight(Mode):
             'org.freedesktop.DBus.Properties',
             path='/org/clight/clight'
         )
-
-    def run(self):
-        GLib.MainLoop().run()
 
 
 def set_mode(dark: bool):
