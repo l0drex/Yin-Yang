@@ -7,10 +7,17 @@ from subprocess import Popen, PIPE
 
 import communicate
 from yin_yang.checker import Checker
-from yin_yang.config import config, Modes
+from yin_yang.config import ConfigParser, Modes
+
+config = ConfigParser(2.2)
 
 
 class CommunicationTest(unittest.TestCase):
+    def setUp(self):
+        # reset all changes
+        global config
+        config = ConfigParser(2.2)
+
     def test_parse_time(self):
         response = communicate.parse_time('07:00')
 
@@ -19,8 +26,6 @@ class CommunicationTest(unittest.TestCase):
         self.assertEqual(date.strftime('%H:%M'), '07:00')
 
         now: int = int(datetime.now().timestamp())
-        self.assertTrue(communicate.parse_time(datetime.today().strftime('%H:%M')) > now,
-                        'Passed time should always be in the future')
         one_hour_later = communicate.parse_time(datetime.fromtimestamp(now + 60*60).strftime('%H:%M'))
         one_hour_later_next_day = datetime.today().timestamp() + 60*60 + 60+60*24
         self.assertTrue(one_hour_later < one_hour_later_next_day,
@@ -42,8 +47,9 @@ class CommunicationTest(unittest.TestCase):
                 time_dark, time_light = message['times']
                 self.assertIsInstance(time_light, int)
                 self.assertIsInstance(time_dark, int)
-                self.assertTrue(time_light > datetime.now().timestamp())
-                self.assertTrue(time_dark > datetime.now().timestamp())
+                time_now = datetime.today().timestamp()
+                self.assertTrue(time_light <= time_now < time_dark or time_dark <= time_now < time_light,
+                                'Current time should always be between light and dark times')
 
     def test_encode_decode(self):
         message = communicate.send_config('firefox')
