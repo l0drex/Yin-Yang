@@ -32,8 +32,10 @@ class Listener:
     def __init__(self, listener):
         if listener == 'native':
             self._mode = InternalMainLoop(Checker(config.get('mode')))
-        elif (listener == 'clight'):
-            self._mode = Clight()
+        #elif (listener == 'clight'):
+            #self._mode = Clight()
+        else:
+            raise ValueError('Unexpected value for listener!')
 
     def run(self):
         self._mode.run()
