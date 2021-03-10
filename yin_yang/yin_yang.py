@@ -32,7 +32,7 @@ class Listener:
     def __init__(self, listener):
         if listener == 'native':
             self._mode = Native(Checker(config.get('mode')))
-        elif listener == 'clight':
+        elif False and listener == 'clight':
             self._mode = Clight()
 
     def run(self):
@@ -70,24 +70,24 @@ class Native(Mode):
             time.sleep(60)
 
 
-# class Clight(Mode):
-#     # source: https://github.com/FedeDP/Clight/wiki/DE-Automation
-#
-#     def __init__(self):
-#         super().__init__()
-#
-#         DBusGMainLoop(set_as_default=True)
-#         bus = dbus.SessionBus()
-#         # noinspection SpellCheckingInspection
-#         bus.add_signal_receiver(
-#             handle_time_change,
-#             'PropertiesChanged',
-#             'org.freedesktop.DBus.Properties',
-#             path='/org/clight/clight'
-#         )
-#
-#     def run(self):
-#         GLib.MainLoop().run()
+class Clight(Mode):
+    # source: https://github.com/FedeDP/Clight/wiki/DE-Automation
+
+    def __init__(self):
+        super().__init__()
+
+        DBusGMainLoop(set_as_default=True)
+        bus = dbus.SessionBus()
+        # noinspection SpellCheckingInspection
+        bus.add_signal_receiver(
+            handle_time_change,
+            'PropertiesChanged',
+            'org.freedesktop.DBus.Properties',
+            path='/org/clight/clight'
+        )
+
+    def run(self):
+        GLib.MainLoop().run()
 
 
 def set_mode(dark: bool):
