@@ -72,7 +72,7 @@ class ConfigParser:
     debugging: bool = False
     changed: bool = False
     # needed because editing systemd timer needs sudo and we dont want to ask for the password after every change
-    time_changed: bool = False
+    update_systemd_needed: bool = False
 
     def __init__(self, version: float):
         self._version = version
@@ -184,7 +184,8 @@ class ConfigParser:
             with open(path + "/yin_yang/yin_yang.json", 'w') as conf_file:
                 json.dump(self._config, conf_file, indent=4)
 
-            self.update_systemd_timer()
+            if self.update_systemd_needed:
+                self.update_systemd_timer()
 
             # no unsaved changes anymore
             self.changed = False
@@ -230,11 +231,26 @@ class ConfigParser:
 
         try:
             if plugin is None:
-                # if time values changed
-                if ((not self.time_changed) and
-                        (key.casefold() == 'switch_to_dark' and value != self._config.get('switch_to_dark')) or
-                        (key.casefold() == 'switch_to_light' and value != self._config.get('switch_to_light'))):
-                    self.time_changed = True
+                time_changes = (key.casefold() == ('switch_to_dark' and value != self._config.get('switch_to_dark')) or
+                                (key.casefold() == 'switch_to_light' and value != self._config.get('switch_to_light')))
+                mode_changes = (key.casefold() == 'mode' and value != self.get('mode'))
+                listener_changed_systemd = (key.casefold() == 'listener') and \
+                                           (value != self.get('listener') and
+                                            'systemd' in [value, self.get('listener')])
+
+                if ((not self.update_systemd_needed) and
+                        (((self.get('listener') == Listener.systemd.value) and (time_changes or mode_changes)) or
+                         listener_changed_systemd)):
+                    reason = ''
+                    if time_changes:
+                        reason = 'time changed'
+                    if mode_changes:
+                        reason += ', mode changes'
+                    if listener_changed_systemd:
+                        reason += ', listener changed from or to systemd'
+                    print('Reason: ' + reason)
+                    self.update_systemd_needed = True
+
                 self._config[key.casefold()] = value
             else:
                 self._config[plugin.casefold()][key.casefold()] = value
@@ -258,7 +274,7 @@ class ConfigParser:
         logger.info('Updating systemd timer')
 
         mode = self.get('mode')
-        needed = mode != Modes.manual.value
+        needed = mode != Modes.manual.value and self.get('listener') == Listener.systemd.value
 
         if not needed and not self.get('running'):
             return True
@@ -285,7 +301,7 @@ class ConfigParser:
             raise error
 
         self.update('running', needed and (completed.returncode == 0))
-        self.time_changed = False
+        self.update_systemd_needed = False
 
 
 def get_desktop() -> str:
