@@ -9,6 +9,8 @@ from enum import Enum
 from typing import Optional, Union, Tuple
 
 import requests
+from suntime import Sun, SunTimeException
+
 from yin_yang.plugins.plugin import Plugin
 from yin_yang.plugins import kde, gnome, gtk, kvantum, wallpaper, vscode, atom, sound, notify, konsole, firefox
 
@@ -326,6 +328,21 @@ def get_current_location() -> Tuple[float, float]:
     """
     loc = requests.get('http://www.ipinfo.io/loc').text.split(',')
     return float(loc[0]), float(loc[1])
+
+
+def get_sun_time() -> Tuple[time, time]:
+    """Sets the sunrise and sunset to config based on location"""
+    latitude, longitude = config.get('coordinates')
+    sun = Sun(latitude, longitude)
+
+    try:
+        today_sr = sun.get_local_sunrise_time()
+        today_ss = sun.get_local_sunset_time()
+
+        return today_sr.time(), today_ss.time()
+
+    except SunTimeException as e:
+        logger.error("Error: {0}.".format(e))
 
 
 # create global object with current version
