@@ -52,7 +52,7 @@ class CommunicationTest(unittest.TestCase):
                                 'Current time should always be between light and dark times')
 
     def test_encode_decode(self):
-        message = communicate.send_config('firefox')
+        message = 'firefox'
 
         process = Popen([sys.executable, '../communicate.py'],
                         stdin=PIPE, stdout=PIPE)

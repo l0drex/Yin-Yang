@@ -129,12 +129,11 @@ def decode_message():
 if __name__ == '__main__':
     while True:
         try:
-            message_received: dict = decode_message()
+            message_received: str = decode_message()
             if message_received is not None:
-                logger.debug('Message received from ' + message_received['name'])
+                logger.debug('Message received from ' + message_received)
 
-            if message_received['name'] == 'Firefox':
-                # TODO add information about installed themes
+            if message_received == 'firefox':
                 send_message(encode_message(send_config('firefox')))
         except Exception as e:
             logger.error(e)
