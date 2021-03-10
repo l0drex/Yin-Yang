@@ -8,14 +8,14 @@ from typing import Optional, Union, Tuple
 
 import requests
 from yin_yang.plugins.plugin import Plugin
-from yin_yang.plugins import kde, gnome, gtk, kvantum, wallpaper, vscode, atom, sound, notify, konsole
+from yin_yang.plugins import kde, gnome, gtk, kvantum, wallpaper, vscode, atom, sound, notify, konsole, firefox
 
 logger = logging.getLogger(__name__)
 ConfigValue = Union[str, float, bool, tuple]
 
 # default objects
 PLUGINS: [Plugin] = [kde.Kde(), gnome.Gnome(), gtk.Gtk(), kvantum.Kvantum(), wallpaper.Wallpaper(),
-                     vscode.Vscode(), atom.Atom(), konsole.Konsole(),
+                     vscode.Vscode(), atom.Atom(), konsole.Konsole(), firefox.Firefox(),
                      sound.Sound(), notify.Notification()]
 
 

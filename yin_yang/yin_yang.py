@@ -14,7 +14,7 @@ from abc import ABC, abstractmethod
 
 import dbus
 from dbus.mainloop.glib import DBusGMainLoop
-from gi.repository import GLib
+#from gi.repository import GLib
 
 from yin_yang.config import config, PLUGINS
 from yin_yang.checker import Checker, ManualMode
@@ -31,7 +31,7 @@ def handle_time_change(*args):
 class Listener:
     def __init__(self, listener):
         if listener == 'native':
-            self._mode = Native(config.get('mode'))
+            self._mode = Native(Checker(config.get('mode')))
         elif listener == 'clight':
             self._mode = Clight()
 
@@ -70,24 +70,24 @@ class Native(Mode):
             time.sleep(60)
 
 
-class Clight(Mode):
-    # source: https://github.com/FedeDP/Clight/wiki/DE-Automation
-
-    def __init__(self):
-        super().__init__()
-
-        DBusGMainLoop(set_as_default=True)
-        bus = dbus.SessionBus()
-        # noinspection SpellCheckingInspection
-        bus.add_signal_receiver(
-            handle_time_change,
-            'PropertiesChanged',
-            'org.freedesktop.DBus.Properties',
-            path='/org/clight/clight'
-        )
-
-    def run(self):
-        GLib.MainLoop().run()
+# class Clight(Mode):
+#     # source: https://github.com/FedeDP/Clight/wiki/DE-Automation
+#
+#     def __init__(self):
+#         super().__init__()
+#
+#         DBusGMainLoop(set_as_default=True)
+#         bus = dbus.SessionBus()
+#         # noinspection SpellCheckingInspection
+#         bus.add_signal_receiver(
+#             handle_time_change,
+#             'PropertiesChanged',
+#             'org.freedesktop.DBus.Properties',
+#             path='/org/clight/clight'
+#         )
+#
+#     def run(self):
+#         GLib.MainLoop().run()
 
 
 def set_mode(dark: bool):
