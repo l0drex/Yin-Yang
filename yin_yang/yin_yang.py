@@ -31,8 +31,8 @@ def handle_time_change(*args):
 class Listener:
     def __init__(self, listener):
         if listener == 'native':
-            self._mode = Native(Checker(config.get('mode')))
-        elif False and listener == 'clight':
+            self._mode = InternalMainLoop(Checker(config.get('mode')))
+        elif False and (listener == 'clight'):
             self._mode = Clight()
 
     def run(self):
@@ -50,14 +50,19 @@ class Mode(ABC):
         raise NotImplementedError('Method is not implemented.')
 
 
-class Native(Mode):
+class ExternalMainLoop(Mode):
     def __init__(self, checker: Checker):
-        super(Native, self).__init__()
+        super(ExternalMainLoop, self).__init__()
         if isinstance(checker, ManualMode):
             raise ValueError('No notifier needed if mode is manual!')
         else:
             self._checker = checker
 
+    def run(self):
+        set_mode(self._checker.should_be_dark())
+
+
+class InternalMainLoop(ExternalMainLoop):
     def run(self):
         while True:
             if self.terminate:
@@ -65,8 +70,7 @@ class Native(Mode):
                 config.write()
                 break
 
-            # check if dark mode should be enabled and switch if necessary
-            set_mode(self._checker.should_be_dark())
+            super(InternalMainLoop, self).run()
             time.sleep(60)
 
 
