@@ -34,23 +34,25 @@ QtWidgets.QApplication.setAttribute(
 
 
 def main(arguments):
-    config.debugging = arguments.debugging
-
     # set settings via terminal
     if arguments.schedule:
-        mode = config.get("mode")
-        if mode == Modes.manual.value:
+        mode = config.mode
+        if mode == Modes.manual:
             print("looks like you did not specified a time")
             print("You can use the gui with yin-yang -gui")
             print("Or edit the config found in ~/.config/yin_yang/yin_yang.json")
             print("You need to set schedule to True and edit the time to toggles")
-        else:
-            print(f"Using mode {mode}")
+            return
+
+        print(f"Using mode {mode}")
+        if config.mode != Modes.manual:
+            config.running = False
+            print("START thread listener")
+            yin_yang.run()
     elif arguments.toggle:
         # toggle theme manually
-        config.update("mode", Modes.manual.value)
-        checker = Checker(config.get('mode'))
-        set_mode(checker.should_be_dark())
+        config.mode = Modes.manual
+        set_mode(not config.dark_mode)
     else:
         # load GUI to apply settings or set theme manually
         app = QtWidgets.QApplication(sys.argv)
@@ -74,7 +76,3 @@ if __name__ == "__main__":
                             format='%(asctime)s %(levelname)s - %(name)s: %(message)s')
 
     main(args)
-    if not config.debugging and config.get("mode") != Modes.manual.value:
-        config.update("running", False)
-        print("START thread listener")
-        yin_yang.run()
