@@ -5,7 +5,7 @@ import pathlib
 import re
 from datetime import time
 from enum import Enum
-from typing import Optional, Union, Tuple
+from typing import Optional, Union
 
 import requests
 from suntime import Sun, SunTimeException
@@ -14,7 +14,6 @@ from yin_yang.plugins.plugin import Plugin
 from yin_yang.plugins import kde, gnome, gtk, kvantum, wallpaper, vscode, atom, sound, notify, konsole, firefox
 
 logger = logging.getLogger(__name__)
-ConfigValue = Union[str, float, bool, tuple]
 
 # default objects
 PLUGINS: [Plugin] = [kde.Kde(), gnome.Gnome(), gtk.Gtk(), kvantum.Kvantum(), wallpaper.Wallpaper(),
@@ -38,62 +37,17 @@ home = os.getenv("HOME")
 path = home + "/.config"
 
 
-def get_default() -> dict:
-    # if there is no config generate a generic one
-    # NOTE: if you change or add new values here, make sure to update the version number and update_config() method
-    conf_default = {
-        "version": -1,
-        "running": False,
-        "dark_mode": False,
-        "desktop": get_desktop(),
-        "mode": Modes.manual.value,
-        "listener": Listener.native.value,
-        "coordinates": (0, 0),
-        "switch_to_dark": "20:00",
-        "switch_to_light": "07:00"
-    }
-
-    # plugin settings
-    for plugin in PLUGINS:
-        conf_default[plugin.name.casefold()] = {
-            "enabled": False,
-            "light_theme": plugin.theme_bright,
-            "dark_theme": plugin.theme_dark
-        }
-
-    return conf_default
-
-
 class ConfigParser:
-    _config: dict = None
-    _version: float
-    debugging: bool = False
-    changed: bool = False
+    _config_data: dict = None
 
     def __init__(self, version: float):
         self._version = version
-
-        # load config from file
-        self._config = self.load()
-
-        if self._config is None:
-            # use default values if something went wrong
-            logger.warning('Using default configuration values.')
-            self._config = get_default()
-            self.update('version', self._version)
-
-        # set plugin themes
-        for plugin in PLUGINS:
-            plugin.theme_bright = self.get('light_theme', plugin.name)
-            plugin.theme_dark = self.get('dark_theme', plugin.name)
-
-        # save the config
-        self.write()
+        self.changed = False
 
     def set_default(self):
         logger.info('Setting default values.')
-        self._config = get_default()
-        self.update("version", self._version)
+        self._config_data = self.defaults
+        self._config_data['version'] = self._version
 
     def update_config(self, config_old):
         """Update old config files
@@ -106,9 +60,9 @@ class ConfigParser:
         logger.debug('Attempt to update the config file')
 
         # replace current config with defaults
-        config_new = get_default()
+        config_new = self.defaults
 
-        # replace default values with old ones
+        # replace default values with previous ones
         if config_old["version"] < 0:
             return config_old
         if config_old["version"] <= 2.1:
@@ -125,10 +79,10 @@ class ConfigParser:
             config_new["dark_mode"] = config_old["theme"] == "dark"
 
             # put settings for PLUGINS into sections
-            for plugin in PLUGINS:
-                for key in get_default()[plugin.name].keys():
+            for pl in PLUGINS:
+                for key in self.defaults[pl.name].keys():
                     key_old = key[0].upper() + key[1:]
-                    config_new[plugin.name][key] = config_old[plugin.name.casefold() + key_old]
+                    config_new[pl.name][key] = config_old[pl.name.casefold() + key_old]
         self.changed = True
         return config_new
 
@@ -159,7 +113,14 @@ class ConfigParser:
 
         # no unsaved changes yet
         self.changed = False
-        return config_loaded
+
+        if config_loaded is None:
+            # use default values if something went wrong
+            logger.warning('Using default configuration values.')
+            config_loaded = self.defaults
+            config_loaded['version'] = self._version
+
+        self._config_data = config_loaded
 
     def write(self) -> bool:
         """Write configuration
@@ -171,14 +132,10 @@ class ConfigParser:
             logger.debug('No changes were made, skipping save')
             return False
 
-        if self.debugging:
-            logger.warning('Saving the config in debug mode is disabled!')
-            return False
-
         logger.debug("Saving the config")
         try:
             with open(path + "/yin_yang/yin_yang.json", 'w') as conf_file:
-                json.dump(self._config, conf_file, indent=4)
+                json.dump(self._config_data, conf_file, indent=4)
 
             # no unsaved changes anymore
             self.changed = False
@@ -188,31 +145,16 @@ class ConfigParser:
             logger.error(f"Error while writing the file: {e}")
             return False
 
-    def get(self, key, plugin: Optional[str] = None) -> ConfigValue:
+    def get(self, key, plugin: str) -> Union[bool, str]:
         """Return the given key from the config
-
         :param key: the key to change
         :param plugin: name of the plugin
-
         :returns: value
         """
 
-        try:
-            if plugin is None:
-                return self._config[key.casefold()]
-            else:
-                return self._config[plugin.casefold()][key.casefold()]
-        except KeyError as e:
-            logger.warning(f"Unknown key {key}")
-            if plugin is None:
-                for p in PLUGINS:
-                    if p.name.casefold() in key:
-                        logger.warning("Key is deprecated. Use plugin option instead")
-                        return self.get(key.replace(p.name, ''), plugin=p.name)
-            else:
-                raise e
+        return self._config_data[plugin.casefold()][key.casefold()]
 
-    def update(self, key: str, value: ConfigValue, plugin: Optional[str] = None) -> ConfigValue:
+    def update(self, plugin: str, key: str, value: Union[bool, str]) -> Union[bool, str]:
         """Update the value of a key in configuration
 
         :param key: The setting to change
@@ -224,9 +166,9 @@ class ConfigParser:
 
         try:
             if plugin is None:
-                self._config[key.casefold()] = value
+                self._config_data[key.casefold()] = value
             else:
-                self._config[plugin.casefold()][key.casefold()] = value
+                self._config_data[plugin.casefold()][key.casefold()] = value
 
             # new unsaved changes
             self.changed = True
@@ -236,69 +178,164 @@ class ConfigParser:
             logger.error(f'Error while updating {key}')
             raise e
 
-    def get_config(self) -> dict:
-        """returns the config"""
+    @property
+    def defaults(self) -> dict:
+        # NOTE: if you change or add new values here, make sure to update the version number and update_config() method
+        conf_default = {
+            "version": -1,
+            "running": False,
+            "dark_mode": False,
+            "mode": Modes.manual.value,
+            "listener": Listener.native.value,
+            "coordinates": (0, 0),
+            "update_location": False,
+            "switch_to_dark": "20:00",
+            "switch_to_light": "07:00"
+        }
 
-        return self._config
+        # plugin settings
+        for pl in PLUGINS:
+            conf_default[pl.name.casefold()] = {
+                "enabled": False,
+                "light_theme": pl.theme_bright,
+                "dark_theme": pl.theme_dark
+            }
 
+        return conf_default
 
-def get_desktop() -> str:
-    """Return the current desktops name or 'unknown' if can't determine it"""
-    # just to get all possible implementations of desktop variables
-    # noinspection SpellCheckingInspection
-    env = str(os.getenv("GDMSESSION")).lower()
-    second_env = str(os.getenv("XDG_CURRENT_DESKTOP")).lower()
-    third_env = str(os.getenv("XDG_CURRENT_DESKTOP")).lower()
+    @property
+    def running(self) -> bool:
+        return self._config_data['running']
 
-    # these are the envs I will look for
-    # feel free to add your Desktop and see if it works
-    gnome_re = re.compile(r'gnome')
-    budgie_re = re.compile(r'budgie')
-    kde_re = re.compile(r'kde')
-    plasma_re = re.compile(r'plasma')
-    plasma5_re = re.compile(r'plasma5')
+    @running.setter
+    def running(self, running: bool):
+        self._config_data['running'] = running
 
-    if (gnome_re.search(env) or
-            gnome_re.search(second_env) or gnome_re.search(third_env)):
-        return "gtk"
-    if (budgie_re.search(env) or
-            budgie_re.search(second_env) or budgie_re.search(third_env)):
-        return "gtk"
-    if (kde_re.search(env) or
-            kde_re.search(second_env) or kde_re.search(third_env)):
-        return "kde"
-    if (plasma_re.search(env) or
-            plasma_re.search(second_env) or plasma_re.search(third_env)):
-        return "kde"
-    if (plasma5_re.search(env) or
-            plasma5_re.search(second_env) or plasma5_re.search(third_env)):
-        return "kde"
-    return "unknown"
+    @property
+    def dark_mode(self) -> bool:
+        return self._config_data['dark_mode']
 
+    @dark_mode.setter
+    def dark_mode(self, dark_mode: bool):
+        self._config_data['dark_mode'] = dark_mode
 
-def get_current_location() -> Tuple[float, float]:
-    """
-    Returns the current location as a tuple (latitude, longitude)
-    """
-    loc = requests.get('http://www.ipinfo.io/loc').text.split(',')
-    return float(loc[0]), float(loc[1])
+    @property
+    def mode(self) -> Modes:
+        mode_string = self._config_data['mode']
 
+        for mode in list(Modes):
+            if mode_string == mode.value:
+                return mode
 
-def get_sun_time() -> Tuple[time, time]:
-    """Sets the sunrise and sunset to config based on location"""
-    latitude, longitude = config.get('coordinates')
-    sun = Sun(latitude, longitude)
+        raise ValueError('Unsupported mode!')
 
-    try:
-        today_sr = sun.get_local_sunrise_time()
-        today_ss = sun.get_local_sunset_time()
+    @mode.setter
+    def mode(self, mode: Modes):
+        self._config_data['mode'] = mode.value
 
-        return today_sr.time(), today_ss.time()
+    @property
+    def listener(self) -> Listener:
+        listener_string = self._config_data['listener']
 
-    except SunTimeException as e:
-        logger.error("Error: {0}.".format(e))
+        for listener in list(Listener):
+            if listener_string == listener.value:
+                return listener
+
+        raise ValueError('Unsupported mode!')
+
+    @listener.setter
+    def listener(self, listener: Listener):
+        self._config_data['listener'] = listener.value
+
+    @property
+    def location(self) -> tuple[float, float]:
+        if self._config_data['update_location']:
+            loc = requests.get('http://www.ipinfo.io/loc').text.split(',')
+            return float(loc[0]), float(loc[1])
+
+        return self._config_data['coordinates']
+
+    @location.setter
+    def location(self, coordinates: tuple[float, float]):
+        if self._config_data['update_location']:
+            raise ValueError('Location is updated automatically!')
+
+        self._config_data['coordinates'] = coordinates
+
+    @property
+    def times(self) -> tuple[time, time]:
+        if self.mode == Modes.scheduled:
+            # return time in config data
+            time_light = self._config_data['switch_to_light']
+            time_dark = self._config_data['switch_to_dark']
+
+            time_light = time.fromisoformat(time_light)
+            time_dark = time.fromisoformat(time_dark)
+
+            return time_light, time_dark
+        elif self.mode == Modes.followSun:
+            # use times for sunrise and sunset
+            latitude, longitude = config.location
+            sun = Sun(latitude, longitude)
+
+            try:
+                today_sr = sun.get_local_sunrise_time()
+                today_ss = sun.get_local_sunset_time()
+
+                return today_sr.time(), today_ss.time()
+
+            except SunTimeException as e:
+                logger.error("Error: {0}.".format(e))
+
+    @times.setter
+    def times(self, times: tuple[time, time]):
+        if self.mode == Modes.scheduled:
+            self._config_data['times'] = times[0].isoformat(), times[1].isoformat()
+        else:
+            raise ValueError('Changing times is only allowed in mode scheduled!')
+
+    @property
+    def desktop(self) -> str:
+        """Return the current desktops name or 'unknown' if can't determine it"""
+        # just to get all possible implementations of desktop variables
+        # noinspection SpellCheckingInspection
+        env = str(os.getenv("GDMSESSION")).lower()
+        second_env = str(os.getenv("XDG_CURRENT_DESKTOP")).lower()
+        third_env = str(os.getenv("XDG_CURRENT_DESKTOP")).lower()
+
+        # these are the envs I will look for
+        # feel free to add your Desktop and see if it works
+        gnome_re = re.compile(r'gnome')
+        budgie_re = re.compile(r'budgie')
+        kde_re = re.compile(r'kde')
+        plasma_re = re.compile(r'plasma')
+        plasma5_re = re.compile(r'plasma5')
+
+        if (gnome_re.search(env) or
+                gnome_re.search(second_env) or gnome_re.search(third_env)):
+            return "gtk"
+        if (budgie_re.search(env) or
+                budgie_re.search(second_env) or budgie_re.search(third_env)):
+            return "gtk"
+        if (kde_re.search(env) or
+                kde_re.search(second_env) or kde_re.search(third_env)):
+            return "kde"
+        if (plasma_re.search(env) or
+                plasma_re.search(second_env) or plasma_re.search(third_env)):
+            return "kde"
+        if (plasma5_re.search(env) or
+                plasma5_re.search(second_env) or plasma5_re.search(third_env)):
+            return "kde"
+        return "unknown"
 
 
 # create global object with current version
 # NOTE change the version here if the structure of the config file has been modified
 config = ConfigParser(2.2)
+# load config from file
+config.load()
+
+# set plugin themes
+for plugin in PLUGINS:
+    plugin.theme_bright = config.get('light_theme', plugin.name)
+    plugin.theme_dark = config.get('dark_theme', plugin.name)
