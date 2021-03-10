@@ -22,17 +22,12 @@ logger = logging.getLogger(__name__)
 
 def parse_time(time_str: str) -> int:
     """
-    Converts a time string to seconds since the epoch for the next time the time is reached.
-    Example: When parse_time('07:00') is called on the 01.01.2021 09:00,
-             the function returns the 02.01.2021 07:00 in unix time in seconds.
+    Converts a time string to seconds since the epoch
     :param time_str: a time string formatted as %H:%M
     """
     today = date.today()
     tm = datetimetime.fromisoformat(time_str)
     unix_time: float = time.mktime(datetime.combine(today, tm).timetuple())
-
-    if unix_time < time.time():
-        unix_time += 60*60*24
 
     return int(unix_time)
 
@@ -70,6 +65,17 @@ def send_config(plugin: str) -> dict:
                     parse_time(time_light.strftime('%H:%M')),
                     parse_time(time_dark.strftime('%H:%M'))
                 ]
+            else:
+                raise ValueError('Unexpected value for mode!')
+
+            # move times so that one of them is always in the future
+            time_now = datetime.today().timestamp()
+            one_day = 60 * 60 * 24
+            if time_now < times[0] and time_now < times[1]:
+                times[1] -= one_day
+            elif times[0] < time_now and times[1] < time_now:
+                times[0] += one_day
+
             message['times'] = times
 
     return message
