@@ -12,12 +12,12 @@ license: MIT
 import logging
 import time
 from abc import ABC, abstractmethod
+from datetime import datetime
 
 import dbus
 from dbus.mainloop.glib import DBusGMainLoop
 
 from yin_yang.config import config, PLUGINS
-from yin_yang.checker import Checker, ManualMode
 
 logger = logging.getLogger(__name__)
 
@@ -31,9 +31,7 @@ def handle_time_change(*args):
 class Listener:
     def __init__(self, listener):
         if listener == 'native':
-            self._mode = InternalMainLoop(Checker(config.get('mode')))
-        #elif (listener == 'clight'):
-            #self._mode = Clight()
+            self._mode = Native()
         else:
             raise ValueError('Unexpected value for listener!')
 
@@ -52,23 +50,27 @@ class Mode(ABC):
         raise NotImplementedError('Method is not implemented.')
 
 
-class InternalMainLoop(Mode):
-    def __init__(self, checker: Checker):
-        super(InternalMainLoop, self).__init__()
-        if isinstance(checker, ManualMode):
-            raise ValueError('No notifier needed if mode is manual!')
-        else:
-            self._checker = checker
-
+class Native(Mode):
     def run(self):
         while True:
             if self.terminate:
-                config.update("running", False)
+                config.running = False
                 config.write()
                 break
 
-            set_mode(self._checker.should_be_dark())
+            set_mode(self.should_be_dark())
             time.sleep(60)
+
+    def should_be_dark(self) -> bool:
+        """Compares two times with current time"""
+
+        time_current = datetime.now().time()
+        time_light, time_dark = config.times
+
+        if time_light < time_dark:
+            return not (time_light <= time_current < time_dark)
+        else:
+            return time_dark <= time_current < time_light
 
 
 class Clight(Mode):
@@ -87,7 +89,7 @@ class Clight(Mode):
 
 
 def set_mode(dark: bool):
-    if dark == config.get('dark_mode'):
+    if dark == config.dark_mode:
         return
 
     logger.info(f'Switching to {"dark" if dark else "light"} mode.')
@@ -95,10 +97,10 @@ def set_mode(dark: bool):
         if config.get('enabled', plugin=p.name):
             p.set_mode(dark)
 
-    config.update('dark_mode', dark)
+    config.dark_mode = dark
     config.write()
 
 
 def run():
-    listener = Listener(config.get('listener'))
+    listener = Listener(config.listener)
     listener.run()
