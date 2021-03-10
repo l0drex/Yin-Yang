@@ -71,32 +71,6 @@ Categories=Utility; System; Settings;
 Keywords=night;dark;day;bright;color;theme;
 EOF
 
-echo "Creating systemd job"
-cat > "/usr/lib/systemd/system/yin-yang.service" <<EOF
-[Unit]
-Description=Switch the theme between light and dark automatically
-
-[Service]
-User=$USER
-Group=$USER
-ExecStart=/bin/python /opt/yin-yang/main.py -t
-EOF
-
-cat > "/usr/lib/systemd/system/yin-yang.timer" <<EOF
-[Unit]
-Description=Switch the theme between light and dark automatically
-
-[Timer]
-OnActiveSec=2s
-OnBootSec=5s
-OnCalendar=*-*-* 07:00:00
-OnCalendar=*-*-* 20:00:00
-
-[Install]
-# enable on boot
-WantedBy=timers.target
-EOF
-
 cat << "EOF"
  __     ___          __     __
  \ \   / (_)         \ \   / /

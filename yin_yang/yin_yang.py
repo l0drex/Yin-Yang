@@ -51,19 +51,14 @@ class Mode(ABC):
         raise NotImplementedError('Method is not implemented.')
 
 
-class ExternalMainLoop(Mode):
+class InternalMainLoop(Mode):
     def __init__(self, checker: Checker):
-        super(ExternalMainLoop, self).__init__()
+        super(InternalMainLoop, self).__init__()
         if isinstance(checker, ManualMode):
             raise ValueError('No notifier needed if mode is manual!')
         else:
             self._checker = checker
 
-    def run(self):
-        set_mode(self._checker.should_be_dark())
-
-
-class InternalMainLoop(ExternalMainLoop):
     def run(self):
         while True:
             if self.terminate:
@@ -71,7 +66,7 @@ class InternalMainLoop(ExternalMainLoop):
                 config.write()
                 break
 
-            super(InternalMainLoop, self).run()
+            set_mode(self._checker.should_be_dark())
             time.sleep(60)
 
 

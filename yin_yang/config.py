@@ -3,7 +3,6 @@ import logging
 import os
 import pathlib
 import re
-import subprocess
 from datetime import time
 from enum import Enum
 from typing import Optional, Union, Tuple
@@ -31,7 +30,6 @@ class Modes(Enum):
 
 class Listener(Enum):
     native = 'native'
-    systemd = 'systemd'
     clight = 'clight'
 
 
@@ -71,8 +69,6 @@ class ConfigParser:
     _version: float
     debugging: bool = False
     changed: bool = False
-    # needed because editing systemd timer needs sudo and we dont want to ask for the password after every change
-    update_systemd_needed: bool = False
 
     def __init__(self, version: float):
         self._version = version
@@ -184,9 +180,6 @@ class ConfigParser:
             with open(path + "/yin_yang/yin_yang.json", 'w') as conf_file:
                 json.dump(self._config, conf_file, indent=4)
 
-            if self.update_systemd_needed:
-                self.update_systemd_timer()
-
             # no unsaved changes anymore
             self.changed = False
 
@@ -231,26 +224,6 @@ class ConfigParser:
 
         try:
             if plugin is None:
-                time_changes = (key.casefold() == ('switch_to_dark' and value != self._config.get('switch_to_dark')) or
-                                (key.casefold() == 'switch_to_light' and value != self._config.get('switch_to_light')))
-                mode_changes = (key.casefold() == 'mode' and value != self.get('mode'))
-                listener_changed_systemd = (key.casefold() == 'listener') and \
-                                           (value != self.get('listener') and
-                                            'systemd' in [value, self.get('listener')])
-
-                if ((not self.update_systemd_needed) and
-                        (((self.get('listener') == Listener.systemd.value) and (time_changes or mode_changes)) or
-                         listener_changed_systemd)):
-                    reason = ''
-                    if time_changes:
-                        reason = 'time changed'
-                    if mode_changes:
-                        reason += ', mode changes'
-                    if listener_changed_systemd:
-                        reason += ', listener changed from or to systemd'
-                    print('Reason: ' + reason)
-                    self.update_systemd_needed = True
-
                 self._config[key.casefold()] = value
             else:
                 self._config[plugin.casefold()][key.casefold()] = value
@@ -267,41 +240,6 @@ class ConfigParser:
         """returns the config"""
 
         return self._config
-
-    def update_systemd_timer(self):
-        """Runs a simple bash script that updates the systemd timer"""
-
-        logger.info('Updating systemd timer')
-
-        mode = self.get('mode')
-        needed = mode != Modes.manual.value and self.get('listener') == Listener.systemd.value
-
-        if not needed and not self.get('running'):
-            return True
-
-        time_light: str = self.get('switch_to_light')
-        time_dark: str = self.get('switch_to_dark')
-
-        if mode == Modes.followSun.value:
-            time_light_time, time_dark_time = get_sun_time()
-            time_light = time_light_time.strftime('%H:%M')
-            time_dark = time_dark_time.strftime('%H:%M')
-
-        completed = subprocess.run(['./scripts/update_systemd_timer.sh',
-                                    '1' if needed else '0',
-                                    time_light + ':00',
-                                    time_dark + ':00'])
-
-        if not completed.returncode == 0:
-            error = ValueError('An error happened while changing the systemd timer. \n'
-                               'Try to run /scripts/update-systemd-timer.sh manually. \n'
-                               'If the error persists, leave an issue in the repo on github.')
-            logger.error('An error happened while trying to update systemd.timer: ' + str(error))
-            logger.error(completed.stdout)
-            raise error
-
-        self.update('running', needed and (completed.returncode == 0))
-        self.update_systemd_needed = False
 
 
 def get_desktop() -> str:
