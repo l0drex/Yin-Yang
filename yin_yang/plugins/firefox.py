@@ -1,10 +1,21 @@
 import json
+import os
+from configparser import ConfigParser
 from pathlib import Path
 
 from yin_yang.plugins.plugin import Plugin
 
-# TODO more general please
-path = str(Path.home()) + '/.mozilla/firefox/sooi88to.default-release/extensions.json'
+
+def get_default_profile_path() -> str:
+    path = str(Path.home()) + '/.mozilla/firefox/'
+    config_parser = ConfigParser()
+    config_parser.read(path + '/profiles.ini')
+    path += config_parser['Profile0']['Path']
+
+    return path
+
+
+path = get_default_profile_path() + '/extensions.json'
 
 
 class Firefox(Plugin):
