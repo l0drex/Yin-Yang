@@ -12,7 +12,6 @@ import time
 from datetime import date, datetime, time as datetimetime
 from pathlib import Path
 
-from yin_yang import checker
 from yin_yang.config import config, Modes
 
 logging.basicConfig(filename=str(Path.home()) + '/.local/share/yin_yang.log', level=logging.DEBUG,
@@ -43,30 +42,18 @@ def send_config(plugin: str) -> dict:
     enabled = config.get('enabled', plugin)
     message = {
         'enabled': enabled,
-        'dark_mode': config.get('dark_mode')
+        'dark_mode': config.dark_mode
     }
 
     if enabled:
-        mode = config.get("mode")
+        mode = config.mode
         message['scheduled'] = mode != Modes.manual.value
         message['themes'] = [
             config.get("light_theme", plugin),
             config.get("dark_theme", plugin)
         ]
         if mode != Modes.manual.value:
-            if mode == Modes.scheduled.value:
-                times = [
-                    parse_time(config.get("switch_To_Light")),
-                    parse_time(config.get("switch_To_Dark"))
-                ]
-            elif mode == Modes.followSun.value:
-                time_light, time_dark = checker.get_sun_time()
-                times = [
-                    parse_time(time_light.strftime('%H:%M')),
-                    parse_time(time_dark.strftime('%H:%M'))
-                ]
-            else:
-                raise ValueError('Unexpected value for mode!')
+            times = [parse_time(tm.strftime('%H:%M')) for tm in config.times]
 
             # move times so that one of them is always in the future
             time_now = datetime.today().timestamp()
