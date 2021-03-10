@@ -5,7 +5,7 @@ from PyQt5.QtCore import QTime
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QDialogButtonBox
 
 from yin_yang.ui.mainwindow import Ui_main_window
-from yin_yang.config import config, Modes, get_current_location, PLUGINS
+from yin_yang.config import config, Modes, PLUGINS
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -32,13 +32,13 @@ class MainWindow(QtWidgets.QMainWindow):
         """Sets the values from the config to the elements"""
 
         # set current version in statusbar
-        self.ui.status_bar.showMessage("yin-yang: v" + str(config.get("version")))
+        self.ui.status_bar.showMessage("yin-yang: v" + str(config._version))
 
         # set the correct mode
-        mode = config.get("mode")
-        self.ui.btn_enable.setChecked(mode != Modes.manual.value)
+        mode = config.mode
+        self.ui.btn_enable.setChecked(mode != Modes.manual)
 
-        if mode == Modes.followSun.value:
+        if mode == Modes.followSun:
             self.ui.time.setVisible(False)
             self.ui.btn_sun.setChecked(True)
         else:
@@ -55,16 +55,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.get_plugins()
 
     def get_time(self):
-        d_hour = config.get("switch_To_Dark").split(":")[0]
-        d_minute = config.get("switch_To_Dark").split(":")[1]
-        l_hour = config.get("switch_To_Light").split(":")[0]
-        l_minute = config.get("switch_To_Light").split(":")[1]
+        time_light, time_dark = config.times
 
         # giving the time widget the values of the config
-        dark_time = QTime(int(d_hour), int(d_minute))
-        light_time = QTime(int(l_hour), int(l_minute))
-        self.ui.inp_time_dark.setTime(dark_time)
-        self.ui.inp_time_light.setTime(light_time)
+        self.ui.inp_time_light.setTime(time_light)
+        self.ui.inp_time_dark.setTime(time_dark)
 
     def get_time_sun(self, checked):
         if not checked:
@@ -75,7 +70,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def get_location(self):
         # set correct coordinates
-        coordinates = config.get('coordinates')
+        coordinates = config.location
         self.ui.inp_latitude.setValue(coordinates[0])
         self.ui.inp_longitude.setValue(coordinates[1])
 
@@ -95,13 +90,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
             widget.setChecked(config.get("Enabled", plugin=plugin.name))
 
-            if plugin.name == 'KDE' and config.get("desktop") != "kde":
+            if plugin.name == 'KDE' and config.desktop != "kde":
                 # make the widget invisible
                 widget.setChecked(False)
                 widget.setVisible(False)
                 config.update("Enabled", False, plugin='kde')
 
-            if plugin.name == 'Gnome' and config.get("desktop") != "gnome":
+            if plugin.name == 'Gnome' and config.desktop != "gnome":
                 # make the widget invisible
                 widget.setChecked(False)
                 widget.setVisible(False)
@@ -145,11 +140,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # determine the mode to use
         if not self.ui.btn_enable.isChecked():
-            config.update('mode', Modes.manual.value)
+            config.mode = Modes.manual
         elif self.ui.btn_schedule.isChecked():
-            config.update('mode', Modes.scheduled.value)
+            config.mode = Modes.scheduled
         elif self.ui.btn_sun.isChecked():
-            config.update('mode', Modes.followSun.value)
+            config.mode = Modes.followSun
 
         config.update('enabled', self.ui.toggle_sound.isChecked(), plugin='sound')
         config.update('enabled', self.ui.toggle_notification.isChecked(), plugin='notification')
@@ -165,8 +160,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # update config if time has changed
         time_light = self.ui.inp_time_light.time()
         time_dark = self.ui.inp_time_dark.time()
-        config.update("switch_To_Light", time_light.toString()[0:5])
-        config.update("switch_To_Dark", time_dark.toString()[0:5])
+        config.times = time_light, time_dark
 
     def set_location(self):
         coordinates = [
@@ -178,7 +172,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def set_current_location(self):
         """Sets the current location to config and updates input field values"""
 
-        config.update('coordinates', get_current_location())
+        config.set_auto_location(True)
         self.get_location()
 
     def set_plugins(self):
