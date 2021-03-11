@@ -14,9 +14,6 @@ import time
 from abc import ABC, abstractmethod
 from datetime import datetime
 
-import dbus
-from dbus.mainloop.glib import DBusGMainLoop
-
 from yin_yang.config import config, PLUGINS
 
 logger = logging.getLogger(__name__)
@@ -70,21 +67,6 @@ class Native(Mode):
             time_light, time_dark = config.times
             set_mode(should_be_dark(datetime.now().time(), time_light, time_dark))
             time.sleep(60)
-
-
-class Clight(Mode):
-    # source: https://github.com/FedeDP/Clight/wiki/DE-Automation
-
-    def run(self):
-        DBusGMainLoop(set_as_default=True)
-        bus = dbus.SessionBus()
-        # noinspection SpellCheckingInspection
-        bus.add_signal_receiver(
-            handle_time_change,
-            'PropertiesChanged',
-            'org.freedesktop.DBus.Properties',
-            path='/org/clight/clight'
-        )
 
 
 def set_mode(dark: bool):
