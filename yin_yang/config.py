@@ -223,6 +223,7 @@ class ConfigParser:
     @running.setter
     def running(self, running: bool):
         self._config_data['running'] = running
+        self.write()
 
     @property
     def dark_mode(self) -> bool:
@@ -231,6 +232,7 @@ class ConfigParser:
     @dark_mode.setter
     def dark_mode(self, dark_mode: bool):
         self._config_data['dark_mode'] = dark_mode
+        self.write()
 
     @property
     def mode(self) -> Modes:
