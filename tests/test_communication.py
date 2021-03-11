@@ -6,7 +6,7 @@ from datetime import datetime, time
 from subprocess import Popen, PIPE
 
 import communicate
-from yin_yang.config import ConfigParser
+from yin_yang.config import ConfigParser, config as std_config
 from yin_yang.yin_yang import should_be_dark
 
 config = ConfigParser()
@@ -62,11 +62,14 @@ class CommunicationTest(unittest.TestCase):
                                 'Current time should always be between light and dark times')
 
     def test_encode_decode(self):
+        config.load()
         process = Popen([sys.executable, '../communicate.py'],
                         stdin=PIPE, stdout=PIPE)
         plugins = ['firefox']
 
         for plugin in plugins:
+            config.update(plugin, 'enabled', True)
+            config.write()
             with self.subTest(plugin=plugin):
 
                 # build call
@@ -83,6 +86,9 @@ class CommunicationTest(unittest.TestCase):
                 response = process.stdout.readline()
                 process.terminate()
 
+                self.assertTrue(response is not None and len(response) > 0,
+                                'Response should not be empty')
+
                 # decode response
                 response_length = struct.unpack('=I', response[:4])[0]
                 response = response[4:]
@@ -93,6 +99,8 @@ class CommunicationTest(unittest.TestCase):
                 message_expected = communicate.send_config(plugin)
                 self.assertEqual(message_expected, response_decoded,
                                  'Returned message should be equal to the message')
+
+        std_config.write()
 
         process.terminate()
 
