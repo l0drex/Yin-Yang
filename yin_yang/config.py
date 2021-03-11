@@ -66,15 +66,15 @@ def update_config(config_old: dict, defaults: dict):
 
         # put settings for PLUGINS into sections
         plugins: dict = defaults['plugins']
-        plugins.pop('Konsole')
-        plugins.pop('Sound')
-        plugins.pop('Notification')
+        plugins.pop('konsole')
+        plugins.pop('sound')
+        plugins.pop('notification')
         for plugin_name, plugin_config in plugins.items():
             for key in plugin_config.keys():
                 try:
                     key_old = str(key).replace('_', ' ').title().replace(' ', '')
                     # code was renamed to vs code
-                    if plugin_name == 'VS Code':
+                    if plugin_name == 'vs code':
                         plugin_config[key] = config_old['code' + key_old]
                         continue
                     plugin_config[key] = config_old[plugin_name.casefold() + key_old]
@@ -95,7 +95,7 @@ class ConfigParser:
         logger.info('Setting default values.')
         self._config_data = self.defaults
 
-    def load(self) -> Optional[dict]:
+    def load(self) -> None:
         """Load config from file"""
 
         logger.debug('Loading config file')
@@ -112,22 +112,18 @@ class ConfigParser:
                 config_loaded = json.load(config_file)
 
         if config_loaded is None or config_loaded == {}:
-            logger.warning('Could not load config file.')
-            return None
-
-        # check if config needs an update
-        # if the default values are set, the version number is below 0
-        if 0 < config_loaded["version"] < self.defaults['version']:
-            self.changed = True
-            return update_config(config_loaded, self.defaults)
-
-        # no unsaved changes yet
-        self.changed = False
-
-        if config_loaded is None:
             # use default values if something went wrong
             logger.warning('Using default configuration values.')
             config_loaded = self.defaults
+
+        # check if config needs an update
+        # if the default values are set, the version number is below 0
+        if config_loaded["version"] < self.defaults['version']:
+            self.changed = True
+            config_loaded = update_config(config_loaded, self.defaults)
+        else:
+            # no unsaved changes yet
+            self.changed = False
 
         self._config_data = config_loaded
 
@@ -161,7 +157,10 @@ class ConfigParser:
         :returns: value
         """
 
-        return self._config_data['plugins'][plugin][key.casefold()]
+        plugin = plugin.casefold()
+        key = key.casefold()
+
+        return self._config_data['plugins'][plugin][key]
 
     def update(self, plugin: str, key: str, value: Union[bool, str]) -> Union[bool, str]:
         """Update the value of a key in configuration
@@ -173,13 +172,16 @@ class ConfigParser:
         :returns: new value
         """
 
+        plugin = plugin.casefold()
+        key = key.casefold()
+
         try:
-            self._config_data['plugins'][plugin][key.casefold()] = value
+            self._config_data['plugins'][plugin][key] = value
             # new unsaved changes
             self.changed = True
             return self.get(plugin, key)
         except KeyError as e:
-            logger.error(f'Error while updating {key}')
+            logger.error(f'Error while updating {plugin}.{key}')
             raise e
 
     @property
@@ -200,7 +202,7 @@ class ConfigParser:
 
         # plugin settings
         for pl in PLUGINS:
-            conf_default["plugins"][pl.name] = {
+            conf_default["plugins"][pl.name.casefold()] = {
                 "enabled": False,
                 "light_theme": pl.theme_bright,
                 "dark_theme": pl.theme_dark
