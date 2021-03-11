@@ -60,14 +60,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.inp_time_light.setTime(time_light)
         self.ui.inp_time_dark.setTime(time_dark)
 
-    def get_time_sun(self, checked):
-        if not checked:
-            return
-
-        self.set_location()
-        self.get_time()
-
     def get_location(self):
+        self.ui.btn_location.setChecked(config.update_location)
+        self.ui.location_input.setDisabled(config.update_location)
         # set correct coordinates
         coordinates = config.location
         self.ui.inp_latitude.setValue(coordinates[0])
@@ -99,7 +94,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 # make the widget invisible
                 widget.setChecked(False)
                 widget.setVisible(False)
-                config.update('enabled', False, plugin='gnome')
+                config.update('gnome', 'enabled', False)
 
             if plugin.name == 'Wallpaper':
                 children = widget.findChildren(QtWidgets.QPushButton)
@@ -113,7 +108,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     theme = 'light' if widget.findChildren(QtWidgets.QComboBox).index(child) == 0 else 'dark'
                     index = child.findText(
                         plugin.get_themes_available()[
-                            config.get(plugin=plugin.name, key=f'{theme}_theme')
+                            config.get(plugin.name, f'{theme}_theme')
                         ]
                     )
                     child.setCurrentIndex(index)
@@ -124,12 +119,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def register_handlers(self):
         # set sunrise and sunset times if mode is set to followSun or coordinates changed
-        self.ui.btn_sun.toggled.connect(self.get_time_sun)
-        self.ui.inp_latitude.valueChanged.connect(self.get_time_sun)
-        self.ui.inp_longitude.valueChanged.connect(self.get_time_sun)
+        self.ui.btn_sun.toggled.connect(self.set_time)
+        self.ui.inp_latitude.valueChanged.connect(self.set_time)
+        self.ui.inp_longitude.valueChanged.connect(self.set_time)
 
         # button to get the current position
-        self.ui.btn_location.pressed.connect(self.set_current_location)
+        self.ui.btn_location.stateChanged.connect(self.set_location)
 
         # connect dialog buttons
         self.ui.btn_box.clicked.connect(self.save_config)
@@ -156,23 +151,26 @@ class MainWindow(QtWidgets.QMainWindow):
     def set_time(self):
         """Sets the time set in the ui to the config"""
 
+        if config.mode != Modes.scheduled:
+            return
         # update config if time has changed
-        time_light = self.ui.inp_time_light.time()
-        time_dark = self.ui.inp_time_dark.time()
+        time_light = self.ui.inp_time_light.time().toPyTime()
+        time_dark = self.ui.inp_time_dark.time().toPyTime()
         config.times = time_light, time_dark
 
     def set_location(self):
+        config.update_location = self.ui.btn_location.isChecked()
+        if config.update_location:
+            self.get_location()
+            return
+        else:
+            self.ui.location_input.setEnabled(True)
+
         coordinates = [
             self.ui.inp_latitude.value(),
             self.ui.inp_longitude.value()
         ]
         config.location = coordinates
-
-    def set_current_location(self):
-        """Sets the current location to config and updates input field values"""
-
-        config.set_auto_location(True)
-        self.get_location()
 
     def set_plugins(self):
         for plugin in PLUGINS:

@@ -2,4 +2,4 @@
 
 from qtpy import uic
 
-uic.compileUiDir("designer")
+uic.compileUiDir("../designer")
