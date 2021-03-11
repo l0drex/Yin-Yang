@@ -42,12 +42,13 @@ def main(arguments):
             print("Or edit the config found in ~/.config/yin_yang/yin_yang.json")
             print("You need to set schedule to True and edit the time to toggles")
             return
-
-        print(f"Using mode {mode}")
-        if config.mode != Modes.manual:
-            config.running = False
-            print("START thread listener")
+        elif not config.running:
+            print(f"Starting in mode {mode.name}")
+            time_light, time_dark = config.times
+            print(f'Dark mode will be active between {time_dark} and {time_light}')
             yin_yang.run()
+        else:
+            raise ValueError('Yin Yang is already running')
     elif arguments.toggle:
         # toggle theme manually
         config.mode = Modes.manual
