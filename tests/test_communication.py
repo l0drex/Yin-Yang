@@ -70,7 +70,7 @@ class CommunicationTest(unittest.TestCase):
         for plugin in plugins:
             config.update(plugin, 'enabled', True)
             config.write()
-            with self.subTest(plugin=plugin):
+            with self.subTest('Returned message should be correct', plugin=plugin):
 
                 # build call
                 call_encoded = json.dumps(plugin).encode('utf-8')
@@ -97,8 +97,8 @@ class CommunicationTest(unittest.TestCase):
 
                 # test if correct
                 message_expected = communicate.send_config(plugin)
-                self.assertEqual(message_expected, response_decoded,
-                                 'Returned message should be equal to the message')
+                self.assertDictEqual(message_expected, response_decoded,
+                                     'Returned message should be equal to the message')
 
         std_config.write()
 
