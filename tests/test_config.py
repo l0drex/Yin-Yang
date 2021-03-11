@@ -103,6 +103,7 @@ class ConfigTest(unittest.TestCase):
         if os.path.isfile(path):
             with open(path, 'r') as file:
                 old_data = json.load(file)
+            assert old_data is not None and old_data != {}
 
         self.assertTrue(self.config.write(),
                         'Config could not be saved')
@@ -110,7 +111,7 @@ class ConfigTest(unittest.TestCase):
 
         if os.path.isfile(path):
             with open(path, 'w') as file:
-                json.dump(old_data)
+                json.dump(old_data, file, indent=4)
 
 
 if __name__ == '__main__':

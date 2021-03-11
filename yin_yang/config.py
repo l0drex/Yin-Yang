@@ -134,7 +134,7 @@ class ConfigParser:
 
         if not self.changed:
             logger.debug('No changes were made, skipping save')
-            return False
+            return True
 
         logger.debug("Saving the config")
         try:
