@@ -356,6 +356,6 @@ config = ConfigParser()
 config.load()
 
 # set plugin themes
-for plugin in PLUGINS:
-    plugin.theme_bright = config.get(plugin.name, 'light_theme')
-    plugin.theme_dark = config.get(plugin.name, 'dark_theme')
+for p in PLUGINS:
+    p.theme_bright = config.get(p.name, 'light_theme')
+    p.theme_dark = config.get(p.name, 'dark_theme')
