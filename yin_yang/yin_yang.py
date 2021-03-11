@@ -11,7 +11,6 @@ license: MIT
 
 import logging
 import time
-from abc import ABC, abstractmethod
 from datetime import datetime
 
 from yin_yang.config import config, PLUGINS
@@ -25,28 +24,6 @@ def handle_time_change(*args):
         set_mode(dark_mode)
 
 
-class Listener:
-    def __init__(self, listener):
-        if listener == 'native':
-            self._mode = Native()
-        else:
-            raise ValueError('Unexpected value for listener!')
-
-    def run(self):
-        self._mode.run()
-
-
-class Mode(ABC):
-    terminate = False
-
-    def __init__(self):
-        pass
-
-    @abstractmethod
-    def run(self):
-        raise NotImplementedError('Method is not implemented.')
-
-
 def should_be_dark(time_current: time, time_light: time, time_dark: time) -> bool:
     """Compares two times with current time"""
 
@@ -54,19 +31,6 @@ def should_be_dark(time_current: time, time_light: time, time_dark: time) -> boo
         return not (time_light <= time_current < time_dark)
     else:
         return time_dark <= time_current < time_light
-
-
-class Native(Mode):
-    def run(self):
-        while True:
-            if self.terminate:
-                config.running = False
-                config.write()
-                break
-
-            time_light, time_dark = config.times
-            set_mode(should_be_dark(datetime.now().time(), time_light, time_dark))
-            time.sleep(60)
 
 
 def set_mode(dark: bool):
@@ -83,5 +47,7 @@ def set_mode(dark: bool):
 
 
 def run():
-    listener = Listener(config.listener)
-    listener.run()
+    while True:
+        time_light, time_dark = config.times
+        set_mode(should_be_dark(datetime.now().time(), time_light, time_dark))
+        time.sleep(60)
