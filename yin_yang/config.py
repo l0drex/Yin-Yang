@@ -53,22 +53,18 @@ def update_config(config_old: dict, defaults: dict):
     # replace default values with previous ones
     if config_old["version"] <= 2.1:
         # determine mode
-        if config_old["schedule"]:
+        if config_old.pop('schedule'):
             mode = Modes.scheduled.value
-        elif config_old["followSun"]:
+        elif config_old.pop('followSun'):
             mode = Modes.followSun.value
         else:
             mode = Modes.manual.value
         config_new["mode"] = mode
 
-        # determine theme
-        config_new["dark_mode"] = config_old["theme"] == "dark"
+        config_new["dark_mode"] = config_old.pop('theme') == "dark"
 
         # put settings for PLUGINS into sections
         plugins: dict = defaults['plugins']
-        plugins.pop('konsole')
-        plugins.pop('sound')
-        plugins.pop('notification')
         for plugin_name, plugin_config in plugins.items():
             for key in plugin_config.keys():
                 try:
@@ -78,9 +74,12 @@ def update_config(config_old: dict, defaults: dict):
                         plugin_config[key] = config_old['code' + key_old]
                         continue
                     plugin_config[key] = config_old[plugin_name.casefold() + key_old]
-                except KeyError as e:
-                    logger.error(f'Error while updating old config file with key {key}')
-                    raise e
+                except KeyError:
+                    if plugin_name == 'sound' and key in ['light_theme', 'dark_theme']:
+                        # this is expected since there is no theme
+                        continue
+                    logger.warning(f'Error while updating old config file. No value found for {plugin_name}.{key}')
+                    logger.info('This is most likely because the plugin was added in a later version')
     return config_new
 
 
