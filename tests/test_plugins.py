@@ -14,8 +14,9 @@ class PluginsTest(unittest.TestCase):
                 self.assertTrue(pl.theme_dark is not None and pl.theme_bright is not None,
                                 'No default theme is specified. ' +
                                 'If your plugin does not support any default themes, use empty strings.')
-                self.assertIsInstance(pl.get_themes_available(), dict,
-                                      'Available themes always should be a dict.')
+                if config.get(pl.name, 'enabled'):
+                    self.assertIsInstance(pl.get_themes_available(), dict,
+                                          'Available themes always should be a dict.')
 
     # if you want to test that your theme changes, set test_theme_changes to true in test_setter.py
     @unittest.skipUnless(test_theme_changes, 'test_theme_changes is disabled')
