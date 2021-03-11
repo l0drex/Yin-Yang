@@ -1,6 +1,6 @@
 import unittest
 
-from yin_yang.config import ConfigParser, PLUGINS, Modes
+from yin_yang.config import ConfigParser, PLUGINS, Modes, update_config
 
 
 class ConfigTest(unittest.TestCase):
@@ -38,9 +38,53 @@ class ConfigTest(unittest.TestCase):
         self.assertTrue(self.config.changed,
                         'Config should see itself as changed when it is.')
 
-    @unittest.skip('Implementation needed')
     def test_updates_old_files(self):
-        pass
+        old_configs = [
+            {
+                "version": 2.1,
+                "desktop": self.config.desktop,
+                "followSun": False,
+                "latitude": "",
+                "longitude": "",
+                "schedule": False,
+                "switchToDark": "20:00",
+                "switchToLight": "07:00",
+                "running": False,
+                "theme": "",
+                "codeLightTheme": "Default Light+", "codeDarkTheme": "Default Dark+",
+                "codeEnabled": False,
+                "kdeLightTheme": "org.kde.breeze.desktop",
+                "kdeDarkTheme": "org.kde.breezedark.desktop",
+                "kdeEnabled": False, "gtkLightTheme": "",
+                "gtkDarkTheme": "", "atomLightTheme": "",
+                "atomDarkTheme": "", "atomEnabled": False,
+                "gtkEnabled": False,
+                "wallpaperLightTheme": "",
+                "wallpaperDarkTheme": "",
+                "wallpaperEnabled": False,
+                "firefoxEnabled": False,
+                "firefoxDarkTheme": "firefox-compact-dark@mozilla.org",
+                "firefoxLightTheme": "firefox-compact-light@mozilla.org",
+                "firefoxActiveTheme": "firefox-compact-light@mozilla.org",
+                "gnomeEnabled": False,
+                "gnomeLightTheme": "",
+                "gnomeDarkTheme": "",
+                "kvantumEnabled": False,
+                "kvantumLightTheme": "",
+                "kvantumDarkTheme": "",
+                "soundEnabled": True
+            }
+        ]
+        for old_config in old_configs:
+            with self.subTest(version=old_config['version']):
+                new_config = update_config(old_config, self.config.defaults)
+
+                for key in self.config.defaults:
+                    self.assertTrue(new_config.get(key) is not None,
+                                    'All default keys should be contained in the new config')
+                for key in new_config:
+                    self.assertTrue(self.config.defaults.get(key) is not None,
+                                    'No new keys should be added to the new config file')
 
     @unittest.skip('Implementation needed')
     def test_writes_file(self):

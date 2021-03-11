@@ -37,7 +37,7 @@ home = os.getenv("HOME")
 path = home + "/.config"
 
 
-def update_config(config_old, defaults):
+def update_config(config_old: dict, defaults: dict):
     """Update old config files
     Adds keys or restructures the config if an old config was loaded from the config file.
     Sets the new config directly to the dict in this class.
@@ -51,8 +51,6 @@ def update_config(config_old, defaults):
     config_new = defaults
 
     # replace default values with previous ones
-    if config_old["version"] < 0:
-        return config_old
     if config_old["version"] <= 2.1:
         # determine mode
         if config_old["schedule"]:
@@ -67,10 +65,22 @@ def update_config(config_old, defaults):
         config_new["dark_mode"] = config_old["theme"] == "dark"
 
         # put settings for PLUGINS into sections
-        for pl in PLUGINS:
-            for key in defaults[pl.name].keys():
-                key_old = key[0].upper() + key[1:]
-                config_new[pl.name][key] = config_old[pl.name.casefold() + key_old]
+        plugins: dict = defaults['plugins']
+        plugins.pop('Konsole')
+        plugins.pop('Sound')
+        plugins.pop('Notification')
+        for plugin_name, plugin_config in plugins.items():
+            for key in plugin_config.keys():
+                try:
+                    key_old = str(key).replace('_', ' ').title().replace(' ', '')
+                    # code was renamed to vs code
+                    if plugin_name == 'VS Code':
+                        plugin_config[key] = config_old['code' + key_old]
+                        continue
+                    plugin_config[key] = config_old[plugin_name.casefold() + key_old]
+                except KeyError as e:
+                    logger.error(f'Error while updating old config file with key {key}')
+                    raise e
     return config_new
 
 
@@ -151,9 +161,7 @@ class ConfigParser:
         :returns: value
         """
 
-        for p in self._config_data['plugins']:
-            if plugin.title() == p['name']:
-                return p[key.casefold()]
+        return self._config_data['plugins'][plugin][key.casefold()]
 
     def update(self, plugin: str, key: str, value: Union[bool, str]) -> Union[bool, str]:
         """Update the value of a key in configuration
@@ -166,12 +174,9 @@ class ConfigParser:
         """
 
         try:
-            for p in self._config_data['plugins']:
-                if plugin.title() == p['name']:
-                    p[key.casefold()] = value
+            self._config_data['plugins'][plugin][key.casefold()] = value
             # new unsaved changes
             self.changed = True
-
             return self.get(plugin, key)
         except KeyError as e:
             logger.error(f'Error while updating {key}')
@@ -190,17 +195,16 @@ class ConfigParser:
             "update_location": False,
             "switch_to_dark": "20:00",
             "switch_to_light": "07:00",
-            "plugins": []
+            "plugins": {}
         }
 
         # plugin settings
         for pl in PLUGINS:
-            conf_default["plugins"].append({
-                "name": pl.name.title(),
+            conf_default["plugins"][pl.name] = {
                 "enabled": False,
                 "light_theme": pl.theme_bright,
                 "dark_theme": pl.theme_dark
-            })
+            }
 
         return conf_default
 
