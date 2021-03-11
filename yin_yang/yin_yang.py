@@ -47,12 +47,11 @@ def set_mode(dark: bool):
 
 def run():
     config.running = True
-    try:
-        while True:
+    while config.running:
+        try:
             time_light, time_dark = config.times
             set_mode(should_be_dark(datetime.now().time(), time_light, time_dark))
             time.sleep(60)
-    except KeyboardInterrupt:
-        print('Terminating')
-        config.running = False
-        return
+        except KeyboardInterrupt:
+            print('Terminating')
+            config.running = False
