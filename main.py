@@ -17,12 +17,12 @@ from yin_yang.config import Modes, config
 from yin_yang.yin_yang import set_mode
 
 parser = ArgumentParser()
-parser.add_argument("-t", "--toggle",
-                    help="toggles Yin-Yang",
-                    action="store_true")
-parser.add_argument("-s", "--schedule",
-                    help="schedule theme toggle, starts daemon in bg",
-                    action="store_true")
+parser.add_argument('-t', '--toggle',
+                    help='toggles Yin-Yang',
+                    action='store_true')
+parser.add_argument('-s', '--schedule',
+                    help='schedule theme toggle, starts daemon in bg',
+                    action='store_true')
 parser.add_argument('-d', '--debugging',
                     help='enables debugging mode',
                     action='store_true')
@@ -60,7 +60,7 @@ def main(arguments):
         app.exec_()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.debugging:

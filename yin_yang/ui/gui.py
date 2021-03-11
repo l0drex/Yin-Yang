@@ -82,15 +82,15 @@ class MainWindow(QtWidgets.QMainWindow):
 
             assert widget is not None, f'No widget for plugin {plugin.name} found'
 
-            widget.setChecked(config.get(plugin.name, "Enabled"))
+            widget.setChecked(config.get(plugin.name, 'Enabled'))
 
-            if plugin.name == 'KDE' and config.desktop != "kde":
+            if plugin.name == 'KDE' and config.desktop != 'kde':
                 # make the widget invisible
                 widget.setChecked(False)
                 widget.setVisible(False)
                 config.update('kde', 'enabled', False)
 
-            if plugin.name == 'Gnome' and config.desktop != "gnome":
+            if plugin.name == 'Gnome' and config.desktop != 'gnome':
                 # make the widget invisible
                 widget.setChecked(False)
                 widget.setVisible(False)
@@ -114,8 +114,8 @@ class MainWindow(QtWidgets.QMainWindow):
                     child.setCurrentIndex(index)
             else:
                 children = widget.findChildren(QtWidgets.QLineEdit)
-                children[0].setText(config.get(plugin=plugin.name, key="light_theme"))
-                children[1].setText(config.get(plugin=plugin.name, key="dark_theme"))
+                children[0].setText(config.get(plugin=plugin.name, key='light_theme'))
+                children[1].setText(config.get(plugin=plugin.name, key='dark_theme'))
 
     def register_handlers(self):
         # set sunrise and sunset times if mode is set to followSun or coordinates changed
@@ -190,13 +190,13 @@ class MainWindow(QtWidgets.QMainWindow):
                     config.update(plugin.name, f'{theme}_theme', theme_name)
             else:
                 children = widget.findChildren(QtWidgets.QLineEdit)
-                config.update(plugin.name, "light_theme", children[0].text())
-                config.update(plugin.name, "dark_theme", children[1].text())
+                config.update(plugin.name, 'light_theme', children[0].text())
+                config.update(plugin.name, 'dark_theme', children[1].text())
 
     def set_wallpaper(self, dark: bool):
         file_name, _ = QFileDialog.getOpenFileName(
-            self, f"Open Wallpaper {'dark' if dark else 'light'}",
-            str(Path.home()), "Images (*.png *.jpg *.jpeg *.JPG *.JPEG)")
+            self, f'Open Wallpaper {"dark" if dark else "light"}',
+            str(Path.home()), 'Images (*.png *.jpg *.jpeg *.JPG *.JPEG)')
 
         group_wallpaper = self.ui.plugins_scroll_content.findChild(QtWidgets.QGroupBox, 'groupWallpaper')
         inputs_wallpaper = group_wallpaper.findChildren(QtWidgets.QLineEdit)

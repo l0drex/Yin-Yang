@@ -62,8 +62,8 @@ def send_config(plugin: str) -> dict:
         mode = config.mode
         message['scheduled'] = mode != Modes.manual
         message['themes'] = [
-            config.get(plugin, "light_theme"),
-            config.get(plugin, "dark_theme")
+            config.get(plugin, 'light_theme'),
+            config.get(plugin, 'dark_theme')
         ]
         if mode != Modes.manual:
             time_light, time_dark = config.times
@@ -79,14 +79,14 @@ def encode_message(message_content: dict) -> dict[str, bytes]:
     Encode a message for transmission, given its content.
     :param message_content: a message
     """
-    encoded_content = json.dumps(message_content).encode("utf-8")
+    encoded_content = json.dumps(message_content).encode('utf-8')
     encoded_length = struct.pack('=I', len(encoded_content))
     # use struct.pack("10s", bytes)
     # to pack a string of the length of 10 characters
 
     encoded_message = {
         'length': encoded_length,
-        'content': struct.pack(str(len(encoded_content)) + "s",
+        'content': struct.pack(str(len(encoded_content)) + 's',
                                encoded_content)}
     logger.debug('Encoded message with length ' + str(len(encoded_content)))
     return encoded_message
@@ -114,7 +114,7 @@ def decode_message():
     if not raw_length:
         sys.exit(0)
     message_length = struct.unpack('=I', raw_length)[0]
-    message = sys.stdin.buffer.read(message_length).decode("utf-8")
+    message = sys.stdin.buffer.read(message_length).decode('utf-8')
 
     return json.loads(message)
 

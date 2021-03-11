@@ -22,9 +22,9 @@ PLUGINS: [PluginClass] = [kde.Kde(), gnome.Gnome(), gtk.Gtk(), kvantum.Kvantum()
 
 
 class Modes(Enum):
-    manual = "manual"
-    scheduled = "manual time"
-    followSun = "sunset to sunrise"
+    manual = 'manual'
+    scheduled = 'manual time'
+    followSun = 'sunset to sunrise'
 
 
 class Listener(Enum):
@@ -33,8 +33,8 @@ class Listener(Enum):
 
 
 # aliases for path to use later on
-home = os.getenv("HOME")
-path = home + "/.config"
+home = str(pathlib.Path.home())
+path = home + '/.config'
 
 
 def update_config(config_old: dict, defaults: dict):
@@ -51,7 +51,7 @@ def update_config(config_old: dict, defaults: dict):
     config_new = defaults
 
     # replace default values with previous ones
-    if config_old["version"] <= 2.1:
+    if config_old['version'] <= 2.1:
         # determine mode
         if config_old.pop('schedule'):
             mode = Modes.scheduled.value
@@ -59,9 +59,9 @@ def update_config(config_old: dict, defaults: dict):
             mode = Modes.followSun.value
         else:
             mode = Modes.manual.value
-        config_new["mode"] = mode
+        config_new['mode'] = mode
 
-        config_new["dark_mode"] = config_old.pop('theme') == "dark"
+        config_new['dark_mode'] = config_old.pop('theme') == 'dark'
 
         # put settings for PLUGINS into sections
         plugins: dict = defaults['plugins']
@@ -100,14 +100,14 @@ class ConfigParser:
         logger.debug('Loading config file')
 
         # generate path for yin-yang if there is none this will be skipped
-        pathlib.Path(path + "/yin_yang").mkdir(parents=True, exist_ok=True)
+        pathlib.Path(path + '/yin_yang').mkdir(parents=True, exist_ok=True)
 
         config_loaded = {}
 
         # check if conf exists
-        if os.path.isfile(path + "/yin_yang/yin_yang.json"):
+        if os.path.isfile(path + '/yin_yang/yin_yang.json'):
             # load conf
-            with open(path + "/yin_yang/yin_yang.json", "r") as config_file:
+            with open(path + '/yin_yang/yin_yang.json', 'r') as config_file:
                 config_loaded = json.load(config_file)
 
         if config_loaded is None or config_loaded == {}:
@@ -117,7 +117,7 @@ class ConfigParser:
 
         # check if config needs an update
         # if the default values are set, the version number is below 0
-        if config_loaded["version"] < self.defaults['version']:
+        if config_loaded['version'] < self.defaults['version']:
             self.changed = True
             config_loaded = update_config(config_loaded, self.defaults)
         else:
@@ -136,9 +136,9 @@ class ConfigParser:
             logger.debug('No changes were made, skipping save')
             return True
 
-        logger.debug("Saving the config")
+        logger.debug('Saving the config')
         try:
-            with open(path + "/yin_yang/yin_yang.json", 'w') as conf_file:
+            with open(path + '/yin_yang/yin_yang.json', 'w') as conf_file:
                 json.dump(self._config_data, conf_file, indent=4)
 
             # no unsaved changes anymore
@@ -146,7 +146,7 @@ class ConfigParser:
 
             return True
         except IOError as e:
-            logger.error(f"Error while writing the file: {e}")
+            logger.error(f'Error while writing the file: {e}')
             return False
 
     def get(self, plugin: str, key: str) -> Union[bool, str]:
@@ -187,23 +187,23 @@ class ConfigParser:
     def defaults(self) -> dict:
         # NOTE: if you change or add new values here, make sure to update the version number and update_config() method
         conf_default = {
-            "version": 2.2,
-            "running": False,
-            "dark_mode": False,
-            "mode": Modes.manual.value,
-            "listener": Listener.native.value,
-            "coordinates": (0, 0),
-            "update_location": False,
-            "times": ("07:00", "20:00"),
-            "plugins": {}
+            'version': 2.2,
+            'running': False,
+            'dark_mode': False,
+            'mode': Modes.manual.value,
+            'listener': Listener.native.value,
+            'coordinates': (0, 0),
+            'update_location': False,
+            'times': ('07:00', '20:00'),
+            'plugins': {}
         }
 
         # plugin settings
         for pl in PLUGINS:
-            conf_default["plugins"][pl.name.casefold()] = {
-                "enabled": False,
-                "light_theme": pl.theme_bright,
-                "dark_theme": pl.theme_dark
+            conf_default['plugins'][pl.name.casefold()] = {
+                'enabled': False,
+                'light_theme': pl.theme_bright,
+                'dark_theme': pl.theme_dark
             }
 
         return conf_default
@@ -305,7 +305,7 @@ class ConfigParser:
                 return today_sr.time(), today_ss.time()
 
             except SunTimeException as e:
-                logger.error("Error: {0}.".format(e))
+                logger.error(f'Error: {e}.')
 
         # return time in config data
         time_light, time_dark = self._config_data['times']
@@ -328,9 +328,9 @@ class ConfigParser:
         """Return the current desktops name or 'unknown' if can't determine it"""
         # just to get all possible implementations of desktop variables
         # noinspection SpellCheckingInspection
-        env = str(os.getenv("GDMSESSION")).lower()
-        second_env = str(os.getenv("XDG_CURRENT_DESKTOP")).lower()
-        third_env = str(os.getenv("XDG_CURRENT_DESKTOP")).lower()
+        env = str(os.getenv('GDMSESSION')).lower()
+        second_env = str(os.getenv('XDG_CURRENT_DESKTOP')).lower()
+        third_env = str(os.getenv('XDG_CURRENT_DESKTOP')).lower()
 
         # these are the envs I will look for
         # feel free to add your Desktop and see if it works
@@ -342,20 +342,20 @@ class ConfigParser:
 
         if (gnome_re.search(env) or
                 gnome_re.search(second_env) or gnome_re.search(third_env)):
-            return "gtk"
+            return 'gtk'
         if (budgie_re.search(env) or
                 budgie_re.search(second_env) or budgie_re.search(third_env)):
-            return "gtk"
+            return 'gtk'
         if (kde_re.search(env) or
                 kde_re.search(second_env) or kde_re.search(third_env)):
-            return "kde"
+            return 'kde'
         if (plasma_re.search(env) or
                 plasma_re.search(second_env) or plasma_re.search(third_env)):
-            return "kde"
+            return 'kde'
         if (plasma5_re.search(env) or
                 plasma5_re.search(second_env) or plasma5_re.search(third_env)):
-            return "kde"
-        return "unknown"
+            return 'kde'
+        return 'unknown'
 
 
 # create global object with current version
