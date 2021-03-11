@@ -1,6 +1,11 @@
+import json
+import os
 import unittest
+from pathlib import Path
 
 from yin_yang.config import ConfigParser, PLUGINS, Modes, update_config
+
+path = str(Path.home()) + '/.config/yin_yang/yin_yang.json'
 
 
 class ConfigTest(unittest.TestCase):
@@ -86,9 +91,26 @@ class ConfigTest(unittest.TestCase):
                     self.assertTrue(self.config.defaults.get(key) is not None,
                                     'No new keys should be added to the new config file')
 
-    @unittest.skip('Implementation needed')
+    @unittest.skipUnless(os.path.isfile(path), 'No config file found')
+    def test_loads_file(self):
+        self.config.load()
+        with open(path, 'r') as file:
+            data: dict = json.load(file)
+            self.assertDictEqual(data, self.config.data,
+                                 'Loaded data should be correct')
+
     def test_writes_file(self):
-        pass
+        if os.path.isfile(path):
+            with open(path, 'r') as file:
+                old_data = json.load(file)
+
+        self.assertTrue(self.config.write(),
+                        'Config could not be saved')
+        self.test_loads_file()
+
+        if os.path.isfile(path):
+            with open(path, 'w') as file:
+                json.dump(old_data)
 
 
 if __name__ == '__main__':

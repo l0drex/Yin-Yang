@@ -5,7 +5,7 @@ import pathlib
 import re
 from datetime import time
 from enum import Enum
-from typing import Optional, Union
+from typing import Union
 
 import requests
 from suntime import Sun, SunTimeException
@@ -211,6 +211,10 @@ class ConfigParser:
         return conf_default
 
     @property
+    def data(self) -> dict:
+        return self._config_data
+
+    @property
     def version(self) -> float:
         return self._config_data['version']
 
@@ -258,9 +262,6 @@ class ConfigParser:
     def listener(self, listener: Listener):
         self._config_data['listener'] = listener.value
 
-    def set_auto_location(self, enable: bool):
-        self._config_data['update_location'] = enable
-
     @property
     def location(self) -> tuple[float, float]:
         if self._config_data['update_location']:
@@ -275,6 +276,14 @@ class ConfigParser:
             raise ValueError('Location is updated automatically!')
 
         self._config_data['coordinates'] = coordinates
+
+    @property
+    def update_location(self) -> bool:
+        return self._config_data['update_location']
+
+    @update_location.setter
+    def update_location(self, enabled: bool):
+        self._config_data['update_location'] = enabled
 
     @property
     def times(self) -> tuple[time, time]:
