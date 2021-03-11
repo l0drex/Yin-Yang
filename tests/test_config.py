@@ -101,9 +101,8 @@ class ConfigTest(unittest.TestCase):
 
     def test_writes_file(self):
         if os.path.isfile(path):
-            with open(path, 'r') as file:
-                old_data = json.load(file)
-            assert old_data is not None and old_data != {}
+            self.config.load()
+            old_data = self.config.data
 
         self.assertTrue(self.config.write(),
                         'Config could not be saved')
