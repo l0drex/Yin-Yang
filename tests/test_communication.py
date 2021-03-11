@@ -126,19 +126,6 @@ class CommunicationTest(unittest.TestCase):
                 self.assertEqual(is_dark, detected_dark,
                                  f'Dark mode should be {"active" if is_dark else "inactive"} at {time_current_str}')
 
-    def test_dark_mode_detection_follow_sun(self):
-        config.mode = Modes.followSun
-        time_current: datetime = datetime.today()
-        time_light, time_dark = config.times
-        time_light_unix, time_dark_unix = communicate.move_times(time_current, time_light, time_dark)
-        time_current_unix: int = int(time_current.timestamp())
-
-        is_dark = should_be_dark(time_current.time(), time_light, time_dark)
-        # NOTE: this should be equal to how the extension calculates the theme
-        detected_dark = time_dark_unix <= time_current_unix < time_light_unix
-        self.assertEqual(is_dark, detected_dark,
-                         'Dark mode detection should be correct')
-
 
 if __name__ == '__main__':
     unittest.main()
