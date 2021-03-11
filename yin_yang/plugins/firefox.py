@@ -14,9 +14,6 @@ def get_default_profile_path() -> str:
     return path
 
 
-path = get_default_profile_path() + '/extensions.json'
-
-
 class Firefox(Plugin):
     name = 'Firefox'
     theme_bright = 'firefox-compact-light@mozilla.org'
@@ -26,6 +23,7 @@ class Firefox(Plugin):
         pass
 
     def get_themes_available(self) -> dict[str, str]:
+        path = get_default_profile_path() + '/extensions.json'
         themes: dict[str, str] = {}
 
         with open(path, 'r') as file:
