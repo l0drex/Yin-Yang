@@ -4,7 +4,7 @@ from datetime import time
 from yin_yang.yin_yang import should_be_dark
 
 
-class TestThemeSelection(unittest.TestCase):
+class ThemeSelectionTest(unittest.TestCase):
     def test_compare_time(self):
         time_light = time.fromisoformat('08:00')
         time_dark = time.fromisoformat('20:00')
