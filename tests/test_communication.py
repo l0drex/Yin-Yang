@@ -61,6 +61,7 @@ class CommunicationTest(unittest.TestCase):
                 self.assertTrue(time_light <= time_now < time_dark or time_dark <= time_now < time_light,
                                 'Current time should always be between light and dark times')
 
+    @unittest.skipUnless(config.get('firefox', 'enabled'), 'Firefox plugin is disabled')
     def test_encode_decode(self):
         config.load()
         process = Popen([sys.executable, '../communicate.py'],
