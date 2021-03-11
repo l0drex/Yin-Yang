@@ -195,8 +195,7 @@ class ConfigParser:
             "listener": Listener.native.value,
             "coordinates": (0, 0),
             "update_location": False,
-            "switch_to_dark": "20:00",
-            "switch_to_light": "07:00",
+            "times": ("07:00", "20:00"),
             "plugins": {}
         }
 
@@ -302,8 +301,7 @@ class ConfigParser:
                 logger.error("Error: {0}.".format(e))
 
         # return time in config data
-        time_light = self._config_data['switch_to_light']
-        time_dark = self._config_data['switch_to_dark']
+        time_light, time_dark = self._config_data['times']
 
         time_light = time.fromisoformat(time_light)
         time_dark = time.fromisoformat(time_dark)
