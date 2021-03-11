@@ -50,7 +50,7 @@ class Mode(ABC):
         raise NotImplementedError('Method is not implemented.')
 
 
-def should_be_dark(time_current, time_light, time_dark) -> bool:
+def should_be_dark(time_current: time, time_light: time, time_dark: time) -> bool:
     """Compares two times with current time"""
 
     if time_light < time_dark:

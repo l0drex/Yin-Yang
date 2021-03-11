@@ -19,16 +19,29 @@ logging.basicConfig(filename=str(Path.home()) + '/.local/share/yin_yang.log', le
 logger = logging.getLogger(__name__)
 
 
-def parse_time(time_str: str) -> int:
+def move_times(time_now: datetime, time_light: datetimetime, time_dark: datetimetime) -> list[int, int]:
     """
     Converts a time string to seconds since the epoch
-    :param time_str: a time string formatted as %H:%M
+    :param time_now: the current time
+    :param time_light: the time when light mode starts
+    :param time_dark: the time when dark mode starts
     """
-    today = date.today()
-    tm = datetimetime.fromisoformat(time_str)
-    unix_time: float = time.mktime(datetime.combine(today, tm).timetuple())
 
-    return int(unix_time)
+    # convert all times to unix times
+    time_now_unix: int = int(time_now.timestamp())
+    time_light_unix: int = int(time.mktime(
+        datetime.combine(time_now.date(), time_light).timetuple()))
+    time_dark_unix: int = int(time.mktime(
+        datetime.combine(time_now.date(), time_dark).timetuple()))
+
+    # move times so that one of them is always in the future
+    one_day = 60 * 60 * 24
+    if time_now_unix < time_light_unix and time_now_unix < time_dark_unix:
+        time_dark_unix -= one_day
+    elif time_light_unix < time_now_unix and time_dark_unix < time_now_unix:
+        time_light_unix += one_day
+
+    return [time_light_unix, time_dark_unix]
 
 
 def send_config(plugin: str) -> dict:
@@ -39,7 +52,7 @@ def send_config(plugin: str) -> dict:
     """
     logger.debug('Building message')
 
-    enabled = config.get('enabled', plugin)
+    enabled = config.get(plugin, 'enabled')
     message = {
         'enabled': enabled,
         'dark_mode': config.dark_mode
@@ -47,23 +60,16 @@ def send_config(plugin: str) -> dict:
 
     if enabled:
         mode = config.mode
-        message['scheduled'] = mode != Modes.manual.value
+        message['scheduled'] = mode != Modes.manual
         message['themes'] = [
-            config.get("light_theme", plugin),
-            config.get("dark_theme", plugin)
+            config.get(plugin, "light_theme"),
+            config.get(plugin, "dark_theme")
         ]
-        if mode != Modes.manual.value:
-            times = [parse_time(tm.strftime('%H:%M')) for tm in config.times]
+        if mode != Modes.manual:
+            time_light, time_dark = config.times
+            time_now = datetime.now()
 
-            # move times so that one of them is always in the future
-            time_now = datetime.today().timestamp()
-            one_day = 60 * 60 * 24
-            if time_now < times[0] and time_now < times[1]:
-                times[1] -= one_day
-            elif times[0] < time_now and times[1] < time_now:
-                times[0] += one_day
-
-            message['times'] = times
+            message['times'] = move_times(time_now, time_light, time_dark)
 
     return message
 

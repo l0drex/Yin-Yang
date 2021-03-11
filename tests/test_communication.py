@@ -2,34 +2,42 @@ import json
 import struct
 import sys
 import unittest
-from datetime import datetime
+from datetime import datetime, time
 from subprocess import Popen, PIPE
 
 import communicate
-from yin_yang.checker import Checker
-from yin_yang.config import ConfigParser, Modes
-
-config = ConfigParser(2.2)
+from yin_yang.config import config, Modes
+from yin_yang.yin_yang import should_be_dark
 
 
 class CommunicationTest(unittest.TestCase):
     def setUp(self):
-        # reset all changes
-        global config
-        config = ConfigParser(2.2)
+        config.set_default()
+        config.update('firefox', 'enabled', True)
 
-    def test_parse_time(self):
-        response = communicate.parse_time('07:00')
+    def test_move_time(self):
+        time_light = time.fromisoformat('07:00')
+        time_dark = time.fromisoformat('20:00')
 
-        self.assertIsInstance(response, int)
-        date = datetime.fromtimestamp(response)
-        self.assertEqual(date.strftime('%H:%M'), '07:00')
+        times = [
+            # morning
+            datetime.strptime('03:00', '%H:%M'),
+            # day
+            datetime.strptime('12:00', '%H:%M'),
+            # night
+            datetime.strptime('22:00', '%H:%M')
+        ]
 
-        now: int = int(datetime.now().timestamp())
-        one_hour_later = communicate.parse_time(datetime.fromtimestamp(now + 60*60).strftime('%H:%M'))
-        one_hour_later_next_day = datetime.today().timestamp() + 60*60 + 60+60*24
-        self.assertTrue(one_hour_later < one_hour_later_next_day,
-                        'Time should not be increased by one day if it is already in the future')
+        for time_current in times:
+            time_current_str = time_current.strftime('%H:%M')
+            with self.subTest('Current time should always be between dark and light',
+                              time_current=time_current_str):
+                time_current_unix = time_current.timestamp()
+                time_light_unix, time_dark_unix = communicate.move_times(time_current, time_light, time_dark)
+                self.assertIsInstance(time_light_unix, int)
+                self.assertIsInstance(time_dark_unix, int)
+                self.assertTrue(time_light_unix <= time_current_unix <= time_dark_unix or
+                                time_dark_unix <= time_current_unix <= time_light_unix)
 
     def test_message_build(self):
         message = communicate.send_config('firefox')
@@ -52,77 +60,76 @@ class CommunicationTest(unittest.TestCase):
                                 'Current time should always be between light and dark times')
 
     def test_encode_decode(self):
-        message = 'firefox'
+        config.load()
 
         process = Popen([sys.executable, '../communicate.py'],
                         stdin=PIPE, stdout=PIPE)
+        calls = ['firefox']
 
-        # build call
-        call = {
-            'name': 'Firefox',
-            'themes': []
-        }
-        call_encoded = json.dumps(call).encode('utf-8')
-        call_encoded = struct.pack(str(len(call_encoded)) + 's',
-                                   call_encoded)
-        msg_length = struct.pack('=I', len(call_encoded))
+        for call in calls:
+            # build call
+            call_encoded = json.dumps(call).encode('utf-8')
+            call_encoded = struct.pack(str(len(call_encoded)) + 's',
+                                       call_encoded)
+            msg_length = struct.pack('=I', len(call_encoded))
 
-        # send call and get response
-        process.stdin.write(msg_length)
-        process.stdin.write(call_encoded)
-        process.stdin.flush()
-        process.stdin.close()
-        response = process.stdout.readline()
-        process.terminate()
+            # send call and get response
+            process.stdin.write(msg_length)
+            process.stdin.write(call_encoded)
+            process.stdin.flush()
+            process.stdin.close()
+            response = process.stdout.readline()
+            process.terminate()
 
-        # decode response
-        response_length = struct.unpack('=I', response[:4])[0]
-        response = response[4:]
-        response_decoded = response[:response_length].decode('utf-8')
-        response_decoded = json.loads(response_decoded)
+            # decode response
+            response_length = struct.unpack('=I', response[:4])[0]
+            response = response[4:]
+            response_decoded = response[:response_length].decode('utf-8')
+            response_decoded = json.loads(response_decoded)
 
-        # test if correct
-        self.assertEqual(message, response_decoded,
-                         'Returned message should be equal to the message')
+            # test if correct
+            message_expected = communicate.send_config(call)
+            self.assertEqual(message_expected, response_decoded,
+                             'Returned message should be equal to the message')
 
     def test_dark_mode_detection_scheduled(self):
-        config.update('mode', Modes.scheduled.value)
-        time_current: int = int(datetime.today().timestamp())
-        checker_scheduled = Checker(Modes.scheduled.value)
-        msg = 'Dark mode should be decided correctly.'
+        time_light = time.fromisoformat('07:00')
+        time_dark = time.fromisoformat('20:00')
+
         times = [
-            # day
-            [time_current - 60, time_current + 60],
-            # night
-            [time_current - 120, time_current - 60],
             # morning
-            [time_current + 60, time_current + 120],
+            datetime.strptime('03:00', '%H:%M'),
+            # day
+            datetime.strptime('12:00', '%H:%M'),
+            # night
+            datetime.strptime('22:00', '%H:%M')
         ]
 
-        for time_light, time_dark in times:
-            with self.subTest(msg,
-                              time_current=datetime.fromtimestamp(time_current).strftime('%H:%M'),
-                              time_light_str=datetime.fromtimestamp(time_light).strftime('%H:%M'),
-                              time_dark_str=datetime.fromtimestamp(time_dark).strftime('%H:%M')):
-                # update config with those times
-                config.update('switch_to_light', datetime.fromtimestamp(time_light).strftime('%H:%M'))
-                config.update('switch_to_dark', datetime.fromtimestamp(time_dark).strftime('%H:%M'))
+        for time_current in times:
+            time_current_str = time_current.strftime('%H:%M')
+            with self.subTest('Dark mode should be decided correctly.',
+                              time_current=time_current_str):
                 # get unix times
-                time_light_unix, time_dark_unix = communicate.send_config('firefox')['times']
+                time_light_unix, time_dark_unix = communicate.move_times(time_current, time_light, time_dark)
 
+                is_dark = should_be_dark(time_current.time(), time_light, time_dark)
                 # NOTE: this should be equal to how the extension calculates the theme
-                should_be_dark_extension = time_dark_unix <= time_current < time_light_unix
-                self.assertEqual(checker_scheduled.should_be_dark(), should_be_dark_extension,
-                                 'Dark mode should be ' + 'active' if checker_scheduled.should_be_dark() else 'inactive')
+                detected_dark = time_dark_unix <= time_current.timestamp() < time_light_unix
+
+                self.assertEqual(is_dark, detected_dark,
+                                 f'Dark mode should be {"active" if is_dark else "inactive"} at {time_current_str}')
 
     def test_dark_mode_detection_follow_sun(self):
-        config.update('mode', Modes.followSun.value)
-        checker = Checker(Modes.followSun.value)
-        time_current: int = int(datetime.today().timestamp())
-        time_light_unix, time_dark_unix = communicate.send_config('firefox')['times']
+        config.mode = Modes.followSun
+        time_current: datetime = datetime.today()
+        time_light, time_dark = config.times
+        time_light_unix, time_dark_unix = communicate.move_times(time_current, time_light, time_dark)
+        time_current_unix: int = int(time_current.timestamp())
 
-        should_be_dark_extension = time_dark_unix <= time_current < time_light_unix
-        self.assertEqual(checker.should_be_dark(), should_be_dark_extension,
+        is_dark = should_be_dark(time_current.time(), time_light, time_dark)
+        # NOTE: this should be equal to how the extension calculates the theme
+        detected_dark = time_dark_unix <= time_current_unix < time_light_unix
+        self.assertEqual(is_dark, detected_dark,
                          'Dark mode detection should be correct')
 
 
