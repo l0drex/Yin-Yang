@@ -39,6 +39,7 @@ class CommunicationTest(unittest.TestCase):
                 self.assertTrue(time_light_unix <= time_current_unix <= time_dark_unix or
                                 time_dark_unix <= time_current_unix <= time_light_unix)
 
+    @unittest.skipUnless(config.get('firefox', 'enabled'), 'Plugin Firefox is not enabled')
     def test_message_build(self):
         message = communicate.send_config('firefox')
         self.assertNotEqual(message, None,
@@ -64,33 +65,39 @@ class CommunicationTest(unittest.TestCase):
 
         process = Popen([sys.executable, '../communicate.py'],
                         stdin=PIPE, stdout=PIPE)
-        calls = ['firefox']
+        plugins = ['firefox']
 
-        for call in calls:
-            # build call
-            call_encoded = json.dumps(call).encode('utf-8')
-            call_encoded = struct.pack(str(len(call_encoded)) + 's',
-                                       call_encoded)
-            msg_length = struct.pack('=I', len(call_encoded))
+        for plugin in plugins:
+            with self.subTest(plugin=plugin):
+                if not config.get(plugin, 'enabled'):
+                    continue
 
-            # send call and get response
-            process.stdin.write(msg_length)
-            process.stdin.write(call_encoded)
-            process.stdin.flush()
-            process.stdin.close()
-            response = process.stdout.readline()
-            process.terminate()
+                # build call
+                call_encoded = json.dumps(plugin).encode('utf-8')
+                call_encoded = struct.pack(str(len(call_encoded)) + 's',
+                                           call_encoded)
+                msg_length = struct.pack('=I', len(call_encoded))
 
-            # decode response
-            response_length = struct.unpack('=I', response[:4])[0]
-            response = response[4:]
-            response_decoded = response[:response_length].decode('utf-8')
-            response_decoded = json.loads(response_decoded)
+                # send call and get response
+                process.stdin.write(msg_length)
+                process.stdin.write(call_encoded)
+                process.stdin.flush()
+                process.stdin.close()
+                response = process.stdout.readline()
+                process.terminate()
 
-            # test if correct
-            message_expected = communicate.send_config(call)
-            self.assertEqual(message_expected, response_decoded,
-                             'Returned message should be equal to the message')
+                # decode response
+                response_length = struct.unpack('=I', response[:4])[0]
+                response = response[4:]
+                response_decoded = response[:response_length].decode('utf-8')
+                response_decoded = json.loads(response_decoded)
+
+                # test if correct
+                message_expected = communicate.send_config(plugin)
+                self.assertEqual(message_expected, response_decoded,
+                                 'Returned message should be equal to the message')
+
+        process.terminate()
 
     def test_dark_mode_detection_scheduled(self):
         time_light = time.fromisoformat('07:00')

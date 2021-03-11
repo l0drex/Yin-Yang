@@ -151,7 +151,9 @@ class ConfigParser:
         :returns: value
         """
 
-        return self._config_data[plugin.casefold()][key.casefold()]
+        for p in self._config_data['plugins']:
+            if plugin.title() == p['name']:
+                return p[key.casefold()]
 
     def update(self, plugin: str, key: str, value: Union[bool, str]) -> Union[bool, str]:
         """Update the value of a key in configuration
@@ -164,11 +166,9 @@ class ConfigParser:
         """
 
         try:
-            if plugin is None:
-                self._config_data[key.casefold()] = value
-            else:
-                self._config_data[plugin.casefold()][key.casefold()] = value
-
+            for p in self._config_data['plugins']:
+                if plugin.title() == p['name']:
+                    p[key.casefold()] = value
             # new unsaved changes
             self.changed = True
 
@@ -189,16 +189,18 @@ class ConfigParser:
             "coordinates": (0, 0),
             "update_location": False,
             "switch_to_dark": "20:00",
-            "switch_to_light": "07:00"
+            "switch_to_light": "07:00",
+            "plugins": []
         }
 
         # plugin settings
         for pl in PLUGINS:
-            conf_default[pl.name.casefold()] = {
+            conf_default["plugins"].append({
+                "name": pl.name.title(),
                 "enabled": False,
                 "light_theme": pl.theme_bright,
                 "dark_theme": pl.theme_dark
-            }
+            })
 
         return conf_default
 
