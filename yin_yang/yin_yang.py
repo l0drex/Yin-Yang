@@ -50,6 +50,15 @@ class Mode(ABC):
         raise NotImplementedError('Method is not implemented.')
 
 
+def should_be_dark(time_current, time_light, time_dark) -> bool:
+    """Compares two times with current time"""
+
+    if time_light < time_dark:
+        return not (time_light <= time_current < time_dark)
+    else:
+        return time_dark <= time_current < time_light
+
+
 class Native(Mode):
     def run(self):
         while True:
@@ -58,19 +67,9 @@ class Native(Mode):
                 config.write()
                 break
 
-            set_mode(self.should_be_dark())
+            time_light, time_dark = config.times
+            set_mode(should_be_dark(datetime.now().time(), time_light, time_dark))
             time.sleep(60)
-
-    def should_be_dark(self) -> bool:
-        """Compares two times with current time"""
-
-        time_current = datetime.now().time()
-        time_light, time_dark = config.times
-
-        if time_light < time_dark:
-            return not (time_light <= time_current < time_dark)
-        else:
-            return time_dark <= time_current < time_light
 
 
 class Clight(Mode):
@@ -94,7 +93,7 @@ def set_mode(dark: bool):
 
     logger.info(f'Switching to {"dark" if dark else "light"} mode.')
     for p in PLUGINS:
-        if config.get('enabled', plugin=p.name):
+        if config.get(p.name, 'enabled'):
             p.set_mode(dark)
 
     config.dark_mode = dark

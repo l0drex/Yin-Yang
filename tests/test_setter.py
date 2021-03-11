@@ -1,24 +1,22 @@
 import unittest
 
 from yin_yang.config import config, Modes
-from yin_yang.yin_yang import Setter
+from yin_yang.yin_yang import set_mode
 
 
 class SetterTest(unittest.TestCase):
     def test_update_dark_value(self):
-        mode_used = config.get('mode')
-        config.update('mode', Modes.manual.value)
-        dark_mode_active = config.get('dark_mode')
+        mode_used = config.mode
+        config.mode = Modes.manual
+        dark_mode_active = config.dark_mode
 
-        setter = Setter()
+        set_mode(not dark_mode_active)
+        self.assertEqual(not dark_mode_active, config.dark_mode)
 
-        setter.set_mode(not dark_mode_active)
-        self.assertEqual(not dark_mode_active, config.get('dark_mode'))
+        set_mode(dark_mode_active)
+        self.assertEqual(dark_mode_active, config.dark_mode)
 
-        setter.set_mode(dark_mode_active)
-        self.assertEqual(dark_mode_active, config.get('dark_mode'))
-
-        config.update('mode', mode_used)
+        config.mode = mode_used
 
 
 if __name__ == '__main__':

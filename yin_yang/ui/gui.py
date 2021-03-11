@@ -1,7 +1,6 @@
 from pathlib import Path
 
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import QTime
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QDialogButtonBox
 
 from yin_yang.ui.mainwindow import Ui_main_window
@@ -32,7 +31,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """Sets the values from the config to the elements"""
 
         # set current version in statusbar
-        self.ui.status_bar.showMessage("yin-yang: v" + str(config._version))
+        self.ui.status_bar.showMessage("yin-yang: v" + str(config.version))
 
         # set the correct mode
         mode = config.mode
@@ -46,8 +45,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.btn_schedule.setChecked(True)
             self.ui.location.setVisible(False)
 
-        self.ui.toggle_sound.setChecked(config.get('enabled', plugin='sound'))
-        self.ui.toggle_notification.setChecked(config.get('enabled', plugin='notification'))
+        self.ui.toggle_sound.setChecked(config.get(plugin='sound', key='enabled'))
+        self.ui.toggle_notification.setChecked(config.get(plugin='notification', key='enabled'))
 
         # sets the correct time based on config
         self.get_time()
@@ -88,19 +87,19 @@ class MainWindow(QtWidgets.QMainWindow):
 
             assert widget is not None, f'No widget for plugin {plugin.name} found'
 
-            widget.setChecked(config.get("Enabled", plugin=plugin.name))
+            widget.setChecked(config.get(plugin.name, "Enabled"))
 
             if plugin.name == 'KDE' and config.desktop != "kde":
                 # make the widget invisible
                 widget.setChecked(False)
                 widget.setVisible(False)
-                config.update("Enabled", False, plugin='kde')
+                config.update('kde', 'enabled', False)
 
             if plugin.name == 'Gnome' and config.desktop != "gnome":
                 # make the widget invisible
                 widget.setChecked(False)
                 widget.setVisible(False)
-                config.update("Enabled", False, plugin='gnome')
+                config.update('enabled', False, plugin='gnome')
 
             if plugin.name == 'Wallpaper':
                 children = widget.findChildren(QtWidgets.QPushButton)
@@ -114,14 +113,14 @@ class MainWindow(QtWidgets.QMainWindow):
                     theme = 'light' if widget.findChildren(QtWidgets.QComboBox).index(child) == 0 else 'dark'
                     index = child.findText(
                         plugin.get_themes_available()[
-                            config.get(f'{theme}_theme', plugin=plugin.name)
+                            config.get(plugin=plugin.name, key=f'{theme}_theme')
                         ]
                     )
                     child.setCurrentIndex(index)
             else:
                 children = widget.findChildren(QtWidgets.QLineEdit)
-                children[0].setText(config.get("light_theme", plugin=plugin.name))
-                children[1].setText(config.get("dark_theme", plugin=plugin.name))
+                children[0].setText(config.get(plugin=plugin.name, key="light_theme"))
+                children[1].setText(config.get(plugin=plugin.name, key="dark_theme"))
 
     def register_handlers(self):
         # set sunrise and sunset times if mode is set to followSun or coordinates changed
@@ -146,8 +145,8 @@ class MainWindow(QtWidgets.QMainWindow):
         elif self.ui.btn_sun.isChecked():
             config.mode = Modes.followSun
 
-        config.update('enabled', self.ui.toggle_sound.isChecked(), plugin='sound')
-        config.update('enabled', self.ui.toggle_notification.isChecked(), plugin='notification')
+        config.update('sound', 'enabled', self.ui.toggle_sound.isChecked())
+        config.update('notification', 'enabled', self.ui.toggle_notification.isChecked())
 
         # set values of application config
         self.set_time()
@@ -167,7 +166,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.inp_latitude.value(),
             self.ui.inp_longitude.value()
         ]
-        config.update('coordinates', coordinates)
+        config.location = coordinates
 
     def set_current_location(self):
         """Sets the current location to config and updates input field values"""
@@ -183,18 +182,18 @@ class MainWindow(QtWidgets.QMainWindow):
 
             widget = self.ui.plugins_scroll_content.findChild(QtWidgets.QGroupBox, f'group{plugin.name}')
 
-            config.update("enabled", widget.isChecked(), plugin=plugin.name)
+            config.update(plugin.name, 'enabled', widget.isChecked())
             if plugin.get_themes_available():
                 # extra behaviour for combobox
                 children = widget.findChildren(QtWidgets.QComboBox)
                 for child in children:
                     theme = 'light' if children.index(child) == 0 else 'dark'
                     theme_name: str = list(plugin.get_themes_available().keys())[child.currentIndex()]
-                    config.update(f'{theme}_theme', theme_name, plugin=plugin.name)
+                    config.update(plugin.name, f'{theme}_theme', theme_name)
             else:
                 children = widget.findChildren(QtWidgets.QLineEdit)
-                config.update("light_theme", children[0].text(), plugin=plugin.name)
-                config.update("dark_theme", children[1].text(), plugin=plugin.name)
+                config.update(plugin.name, "light_theme", children[0].text())
+                config.update(plugin.name, "dark_theme", children[1].text())
 
     def set_wallpaper(self, dark: bool):
         file_name, _ = QFileDialog.getOpenFileName(

@@ -10,15 +10,15 @@ from typing import Optional, Union
 import requests
 from suntime import Sun, SunTimeException
 
-from yin_yang.plugins.plugin import Plugin
+from yin_yang.plugins.plugin import Plugin as PluginClass
 from yin_yang.plugins import kde, gnome, gtk, kvantum, wallpaper, vscode, atom, sound, notify, konsole, firefox
 
 logger = logging.getLogger(__name__)
 
 # default objects
-PLUGINS: [Plugin] = [kde.Kde(), gnome.Gnome(), gtk.Gtk(), kvantum.Kvantum(), wallpaper.Wallpaper(),
-                     vscode.Vscode(), atom.Atom(), konsole.Konsole(), firefox.Firefox(),
-                     sound.Sound(), notify.Notification()]
+PLUGINS: [PluginClass] = [kde.Kde(), gnome.Gnome(), gtk.Gtk(), kvantum.Kvantum(), wallpaper.Wallpaper(),
+                          vscode.Vscode(), atom.Atom(), konsole.Konsole(), firefox.Firefox(),
+                          sound.Sound(), notify.Notification()]
 
 
 class Modes(Enum):
@@ -37,54 +37,53 @@ home = os.getenv("HOME")
 path = home + "/.config"
 
 
+def update_config(config_old, defaults):
+    """Update old config files
+    Adds keys or restructures the config if an old config was loaded from the config file.
+    Sets the new config directly to the dict in this class.
+
+    :returns: the old config
+    """
+
+    logger.debug('Attempt to update the config file')
+
+    # replace current config with defaults
+    config_new = defaults
+
+    # replace default values with previous ones
+    if config_old["version"] < 0:
+        return config_old
+    if config_old["version"] <= 2.1:
+        # determine mode
+        if config_old["schedule"]:
+            mode = Modes.scheduled.value
+        elif config_old["followSun"]:
+            mode = Modes.followSun.value
+        else:
+            mode = Modes.manual.value
+        config_new["mode"] = mode
+
+        # determine theme
+        config_new["dark_mode"] = config_old["theme"] == "dark"
+
+        # put settings for PLUGINS into sections
+        for pl in PLUGINS:
+            for key in defaults[pl.name].keys():
+                key_old = key[0].upper() + key[1:]
+                config_new[pl.name][key] = config_old[pl.name.casefold() + key_old]
+    return config_new
+
+
 class ConfigParser:
     _config_data: dict = None
 
-    def __init__(self, version: float):
-        self._version = version
+    def __init__(self):
         self.changed = False
+        self._config_data = self.defaults
 
     def set_default(self):
         logger.info('Setting default values.')
         self._config_data = self.defaults
-        self._config_data['version'] = self._version
-
-    def update_config(self, config_old):
-        """Update old config files
-        Adds keys or restructures the config if an old config was loaded from the config file.
-        Sets the new config directly to the dict in this class.
-
-        :returns: the old config
-        """
-
-        logger.debug('Attempt to update the config file')
-
-        # replace current config with defaults
-        config_new = self.defaults
-
-        # replace default values with previous ones
-        if config_old["version"] < 0:
-            return config_old
-        if config_old["version"] <= 2.1:
-            # determine mode
-            if config_old["schedule"]:
-                mode = Modes.scheduled.value
-            elif config_old["followSun"]:
-                mode = Modes.followSun.value
-            else:
-                mode = Modes.manual.value
-            config_new["mode"] = mode
-
-            # determine theme
-            config_new["dark_mode"] = config_old["theme"] == "dark"
-
-            # put settings for PLUGINS into sections
-            for pl in PLUGINS:
-                for key in self.defaults[pl.name].keys():
-                    key_old = key[0].upper() + key[1:]
-                    config_new[pl.name][key] = config_old[pl.name.casefold() + key_old]
-        self.changed = True
-        return config_new
 
     def load(self) -> Optional[dict]:
         """Load config from file"""
@@ -108,8 +107,9 @@ class ConfigParser:
 
         # check if config needs an update
         # if the default values are set, the version number is below 0
-        if 0 < config_loaded["version"] < self._version:
-            return self.update_config(config_loaded)
+        if 0 < config_loaded["version"] < self.defaults['version']:
+            self.changed = True
+            return update_config(config_loaded, self.defaults)
 
         # no unsaved changes yet
         self.changed = False
@@ -118,7 +118,6 @@ class ConfigParser:
             # use default values if something went wrong
             logger.warning('Using default configuration values.')
             config_loaded = self.defaults
-            config_loaded['version'] = self._version
 
         self._config_data = config_loaded
 
@@ -145,10 +144,10 @@ class ConfigParser:
             logger.error(f"Error while writing the file: {e}")
             return False
 
-    def get(self, key, plugin: str) -> Union[bool, str]:
+    def get(self, plugin: str, key: str) -> Union[bool, str]:
         """Return the given key from the config
-        :param key: the key to change
         :param plugin: name of the plugin
+        :param key: the key to change
         :returns: value
         """
 
@@ -173,7 +172,7 @@ class ConfigParser:
             # new unsaved changes
             self.changed = True
 
-            return self.get(key, plugin)
+            return self.get(plugin, key)
         except KeyError as e:
             logger.error(f'Error while updating {key}')
             raise e
@@ -182,7 +181,7 @@ class ConfigParser:
     def defaults(self) -> dict:
         # NOTE: if you change or add new values here, make sure to update the version number and update_config() method
         conf_default = {
-            "version": -1,
+            "version": 2.2,
             "running": False,
             "dark_mode": False,
             "mode": Modes.manual.value,
@@ -202,6 +201,10 @@ class ConfigParser:
             }
 
         return conf_default
+
+    @property
+    def version(self) -> float:
+        return self._config_data['version']
 
     @property
     def running(self) -> bool:
@@ -267,16 +270,7 @@ class ConfigParser:
 
     @property
     def times(self) -> tuple[time, time]:
-        if self.mode == Modes.scheduled:
-            # return time in config data
-            time_light = self._config_data['switch_to_light']
-            time_dark = self._config_data['switch_to_dark']
-
-            time_light = time.fromisoformat(time_light)
-            time_dark = time.fromisoformat(time_dark)
-
-            return time_light, time_dark
-        elif self.mode == Modes.followSun:
+        if self.mode == Modes.followSun:
             # use times for sunrise and sunset
             latitude, longitude = config.location
             sun = Sun(latitude, longitude)
@@ -289,6 +283,15 @@ class ConfigParser:
 
             except SunTimeException as e:
                 logger.error("Error: {0}.".format(e))
+
+        # return time in config data
+        time_light = self._config_data['switch_to_light']
+        time_dark = self._config_data['switch_to_dark']
+
+        time_light = time.fromisoformat(time_light)
+        time_dark = time.fromisoformat(time_dark)
+
+        return time_light, time_dark
 
     @times.setter
     def times(self, times: tuple[time, time]):
@@ -334,11 +337,11 @@ class ConfigParser:
 
 # create global object with current version
 # NOTE change the version here if the structure of the config file has been modified
-config = ConfigParser(2.2)
+config = ConfigParser()
 # load config from file
 config.load()
 
 # set plugin themes
 for plugin in PLUGINS:
-    plugin.theme_bright = config.get('light_theme', plugin.name)
-    plugin.theme_dark = config.get('dark_theme', plugin.name)
+    plugin.theme_bright = config.get(plugin.name, 'light_theme')
+    plugin.theme_dark = config.get(plugin.name, 'dark_theme')

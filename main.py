@@ -9,7 +9,6 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 
 from yin_yang import yin_yang
-from yin_yang.checker import Checker
 from yin_yang.ui import gui
 from yin_yang.config import Modes, config
 

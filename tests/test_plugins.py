@@ -17,8 +17,8 @@ class PluginsTest(unittest.TestCase):
     def test_set_theme_works(self):
         for pl in PLUGINS:
             with self.subTest(plugin=pl.name):
-                if config.get('enabled', pl.name):
-                    pl.set_mode(config.get('dark_mode'))
+                if config.get(pl.name, 'enabled'):
+                    pl.set_mode(config.dark_mode)
                     self.assertIsInstance(pl.get_themes_available(), dict,
                                           'Available themes always should be a dict.')
 
