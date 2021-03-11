@@ -37,13 +37,12 @@ def main(arguments):
     if arguments.schedule:
         mode = config.mode
         if mode == Modes.manual:
-            print("looks like you did not specified a time")
-            print("You can use the gui with yin-yang -gui")
-            print("Or edit the config found in ~/.config/yin_yang/yin_yang.json")
-            print("You need to set schedule to True and edit the time to toggles")
+            print('Mode is set to manual. Therefore automatic theme changing is disabled.'
+                  'To enable, start yin yang without arguments to open the gui '
+                  'or edit to file ~/.config/yin_yang/yin_yang.json')
             return
         elif not config.running:
-            print(f"Starting in mode {mode.name}")
+            print(f'Starting in mode {mode.name}')
             time_light, time_dark = config.times
             print(f'Dark mode will be active between {time_dark} and {time_light}')
             yin_yang.run()
