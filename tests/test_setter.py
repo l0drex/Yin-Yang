@@ -1,8 +1,10 @@
 import unittest
 
-from yin_yang.config import config, Modes
+from yin_yang.config import ConfigParser, Modes
 from yin_yang.yin_yang import set_mode
 
+config = ConfigParser()
+config.load()
 # NOTE set this to true if you want to test your plugin
 test_theme_changes = False
 

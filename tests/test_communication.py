@@ -6,14 +6,15 @@ from datetime import datetime, time
 from subprocess import Popen, PIPE
 
 import communicate
-from yin_yang.config import config, Modes
+from yin_yang.config import ConfigParser
 from yin_yang.yin_yang import should_be_dark
+
+config = ConfigParser()
 
 
 class CommunicationTest(unittest.TestCase):
     def setUp(self):
         config.set_default()
-        config.update('firefox', 'enabled', True)
 
     def test_move_time(self):
         time_light = time.fromisoformat('07:00')
@@ -61,16 +62,12 @@ class CommunicationTest(unittest.TestCase):
                                 'Current time should always be between light and dark times')
 
     def test_encode_decode(self):
-        config.load()
-
         process = Popen([sys.executable, '../communicate.py'],
                         stdin=PIPE, stdout=PIPE)
         plugins = ['firefox']
 
         for plugin in plugins:
             with self.subTest(plugin=plugin):
-                if not config.get(plugin, 'enabled'):
-                    continue
 
                 # build call
                 call_encoded = json.dumps(plugin).encode('utf-8')
