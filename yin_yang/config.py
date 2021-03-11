@@ -223,6 +223,7 @@ class ConfigParser:
     @running.setter
     def running(self, running: bool):
         self._config_data['running'] = running
+        self.changed = True
         self.write()
 
     @property
@@ -232,6 +233,7 @@ class ConfigParser:
     @dark_mode.setter
     def dark_mode(self, dark_mode: bool):
         self._config_data['dark_mode'] = dark_mode
+        self.changed = True
         self.write()
 
     @property
@@ -247,6 +249,7 @@ class ConfigParser:
     @mode.setter
     def mode(self, mode: Modes):
         self._config_data['mode'] = mode.value
+        self.changed = True
 
     @property
     def listener(self) -> Listener:
@@ -261,6 +264,7 @@ class ConfigParser:
     @listener.setter
     def listener(self, listener: Listener):
         self._config_data['listener'] = listener.value
+        self.changed = True
 
     @property
     def location(self) -> tuple[float, float]:
@@ -276,6 +280,7 @@ class ConfigParser:
             raise ValueError('Location is updated automatically!')
 
         self._config_data['coordinates'] = coordinates
+        self.changed = True
 
     @property
     def update_location(self) -> bool:
@@ -284,6 +289,7 @@ class ConfigParser:
     @update_location.setter
     def update_location(self, enabled: bool):
         self._config_data['update_location'] = enabled
+        self.changed = True
 
     @property
     def times(self) -> tuple[time, time]:
@@ -313,6 +319,7 @@ class ConfigParser:
     def times(self, times: tuple[time, time]):
         if self.mode == Modes.scheduled:
             self._config_data['times'] = times[0].isoformat(), times[1].isoformat()
+            self.changed = True
         else:
             raise ValueError('Changing times is only allowed in mode scheduled!')
 
