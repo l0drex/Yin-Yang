@@ -54,7 +54,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="settings">
        <attribute name="title">
@@ -271,6 +271,13 @@
                <widget class="QCheckBox" name="btn_location">
                 <property name="text">
                  <string>update automatically</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_active">
+                <property name="text">
+                 <string>Darkmode will be active between</string>
                 </property>
                </widget>
               </item>

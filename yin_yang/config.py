@@ -278,6 +278,8 @@ class ConfigParser:
     def location(self, coordinates: tuple[float, float]):
         if self._config_data['update_location']:
             raise ValueError('Location is updated automatically!')
+        elif self.mode != Modes.followSun:
+            raise ValueError('Updating location while not in mode follow sun is forbidden')
 
         self._config_data['coordinates'] = coordinates
         self.changed = True

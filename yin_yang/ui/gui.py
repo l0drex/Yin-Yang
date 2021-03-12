@@ -31,7 +31,8 @@ class MainWindow(QtWidgets.QMainWindow):
         """Sets the values from the config to the elements"""
 
         # set current version in statusbar
-        self.ui.status_bar.showMessage("yin-yang: v" + str(config.version))
+        self.ui.status_bar.showMessage(f'You are using Version {config.version}. '
+                                       f'Yin-Yang is {"not " if not config.running else ""}running.')
 
         # set the correct mode
         mode = config.mode
@@ -61,12 +62,18 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.inp_time_dark.setTime(time_dark)
 
     def get_location(self):
+        if self.ui.btn_sun.isChecked():
+            config.mode = Modes.followSun
         self.ui.btn_location.setChecked(config.update_location)
         self.ui.location_input.setDisabled(config.update_location)
         # set correct coordinates
         coordinates = config.location
         self.ui.inp_latitude.setValue(coordinates[0])
         self.ui.inp_longitude.setValue(coordinates[1])
+        # update message
+        time_light, time_dark = config.times
+        self.ui.label_active.setText(
+            f'Dark mode will be active between {time_dark.strftime("%H:%M")} and {time_light.strftime("%H:%M")}.')
 
     def get_plugins(self):
         widget: QtWidgets.QWidget
@@ -119,9 +126,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def register_handlers(self):
         # set sunrise and sunset times if mode is set to followSun or coordinates changed
-        self.ui.btn_sun.toggled.connect(self.set_time)
-        self.ui.inp_latitude.valueChanged.connect(self.set_time)
-        self.ui.inp_longitude.valueChanged.connect(self.set_time)
+        self.ui.btn_sun.toggled.connect(self.get_location)
+        self.ui.inp_latitude.valueChanged.connect(self.set_location)
+        self.ui.inp_longitude.valueChanged.connect(self.set_location)
 
         # button to get the current position
         self.ui.btn_location.stateChanged.connect(self.set_location)
@@ -159,6 +166,10 @@ class MainWindow(QtWidgets.QMainWindow):
         config.times = time_light, time_dark
 
     def set_location(self):
+        if self.ui.btn_sun.isChecked():
+            config.mode = Modes.followSun
+        else:
+            return
         config.update_location = self.ui.btn_location.isChecked()
         if config.update_location:
             self.get_location()
@@ -171,6 +182,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.inp_longitude.value()
         ]
         config.location = coordinates
+        # update message
+        time_light, time_dark = config.times
+        self.ui.label_active.setText(
+            f'Dark mode will be active between {time_dark.strftime("%H:%M")} and {time_light.strftime("%H:%M")}.')
 
     def set_plugins(self):
         for plugin in PLUGINS:
