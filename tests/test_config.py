@@ -3,10 +3,10 @@ import os
 import unittest
 from pathlib import Path
 
-from yin_yang.config import ConfigParser, PLUGINS, Modes, update_config
+from yin_yang.config import ConfigManager, PLUGINS, Modes, update_config
 
 path = str(Path.home()) + '/.config/yin_yang/yin_yang.json'
-config = ConfigParser()
+config = ConfigManager()
 
 
 class ConfigTest(unittest.TestCase):

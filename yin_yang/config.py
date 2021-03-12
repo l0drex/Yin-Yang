@@ -83,7 +83,7 @@ def update_config(config_old: dict, defaults: dict):
     return config_new
 
 
-class ConfigParser:
+class ConfigManager:
     _config_data: dict = None
 
     def __init__(self):
@@ -362,7 +362,7 @@ class ConfigParser:
 
 # create global object with current version
 # NOTE change the version here if the structure of the config file has been modified
-config = ConfigParser()
+config = ConfigManager()
 # load config from file
 config.load()
 

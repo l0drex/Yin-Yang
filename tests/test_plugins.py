@@ -1,10 +1,10 @@
 import unittest
 
 from tests.test_setter import test_theme_changes
-from yin_yang.config import PLUGINS, ConfigParser
+from yin_yang.config import PLUGINS, ConfigManager
 from yin_yang.plugins.plugin import Plugin
 
-config = ConfigParser()
+config = ConfigManager()
 config.load()
 
 

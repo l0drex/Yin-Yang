@@ -6,10 +6,10 @@ from datetime import datetime, time
 from subprocess import Popen, PIPE
 
 import communicate
-from yin_yang.config import ConfigParser, config as std_config
+from yin_yang.config import ConfigManager, config as std_config
 from yin_yang.yin_yang import should_be_dark
 
-config = ConfigParser()
+config = ConfigManager()
 
 
 def should_be_dark_extensions(time_current: int, time_light: int, time_dark: int):
