@@ -104,6 +104,8 @@ class ConfigTest(unittest.TestCase):
         if os.path.isfile(path):
             config.load()
             old_data = config.data
+        else:
+            self.fail('Config was never saved')
 
         self.assertTrue(config.write(),
                         'Config could not be saved')
