@@ -54,5 +54,5 @@ def run():
             # subtract seconds so that the next switch is on the full minute
             time.sleep(60 - datetime.today().time().second)
         except KeyboardInterrupt:
-            print('Terminating')
+            print('\nTerminating...')
             config.running = False
