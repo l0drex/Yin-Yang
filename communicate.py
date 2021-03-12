@@ -27,19 +27,27 @@ def move_times(time_now: datetime, time_light: datetimetime, time_dark: datetime
     :param time_dark: the time when dark mode starts
     """
 
-    # convert all times to unix times
+    # convert all times to unix times on current day
     time_now_unix: int = int(time_now.timestamp())
     time_light_unix: int = int(time.mktime(
         datetime.combine(time_now.date(), time_light).timetuple()))
     time_dark_unix: int = int(time.mktime(
         datetime.combine(time_now.date(), time_dark).timetuple()))
 
-    # move times so that one of them is always in the future
+    # move times so that the next is always in the future and the other in the past
     one_day = 60 * 60 * 24
     if time_now_unix < time_light_unix and time_now_unix < time_dark_unix:
-        time_dark_unix -= one_day
-    elif time_light_unix < time_now_unix and time_dark_unix < time_now_unix:
-        time_light_unix += one_day
+        if time_dark_unix > time_light_unix:
+            # expected behaviour
+            time_dark_unix -= one_day
+        else:
+            # edge case where time_dark if after 00:00
+            time_light_unix -= one_day
+    elif time_now_unix > time_light_unix and time_now_unix > time_dark_unix:
+        if time_dark_unix > time_light_unix:
+            time_light_unix += one_day
+        else:
+            time_dark_unix += one_day
 
     return [time_light_unix, time_dark_unix]
 

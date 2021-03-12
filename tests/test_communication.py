@@ -12,6 +12,11 @@ from yin_yang.yin_yang import should_be_dark
 config = ConfigParser()
 
 
+def should_be_dark_extensions(time_current: int, time_light: int, time_dark: int):
+    """Determines if dark mode should be active like the extensions do"""
+    return time_dark <= time_current
+
+
 class CommunicationTest(unittest.TestCase):
     def setUp(self):
         config.set_default()
@@ -40,7 +45,12 @@ class CommunicationTest(unittest.TestCase):
                 self.assertTrue(time_light_unix <= time_current_unix <= time_dark_unix or
                                 time_dark_unix <= time_current_unix <= time_light_unix)
 
-    @unittest.skipUnless(config.get('firefox', 'enabled'), 'Plugin Firefox is not enabled')
+                # test with swapped times
+                time_light_unix, time_dark_unix = communicate.move_times(time_current, time_dark, time_light)
+                self.assertTrue(time_light_unix <= time_current_unix <= time_dark_unix or
+                                time_dark_unix <= time_current_unix <= time_light_unix)
+
+    @unittest.skipUnless(config.get('firefox', 'enabled'), 'Firefox plugin is disabled')
     def test_message_build(self):
         message = communicate.send_config('firefox')
         self.assertNotEqual(message, None,
@@ -105,7 +115,7 @@ class CommunicationTest(unittest.TestCase):
 
         process.terminate()
 
-    def test_dark_mode_detection_scheduled(self):
+    def test_dark_mode_detection(self):
         time_light = time.fromisoformat('07:00')
         time_dark = time.fromisoformat('20:00')
 
@@ -120,17 +130,24 @@ class CommunicationTest(unittest.TestCase):
 
         for time_current in times:
             time_current_str = time_current.strftime('%H:%M')
-            with self.subTest('Dark mode should be decided correctly.',
-                              time_current=time_current_str):
-                # get unix times
-                time_light_unix, time_dark_unix = communicate.move_times(time_current, time_light, time_dark)
+            for swap in [False, True]:
+                with self.subTest('Dark mode should be decided correctly.',
+                                  time_current=time_current_str, swap=swap):
+                    if swap:
+                        time_swap = time_dark
+                        time_dark = time_light
+                        time_light = time_swap
+                        time_swap = None
+                    # get unix times
+                    time_light_unix, time_dark_unix = communicate.move_times(time_current, time_light, time_dark)
 
-                is_dark = should_be_dark(time_current.time(), time_light, time_dark)
-                # NOTE: this should be equal to how the extension calculates the theme
-                detected_dark = time_current.timestamp() >= time_dark_unix
+                    is_dark = should_be_dark(time_current.time(), time_light, time_dark)
+                    # NOTE: this should be equal to how the extension calculates the theme
+                    detected_dark = should_be_dark_extensions(int(time_current.timestamp()),
+                                                                   time_light_unix, time_dark_unix)
 
-                self.assertEqual(is_dark, detected_dark,
-                                 f'Dark mode should be {"active" if is_dark else "inactive"} at {time_current_str}')
+                    self.assertEqual(is_dark, detected_dark,
+                                     f'Dark mode should be {"active" if is_dark else "inactive"} at {time_current_str}')
 
 
 if __name__ == '__main__':
