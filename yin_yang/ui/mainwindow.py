@@ -15,7 +15,7 @@ class Ui_main_window(object):
     def setupUi(self, main_window):
         main_window.setObjectName("main_window")
         main_window.setEnabled(True)
-        main_window.resize(377, 615)
+        main_window.resize(380, 609)
         main_window.setMinimumSize(QtCore.QSize(377, 0))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/icons/assets/yin-yang.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -37,6 +37,7 @@ class Ui_main_window(object):
         self.logo_layout.addWidget(self.logo, 0, QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
         self.central_widget_layout.addLayout(self.logo_layout)
         self.tab_widget = QtWidgets.QTabWidget(self.central_widget)
+        self.tab_widget.setMinimumSize(QtCore.QSize(368, 0))
         self.tab_widget.setObjectName("tab_widget")
         self.settings = QtWidgets.QWidget()
         self.settings.setObjectName("settings")
@@ -180,7 +181,7 @@ class Ui_main_window(object):
         self.plugins_scroll.setWidgetResizable(True)
         self.plugins_scroll.setObjectName("plugins_scroll")
         self.plugins_scroll_content = QtWidgets.QWidget()
-        self.plugins_scroll_content.setGeometry(QtCore.QRect(0, 0, 88, 18))
+        self.plugins_scroll_content.setGeometry(QtCore.QRect(0, 0, 348, 387))
         self.plugins_scroll_content.setObjectName("plugins_scroll_content")
         self.plugins_scroll_content_layout = QtWidgets.QVBoxLayout(self.plugins_scroll_content)
         self.plugins_scroll_content_layout.setContentsMargins(11, 11, 11, 11)
@@ -200,6 +201,7 @@ class Ui_main_window(object):
         main_window.setStatusBar(self.status_bar)
 
         self.retranslateUi(main_window)
+        self.tab_widget.setCurrentIndex(1)
         self.btn_sun.toggled['bool'].connect(self.location.setVisible)
         self.btn_schedule.toggled['bool'].connect(self.time.setVisible)
         self.btn_enable.toggled['bool'].connect(self.schedule_settings.setVisible)

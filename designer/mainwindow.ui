@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>377</width>
-    <height>615</height>
+    <width>380</width>
+    <height>609</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -47,6 +47,15 @@
     </item>
     <item>
      <widget class="QTabWidget" name="tab_widget">
+      <property name="minimumSize">
+       <size>
+        <width>368</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="currentIndex">
+       <number>1</number>
+      </property>
       <widget class="QWidget" name="settings">
        <attribute name="title">
         <string>Settings</string>
@@ -325,8 +334,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>88</width>
-             <height>18</height>
+             <width>348</width>
+             <height>387</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="plugins_scroll_content_layout"/>
