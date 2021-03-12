@@ -9,7 +9,7 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 
 from yin_yang import yin_yang
-from yin_yang.ui import gui
+from yin_yang.ui import config_window
 from yin_yang.config import Modes, config
 
 
@@ -55,7 +55,7 @@ def main(arguments):
     else:
         # load GUI to apply settings or set theme manually
         app = QtWidgets.QApplication(sys.argv)
-        window = gui.MainWindow()
+        window = config_window.MainWindow()
         window.show()
         app.exec_()
 
