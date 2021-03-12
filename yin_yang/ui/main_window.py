@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '../designer/mainwindow.ui'
+# Form implementation generated from reading ui file './designer/main_window.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.3
 #
@@ -17,9 +17,11 @@ class Ui_main_window(object):
         main_window.setEnabled(True)
         main_window.resize(391, 633)
         main_window.setMinimumSize(QtCore.QSize(377, 0))
+        main_window.setWindowTitle("Yin & Yang")
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/icons/Logo"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         main_window.setWindowIcon(icon)
+        main_window.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedKingdom))
         self.central_widget = QtWidgets.QWidget(main_window)
         self.central_widget.setObjectName("central_widget")
         self.central_widget_layout = QtWidgets.QVBoxLayout(self.central_widget)
@@ -90,6 +92,7 @@ class Ui_main_window(object):
         sizePolicy.setHeightForWidth(self.inp_time_light.sizePolicy().hasHeightForWidth())
         self.inp_time_light.setSizePolicy(sizePolicy)
         self.inp_time_light.setMinimumSize(QtCore.QSize(88, 0))
+        self.inp_time_light.setDisplayFormat("HH:mm")
         self.inp_time_light.setTime(QtCore.QTime(8, 0, 0))
         self.inp_time_light.setObjectName("inp_time_light")
         self.time_layout.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.inp_time_light)
@@ -104,6 +107,7 @@ class Ui_main_window(object):
         sizePolicy.setHeightForWidth(self.inp_time_dark.sizePolicy().hasHeightForWidth())
         self.inp_time_dark.setSizePolicy(sizePolicy)
         self.inp_time_dark.setMinimumSize(QtCore.QSize(88, 0))
+        self.inp_time_dark.setDisplayFormat("HH:mm")
         self.inp_time_dark.setTime(QtCore.QTime(20, 0, 0))
         self.inp_time_dark.setObjectName("inp_time_dark")
         self.time_layout.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.inp_time_dark)
@@ -131,6 +135,7 @@ class Ui_main_window(object):
         sizePolicy.setHeightForWidth(self.inp_longitude.sizePolicy().hasHeightForWidth())
         self.inp_longitude.setSizePolicy(sizePolicy)
         self.inp_longitude.setMinimumSize(QtCore.QSize(88, 0))
+        self.inp_longitude.setSuffix("°")
         self.inp_longitude.setMinimum(-180.0)
         self.inp_longitude.setMaximum(180.0)
         self.inp_longitude.setObjectName("inp_longitude")
@@ -146,6 +151,7 @@ class Ui_main_window(object):
         sizePolicy.setHeightForWidth(self.inp_latitude.sizePolicy().hasHeightForWidth())
         self.inp_latitude.setSizePolicy(sizePolicy)
         self.inp_latitude.setMinimumSize(QtCore.QSize(88, 0))
+        self.inp_latitude.setSuffix("°")
         self.inp_latitude.setMinimum(-90.0)
         self.inp_latitude.setMaximum(90.0)
         self.inp_latitude.setObjectName("inp_latitude")
@@ -168,6 +174,7 @@ class Ui_main_window(object):
         self.toggle_notification.setObjectName("toggle_notification")
         self.settings_layout.addWidget(self.toggle_notification)
         self.label_active = QtWidgets.QLabel(self.settings)
+        self.label_active.setText("Darkmode will be active between")
         self.label_active.setObjectName("label_active")
         self.settings_layout.addWidget(self.label_active)
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
@@ -184,7 +191,7 @@ class Ui_main_window(object):
         self.plugins_scroll.setWidgetResizable(True)
         self.plugins_scroll.setObjectName("plugins_scroll")
         self.plugins_scroll_content = QtWidgets.QWidget()
-        self.plugins_scroll_content.setGeometry(QtCore.QRect(0, 0, 348, 387))
+        self.plugins_scroll_content.setGeometry(QtCore.QRect(0, 0, 359, 411))
         self.plugins_scroll_content.setObjectName("plugins_scroll_content")
         self.plugins_scroll_content_layout = QtWidgets.QVBoxLayout(self.plugins_scroll_content)
         self.plugins_scroll_content_layout.setContentsMargins(11, 11, 11, 11)
@@ -212,22 +219,16 @@ class Ui_main_window(object):
 
     def retranslateUi(self, main_window):
         _translate = QtCore.QCoreApplication.translate
-        main_window.setWindowTitle(_translate("main_window", "Yin & Yang"))
         self.btn_enable.setText(_translate("main_window", "Automatic theme switching"))
         self.btn_schedule.setText(_translate("main_window", "Custom Schedule"))
         self.btn_sun.setText(_translate("main_window", "Sunset to Sunrise"))
         self.label_light.setText(_translate("main_window", "Light:"))
-        self.inp_time_light.setDisplayFormat(_translate("main_window", "HH:mm"))
         self.label_dark.setText(_translate("main_window", "Dark:"))
-        self.inp_time_dark.setDisplayFormat(_translate("main_window", "HH:mm"))
         self.label_longitude.setText(_translate("main_window", "Longitude:"))
-        self.inp_longitude.setSuffix(_translate("main_window", "°"))
         self.label_latitude.setText(_translate("main_window", "Latitude:"))
-        self.inp_latitude.setSuffix(_translate("main_window", "°"))
         self.btn_location.setText(_translate("main_window", "update automatically"))
         self.toggle_sound.setText(_translate("main_window", "Make a sound when switching the theme"))
         self.toggle_notification.setText(_translate("main_window", "Send a notification"))
-        self.label_active.setText(_translate("main_window", "Darkmode will be active between"))
         self.tab_widget.setTabText(self.tab_widget.indexOf(self.settings), _translate("main_window", "Settings"))
         self.tab_widget.setTabText(self.tab_widget.indexOf(self.plugins), _translate("main_window", "Plugins"))
-import yin_yang.ui.resources_rc
+import resources_rc

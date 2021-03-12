@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import locale
 import logging
 import sys
 from argparse import ArgumentParser
@@ -7,9 +7,10 @@ from pathlib import Path
 
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
+from PyQt5.QtCore import QTranslator
 
 from yin_yang import yin_yang
-from yin_yang.ui import config_window
+from yin_yang.ui import config_window, resources_rc
 from yin_yang.config import Modes, config
 
 
@@ -55,6 +56,14 @@ def main(arguments):
     else:
         # load GUI to apply settings or set theme manually
         app = QtWidgets.QApplication(sys.argv)
+
+        # load translation
+        translator = QTranslator()
+        lang = locale.getdefaultlocale()[0].split('_')[0]
+        print(f'Using language {lang}')
+        translator.load(':/language/resources/yin_yang' + '.' + lang)
+        app.installTranslator(translator)
+
         window = config_window.MainWindow()
         window.show()
         app.exec_()

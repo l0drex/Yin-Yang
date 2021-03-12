@@ -20,11 +20,14 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Yin &amp; Yang</string>
+   <string notr="true">Yin &amp; Yang</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../resources.qrc">
     <normaloff>:/icons/Logo</normaloff>:/icons/Logo</iconset>
+  </property>
+  <property name="locale">
+   <locale language="English" country="UnitedKingdom"/>
   </property>
   <widget class="QWidget" name="central_widget">
    <layout class="QVBoxLayout" name="central_widget_layout">
@@ -138,7 +141,7 @@
                  </size>
                 </property>
                 <property name="displayFormat">
-                 <string>HH:mm</string>
+                 <string notr="true">HH:mm</string>
                 </property>
                 <property name="time">
                  <time>
@@ -174,7 +177,7 @@
                  </size>
                 </property>
                 <property name="displayFormat">
-                 <string>HH:mm</string>
+                 <string notr="true">HH:mm</string>
                 </property>
                 <property name="time">
                  <time>
@@ -219,7 +222,7 @@
                     </size>
                    </property>
                    <property name="suffix">
-                    <string>°</string>
+                    <string notr="true">°</string>
                    </property>
                    <property name="minimum">
                     <double>-180.000000000000000</double>
@@ -254,7 +257,7 @@
                     </size>
                    </property>
                    <property name="suffix">
-                    <string>°</string>
+                    <string notr="true">°</string>
                    </property>
                    <property name="minimum">
                     <double>-90.000000000000000</double>
@@ -304,7 +307,7 @@
         <item>
          <widget class="QLabel" name="label_active">
           <property name="text">
-           <string>Darkmode will be active between</string>
+           <string notr="true">Darkmode will be active between</string>
           </property>
          </widget>
         </item>
@@ -341,8 +344,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>348</width>
-             <height>387</height>
+             <width>359</width>
+             <height>411</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="plugins_scroll_content_layout"/>

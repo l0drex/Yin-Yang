@@ -2,9 +2,12 @@ from pathlib import Path
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QDialogButtonBox
+from PyQt5.QtCore import QCoreApplication
 
-from yin_yang.ui.mainwindow import Ui_main_window
+from yin_yang.ui.main_window import Ui_main_window
 from yin_yang.config import config, Modes, PLUGINS
+
+_translate = QCoreApplication.translate
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -31,8 +34,9 @@ class MainWindow(QtWidgets.QMainWindow):
         """Sets the values from the config to the elements"""
 
         # set current version in statusbar
-        self.ui.status_bar.showMessage(f'You are using Version {config.version}. '
-                                       f'Yin-Yang is {"not " if not config.running else ""}running.')
+        self.ui.status_bar.showMessage(
+            _translate('main_window', f'You are using Version {config.version}. ') +
+            _translate('main_window', f'Yin-Yang is {"not " if not config.running else ""}running.'))
 
         # set the correct mode
         mode = config.mode
@@ -60,8 +64,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # giving the time widget the values of the config
         self.ui.inp_time_light.setTime(time_light)
         self.ui.inp_time_dark.setTime(time_dark)
-        self.ui.label_active.setText(
-            f'Dark mode will be active between {time_dark.strftime("%H:%M")} and {time_light.strftime("%H:%M")}.')
+        self.update_label_enabled()
 
     def get_location(self):
         if self.ui.btn_sun.isChecked():
@@ -72,10 +75,7 @@ class MainWindow(QtWidgets.QMainWindow):
         coordinates = config.location
         self.ui.inp_latitude.setValue(coordinates[0])
         self.ui.inp_longitude.setValue(coordinates[1])
-        # update message
-        time_light, time_dark = config.times
-        self.ui.label_active.setText(
-            f'Dark mode will be active between {time_dark.strftime("%H:%M")} and {time_light.strftime("%H:%M")}.')
+        self.update_label_enabled()
 
     def get_plugins(self):
         widget: QtWidgets.QWidget
@@ -84,7 +84,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if plugin.name.casefold() in ['notification', 'sound']:
                 continue
 
-            widget = self.ui.plugins_scroll_content.findChild(QtWidgets.QGroupBox, 'group'+plugin.name)
+            widget = self.ui.plugins_scroll_content.findChild(QtWidgets.QGroupBox, 'group' + plugin.name)
             if widget is None:
                 widget = plugin.get_widget(self.ui.plugins_scroll_content)
                 self.ui.plugins_scroll_content_layout.addWidget(widget)
@@ -125,6 +125,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 children = widget.findChildren(QtWidgets.QLineEdit)
                 children[0].setText(config.get(plugin=plugin.name, key='light_theme'))
                 children[1].setText(config.get(plugin=plugin.name, key='dark_theme'))
+
+    def update_label_enabled(self):
+        time_light, time_dark = config.times
+        self.ui.label_active.setText(
+            _translate('main_window',
+               f'Dark mode will be active between {time_dark.strftime("%H:%M")} and {time_light.strftime("%H:%M")}.'))
 
     def register_handlers(self):
         # set sunrise and sunset times if mode is set to followSun or coordinates changed
@@ -170,8 +176,7 @@ class MainWindow(QtWidgets.QMainWindow):
         time_dark = self.ui.inp_time_dark.time().toPyTime()
         config.times = time_light, time_dark
 
-        self.ui.label_active.setText(
-            f'Dark mode will be active between {time_dark.strftime("%H:%M")} and {time_light.strftime("%H:%M")}.')
+        self.update_label_enabled()
 
     def set_location(self):
         if config.mode != Modes.followSun:
@@ -190,8 +195,7 @@ class MainWindow(QtWidgets.QMainWindow):
         config.location = coordinates
         # update message
         time_light, time_dark = config.times
-        self.ui.label_active.setText(
-            f'Dark mode will be active between {time_dark.strftime("%H:%M")} and {time_light.strftime("%H:%M")}.')
+        self.update_label_enabled()
 
     def set_plugins(self):
         for plugin in PLUGINS:
@@ -215,8 +219,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 config.update(plugin.name, 'dark_theme', children[1].text())
 
     def set_wallpaper(self, dark: bool):
+        message = _translate('main_window', f'Open Wallpaper {"dark" if dark else "light"}')
         file_name, _ = QFileDialog.getOpenFileName(
-            self, f'Open Wallpaper {"dark" if dark else "light"}',
+            self, message,
             str(Path.home()), 'Images (*.png *.jpg *.jpeg *.JPG *.JPEG)')
 
         group_wallpaper = self.ui.plugins_scroll_content.findChild(QtWidgets.QGroupBox, 'groupWallpaper')
@@ -244,8 +249,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # ask the user if he wants to save changes
         if config.changed:
-            ret = QMessageBox.warning(self, 'Unsaved changes',
-                                      'The settings have been modified. Do you want to save them?',
+            message = _translate('main_window', 'The settings have been modified. Do you want to save them?')
+            ret = QMessageBox.warning(self, _translate('main_window', 'Unsaved changes'),
+                                      message,
                                       QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
             if ret == QMessageBox.Save:
                 return config.write()
