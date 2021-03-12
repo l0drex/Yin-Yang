@@ -58,11 +58,16 @@ def main(arguments):
         app = QtWidgets.QApplication(sys.argv)
 
         # load translation
-        translator = QTranslator()
-        lang = locale.getdefaultlocale()[0].split('_')[0]
-        print(f'Using language {lang}')
-        translator.load(':/language/resources/yin_yang' + '.' + lang)
-        app.installTranslator(translator)
+        try:
+            translator = QTranslator()
+            lang = locale.getdefaultlocale()[0].split('_')[0]
+            print(f'Using language {lang}')
+            translator.load(':/language/resources/yin_yang' + '.' + lang)
+            app.installTranslator(translator)
+        except Exception as e:
+            print('Error while loading translation.')
+            print(str(e))
+            print('Using default language.')
 
         window = config_window.MainWindow()
         window.show()
