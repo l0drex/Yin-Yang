@@ -7,7 +7,9 @@ from pathlib import Path
 
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
-from PyQt5.QtCore import QTranslator
+from PyQt5.QtCore import QTranslator, QCoreApplication
+from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction
 
 from yin_yang import yin_yang
 from yin_yang.ui import config_window, resources_rc
@@ -34,6 +36,9 @@ QtWidgets.QApplication.setAttribute(
 
 
 def main(arguments):
+    # load GUI to apply settings or set theme manually
+    app = QtWidgets.QApplication(sys.argv)
+
     # set settings via terminal
     if arguments.schedule:
         mode = config.mode
@@ -46,6 +51,22 @@ def main(arguments):
             print(f'Starting in mode {mode.name}')
             time_light, time_dark = config.times
             print(f'Dark mode will be active between {time_dark} and {time_light}')
+
+            if QSystemTrayIcon.isSystemTrayAvailable():
+                tray_icon = QSystemTrayIcon(app)
+                # add a menu
+                menu = QMenu()
+                open_config = QAction()
+                open_config.setText(QCoreApplication.translate('tray_icon', 'Open config'))
+                open_config.toggled.connect(open_window)
+                menu.addAction(open_config)
+                # set the icon
+                icon = QIcon()
+                icon.addPixmap(QPixmap(':/icons/Logo'))
+                tray_icon.setIcon(icon)
+                # show the tray icon
+                tray_icon.show()
+
             yin_yang.run()
         else:
             raise ValueError('Yin Yang is already running')
@@ -54,24 +75,25 @@ def main(arguments):
         config.mode = Modes.manual
         set_mode(not config.dark_mode)
     else:
-        # load GUI to apply settings or set theme manually
-        app = QtWidgets.QApplication(sys.argv)
+        open_window(app)
 
-        # load translation
-        try:
-            translator = QTranslator()
-            lang = locale.getdefaultlocale()[0].split('_')[0]
-            print(f'Using language {lang}')
-            translator.load(':/language/resources/yin_yang' + '.' + lang)
-            app.installTranslator(translator)
-        except Exception as e:
-            print('Error while loading translation.')
-            print(str(e))
-            print('Using default language.')
 
-        window = config_window.MainWindow()
-        window.show()
-        app.exec_()
+def open_window(app):
+    # load translation
+    try:
+        translator = QTranslator()
+        lang = locale.getdefaultlocale()[0].split('_')[0]
+        print(f'Using language {lang}')
+        translator.load(':/language/resources/yin_yang' + '.' + lang)
+        app.installTranslator(translator)
+    except Exception as e:
+        print('Error while loading translation.')
+        print(str(e))
+        print('Using default language.')
+
+    window = config_window.MainWindow()
+    window.show()
+    app.exec_()
 
 
 if __name__ == '__main__':
