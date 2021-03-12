@@ -51,7 +51,8 @@ def run():
         try:
             time_light, time_dark = config.times
             set_mode(should_be_dark(datetime.now().time(), time_light, time_dark))
-            time.sleep(60)
+            # subtract seconds so that the next switch is on the full minute
+            time.sleep(60 - datetime.today().time().second)
         except KeyboardInterrupt:
             print('Terminating')
             config.running = False
