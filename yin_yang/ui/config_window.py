@@ -60,6 +60,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # giving the time widget the values of the config
         self.ui.inp_time_light.setTime(time_light)
         self.ui.inp_time_dark.setTime(time_dark)
+        self.ui.label_active.setText(
+            f'Dark mode will be active between {time_dark.strftime("%H:%M")} and {time_light.strftime("%H:%M")}.')
 
     def get_location(self):
         if self.ui.btn_sun.isChecked():
@@ -126,12 +128,16 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def register_handlers(self):
         # set sunrise and sunset times if mode is set to followSun or coordinates changed
-        self.ui.btn_sun.toggled.connect(self.get_location)
+        self.ui.btn_enable.toggled.connect(self.set_mode)
+        self.ui.btn_schedule.toggled.connect(self.set_mode)
+        self.ui.btn_sun.toggled.connect(self.set_mode)
+
+        # buttons and inputs
+        self.ui.btn_location.stateChanged.connect(self.set_location)
         self.ui.inp_latitude.valueChanged.connect(self.set_location)
         self.ui.inp_longitude.valueChanged.connect(self.set_location)
-
-        # button to get the current position
-        self.ui.btn_location.stateChanged.connect(self.set_location)
+        self.ui.inp_time_light.timeChanged.connect(self.set_time)
+        self.ui.inp_time_dark.timeChanged.connect(self.set_time)
 
         # connect dialog buttons
         self.ui.btn_box.clicked.connect(self.save_config)
@@ -139,7 +145,11 @@ class MainWindow(QtWidgets.QMainWindow):
     def set_config(self):
         """Sets the values to the config object, but does not save them"""
 
-        # determine the mode to use
+        config.update('sound', 'enabled', self.ui.toggle_sound.isChecked())
+        config.update('notification', 'enabled', self.ui.toggle_notification.isChecked())
+        self.set_plugins()
+
+    def set_mode(self):
         if not self.ui.btn_enable.isChecked():
             config.mode = Modes.manual
         elif self.ui.btn_schedule.isChecked():
@@ -147,28 +157,24 @@ class MainWindow(QtWidgets.QMainWindow):
         elif self.ui.btn_sun.isChecked():
             config.mode = Modes.followSun
 
-        config.update('sound', 'enabled', self.ui.toggle_sound.isChecked())
-        config.update('notification', 'enabled', self.ui.toggle_notification.isChecked())
-
-        # set values of application config
-        self.set_time()
-        self.set_location()
-        self.set_plugins()
+        self.get_time()
 
     def set_time(self):
         """Sets the time set in the ui to the config"""
 
         if config.mode != Modes.scheduled:
             return
+
         # update config if time has changed
         time_light = self.ui.inp_time_light.time().toPyTime()
         time_dark = self.ui.inp_time_dark.time().toPyTime()
         config.times = time_light, time_dark
 
+        self.ui.label_active.setText(
+            f'Dark mode will be active between {time_dark.strftime("%H:%M")} and {time_light.strftime("%H:%M")}.')
+
     def set_location(self):
-        if self.ui.btn_sun.isChecked():
-            config.mode = Modes.followSun
-        else:
+        if config.mode != Modes.followSun:
             return
         config.update_location = self.ui.btn_location.isChecked()
         if config.update_location:

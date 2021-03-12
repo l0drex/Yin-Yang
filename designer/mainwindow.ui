@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>380</width>
-    <height>609</height>
+    <width>391</width>
+    <height>633</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -23,8 +23,8 @@
    <string>Yin &amp; Yang</string>
   </property>
   <property name="windowIcon">
-   <iconset>
-    <normaloff>:/icons/assets/yin-yang.svg</normaloff>:/icons/assets/yin-yang.svg</iconset>
+   <iconset resource="../resources.qrc">
+    <normaloff>:/icons/Logo</normaloff>:/icons/Logo</iconset>
   </property>
   <widget class="QWidget" name="central_widget">
    <layout class="QVBoxLayout" name="central_widget_layout">
@@ -33,7 +33,7 @@
       <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
        <widget class="QLabel" name="logo">
         <property name="pixmap">
-         <pixmap resource="../resources.qrc">:/icons/resources/icon.svg</pixmap>
+         <pixmap resource="../resources.qrc">:/icons/Logo</pixmap>
         </property>
         <property name="scaledContents">
          <bool>true</bool>
@@ -274,13 +274,6 @@
                 </property>
                </widget>
               </item>
-              <item>
-               <widget class="QLabel" name="label_active">
-                <property name="text">
-                 <string>Darkmode will be active between</string>
-                </property>
-               </widget>
-              </item>
              </layout>
             </widget>
            </item>
@@ -305,6 +298,13 @@
          <widget class="QCheckBox" name="toggle_notification">
           <property name="text">
            <string>Send a notification</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_active">
+          <property name="text">
+           <string>Darkmode will be active between</string>
           </property>
          </widget>
         </item>
@@ -366,7 +366,6 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="../resources.qrc"/>
   <include location="../resources.qrc"/>
  </resources>
  <connections>
