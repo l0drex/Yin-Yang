@@ -33,9 +33,10 @@ class ConfigTest(unittest.TestCase):
                 self.assertIsInstance(config.get(p.name, 'enabled'), bool)
 
     def test_update_value(self):
-        config.dark_mode = True
-        self.assertTrue(config.dark_mode,
-                        'Key should be updated.')
+        old_value = config.update_location
+        config.update_location = not old_value
+        self.assertEqual(config.update_location, not old_value,
+                         'Key should be updated.')
         self.assertTrue(config.update(PLUGINS[0].name, 'enabled', True),
                         'Updating settings for plugins should be possible.')
         self.assertTrue(config.update(PLUGINS[0].name.title(), 'enabled', True),
