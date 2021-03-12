@@ -1,8 +1,11 @@
+import logging
 from abc import ABC, abstractmethod
 from typing import Optional, Dict
 
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QGroupBox, QHBoxLayout, QLineEdit, QComboBox
+
+logger = logging.getLogger(__name__)
 
 
 class Plugin(ABC):
@@ -32,7 +35,7 @@ class Plugin(ABC):
         """Set the theme"""
 
         theme = self.theme_dark if dark else self.theme_bright
-        print(f'Switching theme to {theme} in {self.name}')
+        logger.info(f'Switching theme to {theme} in {self.name}')
         self.set_theme(theme)
 
     @abstractmethod
