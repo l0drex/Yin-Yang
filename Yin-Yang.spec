@@ -3,10 +3,10 @@
 block_cipher = None
 
 
-a = Analysis(['main.py'],
-             pathex=['/home/lorenzh/Projekte/Yin Yang/core'],
+a = Analysis(['main.py', 'communicate.py'],
+             pathex=['/opt/Yin-Yang'],
              binaries=[],
-             datas=[],
+             datas=['scripts/change_wallpaper.sh', 'resources/*.wav', 'resources/icon.svg', 'resources/*.qm'],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
