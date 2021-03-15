@@ -250,6 +250,8 @@ class ConfigManager:
     def mode(self, mode: Modes):
         self._config_data['mode'] = mode.value
         self.changed = True
+        if mode == Modes.manual:
+            self.running = False
 
     @property
     def listener(self) -> Listener:
