@@ -35,7 +35,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # set current version in statusbar
         self.ui.status_bar.showMessage(
-            _translate('main_window', f'You are using Version {config.version}. ') +
+            _translate('main_window', f'You are using version {config.version}. ') +
             _translate('main_window', f'Yin-Yang is {"not " if not config.running else ""}running.'))
 
         # set the correct mode
