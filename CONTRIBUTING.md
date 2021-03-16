@@ -75,7 +75,7 @@ If you need to update the theme from an external application, you can do the fol
   If not, the response does not contain the times section.
 - `themes` is a list of the preferred themes a strings.
 - `times` is a list of the times when the theme changes.
-  These are unix times in seconds since the epoch and always "surround" the current time
-  so that your external application can calculate the preferred theme directly and
-  compare it to dark_mode if you want.
+  These are unix times in seconds since the epoch and always "surround" the current time.
+  This enables your external application to calculate the preferred theme directly and
+  compare it to `dark_mode` if you want.
   > For example, the times provided above would be the times when called on `2021-03-16 13:31:05`.
