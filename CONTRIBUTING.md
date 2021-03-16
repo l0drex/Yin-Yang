@@ -81,3 +81,25 @@ If you need to update the theme from an external application, you can do the fol
   This enables your external application to calculate the preferred theme directly and
   compare it to `dark_mode` if you want.
   > For example, the times provided above would be the times when called on `2021-03-16 13:31:05`.
+
+
+# Translations
+
+If you want to help to translate the GUI into another language, follow these steps:
+
+1. If not done already, create a fork of this repository and clone it.
+2. Add `TRANSLATIONS += resources/yin-yang.[lang].ts`, with [lang] being your language code.
+3. Run `scripts/build_ui.sh` from the top level directory (where `main.py` is located).
+4. Fix the script changes:
+    - Go to `/yin_yang/ui`
+    - In `main_window.py`, change the last line back to `import yin_yang.ui.resources_rc`
+    - In `resource_rc.py`, change the first __code__ line back to `from PyQt5 import QtCore`
+5. After running the script, there should be a file called `yin_yang.[lang].ts`.
+   Open it with _Qt Linguist_.
+6. Translate all the text.
+7. When you are ready, click <kbd>File</kbd> → <kbd>Share</kbd>. This will create a `.qm`file.
+8. Run steps 2 and 3 again to make the changes visible in the application.
+9. Create a pull request to make the translation usable by everybody.
+
+In future releases, steps 4 and 7 might become unnecessary as they could be implemented
+in the `build_ui.sh` script. If you now how to do this, feel free to make a pull request.
