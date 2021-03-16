@@ -3,7 +3,7 @@ import subprocess
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QDialogButtonBox, QVBoxLayout
 
-from yin_yang import config
+from yin_yang.config import config
 from yin_yang.plugins.plugin import Plugin
 
 
@@ -15,9 +15,9 @@ class Wallpaper(Plugin):
     def set_theme(self, theme: str):
         # theme is actually the wallpaper
 
-        if config.get_desktop() == "kde":
+        if config.desktop == "kde":
             subprocess.run(["./scripts/change_wallpaper.sh", theme])
-        if config.get_desktop() == "gtk":
+        if config.desktop == "gtk":
             # noinspection SpellCheckingInspection
             subprocess.run(["gsettings", "set", "org.gnome.desktop.background",
                             "picture-uri", "file://" + theme])
@@ -26,7 +26,7 @@ class Wallpaper(Plugin):
         _translate = QtCore.QCoreApplication.translate
         widgets = []
 
-        for theme in ['light', 'dark']:
+        for theme in ['Light', 'Dark']:
             grp = QtWidgets.QWidget(widget)
             horizontal_layout = QVBoxLayout(grp)
 
