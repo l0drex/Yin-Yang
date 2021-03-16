@@ -59,6 +59,7 @@ If you need to update the theme from an external application, you can do the fol
 1. Call `communicate.py` as a process from your application.
 2. Write your application name into stdin of that process.
 3. Read the response from stdout. It should be a json object with the following data:
+
 ```json
 {
   "enabled": true,
@@ -68,6 +69,7 @@ If you need to update the theme from an external application, you can do the fol
   "times": [1615881600, 1615924800]
 } 
 ```
+
 - `enabled` is true if your plugin is enabled.
   If not, the response only contains `enabled` and `dark_mode`
 - `dark_mode` is true if the system is currently using a dark theme
