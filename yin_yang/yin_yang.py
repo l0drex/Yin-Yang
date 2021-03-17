@@ -42,7 +42,11 @@ def set_mode(dark: bool):
     logger.info(f'Switching to {"dark" if dark else "light"} mode.')
     for p in PLUGINS:
         if config.get(p.name, 'enabled'):
-            p.set_mode(dark)
+            try:
+                p.set_mode(dark)
+            except Exception as e:
+                logger.error('Error while changing theme in ' + p.name)
+                logger.error(str(e))
 
     config.dark_mode = dark
 
