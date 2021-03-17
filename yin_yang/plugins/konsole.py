@@ -1,17 +1,14 @@
 from configparser import ConfigParser
-from os import listdir
-from os.path import isfile, join
 from pathlib import Path
 
-from yin_yang.plugins.plugin import Plugin
+from yin_yang.plugins.plugin import Plugin, get_stuff_in_dir
 
 
 def get_file() -> str:
     # noinspection SpellCheckingInspection
     path = str(Path.home()) + '/.local/share/konsole/'
+    files = get_stuff_in_dir(path, type='dir')
 
-    # copied from https://stackoverflow.com/questions/3207219/how-do-i-list-all-files-of-a-directory
-    files = [f for f in listdir(path) if isfile(join(path, f))]
     if len(files) == 1:
         return files[0]
     else:

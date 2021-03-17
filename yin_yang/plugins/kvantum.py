@@ -1,14 +1,6 @@
 import subprocess
-from os import listdir
-from os.path import join, isdir
 
-from yin_yang.plugins.plugin import Plugin
-
-
-def get_files_in_dir(path: str):
-    # copied from https://stackoverflow.com/questions/3207219/how-do-i-list-all-files-of-a-directory
-    return [f for f in listdir(path) if isdir(join(path, f))]
-
+from yin_yang.plugins.plugin import Plugin, get_stuff_in_dir
 
 
 class Kvantum(Plugin):
@@ -24,7 +16,7 @@ class Kvantum(Plugin):
         subprocess.run(["kvantummanager", "--set", theme])
 
     def get_themes_available(self) -> dict[str, str]:
-        themes = get_files_in_dir('/usr/share/Kvantum')
+        themes = get_stuff_in_dir('/usr/share/Kvantum', type='dir')
         themes_dict: dict = {}
         assert len(themes) > 0, 'No themes were found'
 

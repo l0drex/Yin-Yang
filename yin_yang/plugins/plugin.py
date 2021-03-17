@@ -1,5 +1,7 @@
 import logging
 from abc import ABC, abstractmethod
+from os import listdir
+from os.path import isdir, join, isfile
 from typing import Optional, Dict
 
 from PyQt5 import QtCore
@@ -130,3 +132,17 @@ def inplace_change(filename, old_string, new_string):
     with open(filename, 'w') as f:
         s = s.replace(old_string, new_string)
         f.write(s)
+
+
+def get_stuff_in_dir(path: str, type: str):
+    """Returns all files or directories in the path
+    :param path: The path where to search.
+    :param type: The type. Either dir (a directory) or file
+    """
+    # source: https://stackoverflow.com/questions/3207219/how-do-i-list-all-files-of-a-directory
+    if type == 'dir':
+        return [f for f in listdir(path) if isdir(join(path, f))]
+    elif type == 'file':
+        return [f for f in listdir(path) if isfile(join(path, f))]
+    else:
+        raise ValueError('Unknown type! Use dir or file')
