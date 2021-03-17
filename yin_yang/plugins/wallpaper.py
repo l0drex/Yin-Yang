@@ -42,6 +42,9 @@ class Wallpaper(PluginDesktopDependent):
 
 
 class Gnome(Plugin):
+    theme_dark = ''
+    theme_bright = ''
+
     def set_theme(self, theme: str):
         # noinspection SpellCheckingInspection
         subprocess.run(["gsettings", "set", "org.gnome.desktop.background",
@@ -49,5 +52,8 @@ class Gnome(Plugin):
 
 
 class Kde(Plugin):
+    theme_dark = ''
+    theme_bright = ''
+
     def set_theme(self, theme: str):
         subprocess.run(["./scripts/change_wallpaper.sh", theme])
