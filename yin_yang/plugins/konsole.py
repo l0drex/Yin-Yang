@@ -31,3 +31,19 @@ class Konsole(Plugin):
         config['Appearance']['ColorScheme'] = theme
         with open(config_file, 'w') as file:
             config.write(file)
+
+    def get_themes_available(self) -> dict[str, str]:
+        path = '/usr/share/konsole'
+        themes_machine = get_stuff_in_dir(path, type='file')
+        themes_machine = [theme.replace('.colorscheme', '') for theme in themes_machine if theme.endswith('.colorscheme')]
+        themes_machine.sort()
+
+        themes_dict = {}
+        config_parser = ConfigParser()
+
+        for theme in themes_machine:
+            config_parser.read(f'{path}/{theme}.colorscheme')
+            theme_name = config_parser['General']['Description']
+            themes_dict[theme] = theme_name
+
+        return themes_dict
