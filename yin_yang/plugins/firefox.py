@@ -23,13 +23,16 @@ class Firefox(Plugin):
         pass
 
     def get_themes_available(self) -> dict[str, str]:
-        path = get_default_profile_path() + '/extensions.json'
-        themes: dict[str, str] = {}
+        try:
+            path = get_default_profile_path() + '/extensions.json'
+            themes: dict[str, str] = {}
 
-        with open(path, 'r') as file:
-            content = json.load(file)
-            for addon in content['addons']:
-                if addon['type'] == 'theme':
-                    themes[addon['id']] = addon['defaultLocale']['name']
+            with open(path, 'r') as file:
+                content = json.load(file)
+                for addon in content['addons']:
+                    if addon['type'] == 'theme':
+                        themes[addon['id']] = addon['defaultLocale']['name']
 
-        return themes
+            return themes
+        except FileNotFoundError:
+            return {}

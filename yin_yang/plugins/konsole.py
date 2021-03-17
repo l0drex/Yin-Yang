@@ -13,7 +13,7 @@ def get_file() -> str:
         return files[0]
     else:
         # TODO either return all profiles or return the standard profile
-        return path + 'Fish.profile'
+        return path + 'Bash.profile'
 
 
 class Konsole(Plugin):
@@ -33,17 +33,20 @@ class Konsole(Plugin):
             config.write(file)
 
     def get_themes_available(self) -> dict[str, str]:
-        path = '/usr/share/konsole'
-        themes_machine = get_stuff_in_dir(path, type='file')
-        themes_machine = [theme.replace('.colorscheme', '') for theme in themes_machine if theme.endswith('.colorscheme')]
-        themes_machine.sort()
+        try:
+            path = '/usr/share/konsole'
+            themes_machine = get_stuff_in_dir(path, type='file')
+            themes_machine = [theme.replace('.colorscheme', '') for theme in themes_machine if theme.endswith('.colorscheme')]
+            themes_machine.sort()
 
-        themes_dict = {}
-        config_parser = ConfigParser()
+            themes_dict = {}
+            config_parser = ConfigParser()
 
-        for theme in themes_machine:
-            config_parser.read(f'{path}/{theme}.colorscheme')
-            theme_name = config_parser['General']['Description']
-            themes_dict[theme] = theme_name
+            for theme in themes_machine:
+                config_parser.read(f'{path}/{theme}.colorscheme')
+                theme_name = config_parser['General']['Description']
+                themes_dict[theme] = theme_name
 
-        return themes_dict
+            return themes_dict
+        except FileNotFoundError:
+            return {}

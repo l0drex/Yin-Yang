@@ -17,16 +17,17 @@ class Kvantum(Plugin):
         subprocess.run(["kvantummanager", "--set", theme])
 
     def get_themes_available(self) -> dict[str, str]:
-        path = '/usr/share/Kvantum'
-        if not isdir(path):
+        try:
+            path = '/usr/share/Kvantum'
+
+            themes = get_stuff_in_dir(path, type='dir')
+            themes_dict: dict = {}
+            assert len(themes) > 0, 'No themes were found'
+
+            themes.sort()
+            for theme in themes:
+                themes_dict[theme] = theme
+
+            return themes_dict
+        except FileNotFoundError:
             return {}
-
-        themes = get_stuff_in_dir(path, type='dir')
-        themes_dict: dict = {}
-        assert len(themes) > 0, 'No themes were found'
-
-        themes.sort()
-        for theme in themes:
-            themes_dict[theme] = theme
-
-        return themes_dict
