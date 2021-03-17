@@ -60,6 +60,19 @@ To test your plugin you have to:
 1. Enable it (via UI or the config file stored in `~/.config/yin-yang/yin-yang.json`).
 2. Run `tests/test_plugins.py`.
 
+Alternatives are:
+- use [assertions](https://docs.python.org/3/reference/simple_stmts.html#the-assert-statement):
+  ```python
+  assert statement, 'Statement is false'
+  ```
+- use the logger:
+  ```python
+  import logging
+  logger = logging.getLogger(__name__)
+  logger.debug('Message')
+  ```
+- use the python console
+
 
 ## Communication
 
