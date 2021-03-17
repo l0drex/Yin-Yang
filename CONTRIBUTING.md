@@ -83,6 +83,32 @@ If you need to update the theme from an external application, you can do the fol
   > For example, the times provided above would be the times when called on `2021-03-16 13:31:05`.
 
 
+# Default themes
+
+We are searching for the default themes in the following plugins:
+- Gnome
+- Gnome GTK
+
+If you now the names for the default themes in any of these applications,
+please create an issue, or a pull request where you add those theme names into the
+corresponding plugin class as following:
+
+_Example: /yin_yang/plugins/gnome.py_
+
+```python
+class Gnome(Plugin):
+    theme_dark = 'name of the default dark theme as written in config files'
+    theme_bright = 'name of the default bright theme'
+```
+
+As the plugin konsole was developed on a Manjaro system and Manjaro provides additional
+themes, it might be that the default light theme of Konsole is not available on all systems.
+If so, please create an issue for that.
+
+Another plugin we need some help with is the wallpaper plugin. It would be nice to provide
+some default wallpapers. If you want to add some, feel free to create a pull request.
+
+
 # Translations
 
 If you want to help to translate the GUI into another language, follow these steps:
