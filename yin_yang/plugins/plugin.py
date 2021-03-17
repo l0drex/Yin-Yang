@@ -2,7 +2,7 @@ import logging
 from abc import ABC, abstractmethod
 from os import listdir
 from os.path import isdir, join, isfile
-from typing import Optional, Dict
+from typing import Optional
 
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QGroupBox, QHBoxLayout, QLineEdit, QComboBox
@@ -27,7 +27,7 @@ class Plugin(ABC):
         if theme_dark is not None and theme_bright != self.theme_bright:
             self.theme_bright = theme_bright
 
-    def get_themes_available(self) -> Dict[str, str]:
+    def get_themes_available(self) -> dict[str, str]:
         """Return a list of available themes
         :return: Dict[intern_name, readable_name]
         """
