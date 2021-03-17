@@ -22,7 +22,7 @@ def get_file() -> str:
 class Konsole(Plugin):
     name = 'Konsole'
     theme_dark = 'Breeze'
-    theme_bright = 'Breath2-light'
+    theme_bright = 'BlackOnWhite'
 
     def set_theme(self, theme: str):
         config = ConfigParser()
