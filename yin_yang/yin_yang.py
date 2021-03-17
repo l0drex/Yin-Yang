@@ -47,6 +47,7 @@ def set_mode(dark: bool):
             except Exception as e:
                 logger.error('Error while changing theme in ' + p.name)
                 logger.error(str(e))
+                print(str(e))
 
     config.dark_mode = dark
 
