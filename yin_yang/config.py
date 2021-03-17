@@ -16,9 +16,11 @@ from yin_yang.plugins import kde, gnome, gtk, kvantum, wallpaper, vscode, atom, 
 logger = logging.getLogger(__name__)
 
 # default objects
-PLUGINS: [PluginClass] = [kde.Kde(), gnome.Gnome(), gtk.Gtk(), kvantum.Kvantum(), wallpaper.Wallpaper(),
+PLUGINS: [PluginClass] = [kde.Kde(), gnome.Gnome(), kvantum.Kvantum(),
                           vscode.Vscode(), atom.Atom(), konsole.Konsole(), firefox.Firefox(),
                           sound.Sound(), notify.Notification()]
+desktop_dependent_plugins = [gtk.Gtk(), wallpaper.Wallpaper()]
+PLUGINS += desktop_dependent_plugins
 
 
 class Modes(Enum):
@@ -369,6 +371,10 @@ config = ConfigManager()
 config.load()
 
 # set plugin themes
+for p in desktop_dependent_plugins:
+    p.set_strategy(config.desktop)
+
+
 for p in PLUGINS:
     p.theme_bright = config.get(p.name, 'light_theme')
     p.theme_dark = config.get(p.name, 'dark_theme')

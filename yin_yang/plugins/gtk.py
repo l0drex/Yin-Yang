@@ -1,30 +1,42 @@
 import subprocess
 from configparser import ConfigParser
 from pathlib import Path
-from typing import Optional
 
-from yin_yang.plugins.plugin import Plugin
+from yin_yang.plugins.plugin import PluginDesktopDependent, Plugin
 
 
-class Gtk(Plugin):
+class Gtk(PluginDesktopDependent):
     name = 'GTK'
-    theme_dark = ''
-    theme_bright = ''
 
-    def __init__(self, theme_dark: Optional[str] = None, theme_bright: Optional[str] = None):
-        super().__init__(theme_dark, theme_bright)
+    def set_strategy(self, strategy: str):
+        if strategy == 'kde':
+            self.strategy = Kde()
+        else:
+            self.strategy = Gnome()
 
-        self._strategy = Gnome()
+    @property
+    def theme_dark(self):
+        if hasattr(self, 'strategy'):
+            # needed since the plugin class checks if the themes are set correctly
+            # in it's init
+            return self.strategy.theme_dark
+        else:
+            return ''
 
-        # FIXME themes are not set correctly
-        self.theme_bright = self._strategy.theme_bright
-        self.theme_dark = self._strategy.theme_dark
+    @theme_dark.setter
+    def theme_dark(self, theme: str):
+        self.strategy.theme_dark = theme
 
-    def use_kde(self):
-        self._strategy = Kde()
+    @property
+    def theme_bright(self):
+        if hasattr(self, 'strategy'):
+            return self.strategy.theme_bright
+        else:
+            return ''
 
-    def set_theme(self, theme: str):
-        self._strategy.set_theme(theme)
+    @theme_bright.setter
+    def theme_bright(self, theme: str):
+        self.strategy.theme_bright = theme
 
 
 class Gnome(Plugin):
@@ -50,5 +62,5 @@ class Kde(Plugin):
 
         config['Settings']['gtk-theme-name'] = theme
 
-        with open(config_file, "r") as file:
+        with open(config_file, "w") as file:
             config.write(file)

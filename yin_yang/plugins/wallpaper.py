@@ -3,24 +3,22 @@ import subprocess
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QDialogButtonBox, QVBoxLayout
 
-from yin_yang.config import config
-from yin_yang.plugins.plugin import Plugin
+from yin_yang.plugins.plugin import PluginDesktopDependent, Plugin
 
 
-class Wallpaper(Plugin):
+class Wallpaper(PluginDesktopDependent):
     name = 'Wallpaper'
+    # themes are actually the wallpapers
     theme_dark = ''
     theme_bright = ''
 
-    def set_theme(self, theme: str):
-        # theme is actually the wallpaper
-
-        if config.desktop == "kde":
-            subprocess.run(["./scripts/change_wallpaper.sh", theme])
-        if config.desktop == "gtk":
-            # noinspection SpellCheckingInspection
-            subprocess.run(["gsettings", "set", "org.gnome.desktop.background",
-                            "picture-uri", "file://" + theme])
+    def set_strategy(self, strategy: str):
+        if strategy == 'kde':
+            self.strategy = Kde()
+        elif strategy == 'gtk':
+            self.strategy = Gnome()
+        else:
+            raise ValueError('Unknown strategy!')
 
     def get_input(self, widget):
         _translate = QtCore.QCoreApplication.translate
@@ -41,3 +39,18 @@ class Wallpaper(Plugin):
             widgets.append(grp)
 
         return widgets
+
+
+class Gnome(Plugin):
+    def set_theme(self, theme: str):
+        # noinspection SpellCheckingInspection
+        subprocess.run(["gsettings", "set", "org.gnome.desktop.background",
+                        "picture-uri", "file://" + theme])
+
+
+class Kde(Plugin):
+    theme_dark = ''
+    theme_bright = ''
+
+    def set_theme(self, theme: str):
+        subprocess.run(["./scripts/change_wallpaper.sh", theme])

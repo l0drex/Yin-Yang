@@ -84,6 +84,36 @@ class Plugin(ABC):
         return inputs
 
 
+class NonePlugin(Plugin):
+    """A plugin that is none. Used for desktop dependent plugins."""
+    theme_bright = ''
+    theme_dark = ''
+
+    def set_theme(self, theme: str):
+        raise ValueError('Plugin is None')
+
+    def __init__(self):
+        super().__init__()
+
+
+class PluginDesktopDependent(Plugin):
+    """Plugins that behave differently on different desktops"""
+    strategy: Plugin
+
+    def __init__(self):
+        super().__init__()
+        self.strategy: Plugin = NonePlugin()
+
+    def set_strategy(self, strategy: str):
+        raise NotImplementedError
+
+    def set_theme(self, theme: str):
+        if isinstance(self.strategy, NonePlugin):
+            raise NotImplementedError('Strategy is not set!')
+
+        self.strategy.set_theme(theme)
+
+
 def inplace_change(filename, old_string, new_string):
     """@params: config - config to be written into file
                 path - the path where the config is will be written into.
