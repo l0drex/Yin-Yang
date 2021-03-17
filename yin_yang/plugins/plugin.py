@@ -134,7 +134,7 @@ def inplace_change(filename, old_string, new_string):
         f.write(s)
 
 
-def get_stuff_in_dir(path: str, type: str):
+def get_stuff_in_dir(path: str, type: str) -> [str]:
     """Returns all files or directories in the path
     :param path: The path where to search.
     :param type: The type. Either dir (a directory) or file
