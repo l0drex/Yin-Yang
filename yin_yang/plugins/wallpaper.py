@@ -8,7 +8,7 @@ from yin_yang.plugins.plugin import PluginDesktopDependent, Plugin
 
 class Wallpaper(PluginDesktopDependent):
     name = 'Wallpaper'
-    # themes are actually the wallpapers
+    # themes are actually image file paths
     theme_dark = ''
     theme_bright = ''
 
@@ -18,7 +18,7 @@ class Wallpaper(PluginDesktopDependent):
         elif strategy == 'gtk':
             self.strategy = Gnome()
         else:
-            raise ValueError('Unknown strategy!')
+            raise ValueError('Unsupported desktop environment!')
 
     def get_input(self, widget):
         _translate = QtCore.QCoreApplication.translate
@@ -49,8 +49,5 @@ class Gnome(Plugin):
 
 
 class Kde(Plugin):
-    theme_dark = ''
-    theme_bright = ''
-
     def set_theme(self, theme: str):
         subprocess.run(["./scripts/change_wallpaper.sh", theme])
