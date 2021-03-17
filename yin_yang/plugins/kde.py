@@ -60,6 +60,7 @@ def get_kde_theme_names():
     # noinspection SpellCheckingInspection
     long_names = subprocess.check_output(["lookandfeeltool", "-l"], universal_newlines=True)
     long_names = long_names.splitlines()
+    long_names.sort()
 
     # get the actual name
     for long_name in long_names:
