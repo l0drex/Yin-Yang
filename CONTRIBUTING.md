@@ -39,6 +39,17 @@ By default, each plugin has its own section in the tab plugins,
 with one simple text input to set the desired theme.
 
 If you want to provide a combobox instead, you can simply implement the `get_available_themes()` function.
+Please don't forget to add exception handling for cases where the application is not installed.
+For example, you could do the following:
+```python
+def get_available_themes(self) -> dict[str, str]:
+    try:
+        # your implementation
+        ...
+        return themes_dict
+    except FileNotFoundError:
+        return {}
+```
 
 
 ### Testing
