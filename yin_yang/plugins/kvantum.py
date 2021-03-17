@@ -1,4 +1,5 @@
 import subprocess
+from os.path import isdir
 
 from yin_yang.plugins.plugin import Plugin, get_stuff_in_dir
 
@@ -16,7 +17,11 @@ class Kvantum(Plugin):
         subprocess.run(["kvantummanager", "--set", theme])
 
     def get_themes_available(self) -> dict[str, str]:
-        themes = get_stuff_in_dir('/usr/share/Kvantum', type='dir')
+        path = '/usr/share/Kvantum'
+        if not isdir(path):
+            return {}
+
+        themes = get_stuff_in_dir(path, type='dir')
         themes_dict: dict = {}
         assert len(themes) > 0, 'No themes were found'
 
