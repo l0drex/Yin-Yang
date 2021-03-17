@@ -2,7 +2,7 @@ import os
 import json
 from pathlib import Path
 
-from yin_yang.plugins.plugin import Plugin
+from yin_yang.plugins.plugin import Plugin, get_stuff_in_dir
 
 
 def write_new_settings(settings, path):
@@ -39,3 +39,29 @@ class Vscode(Plugin):
                 settings['workbench.colorTheme'] = theme
                 with open(editor, 'w') as sett:
                     json.dump(settings, sett)
+
+    def get_themes_available(self) -> dict[str, str]:
+        path = '/usr/lib/code/extensions'
+        theme_packages = get_stuff_in_dir(path, type='dir')
+        theme_packages = [package_name.replace('theme-', '')
+                          for package_name in theme_packages
+                          if package_name.startswith('theme-')]
+        assert len(theme_packages) > 0
+        theme_packages.sort()
+
+        themes_dict: dict = {}
+
+        for package_name in theme_packages:
+            with open(f'{path}/theme-{package_name}/package.json', 'r') as file:
+                package_metadata = json.load(file)
+            try:
+                theme_ids = package_metadata['contributes']['themes']
+                # only take the ids
+                theme_ids = [theme_meta['id'] for theme_meta in theme_ids]
+
+                for theme_id in theme_ids:
+                    themes_dict[theme_id] = theme_id
+            except KeyError:
+                continue
+
+        return themes_dict
