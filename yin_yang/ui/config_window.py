@@ -115,11 +115,16 @@ class MainWindow(QtWidgets.QMainWindow):
                 # set the index
                 for child in widget.findChildren(QtWidgets.QComboBox):
                     theme = 'light' if widget.findChildren(QtWidgets.QComboBox).index(child) == 0 else 'dark'
-                    index = child.findText(
-                        plugin.get_themes_available()[
-                            config.get(plugin.name, f'{theme}_theme')
-                        ]
-                    )
+                    used_theme: str = config.get(plugin.name, f'{theme}_theme')
+                    index: int
+                    if used_theme == '':
+                        index = 0
+                    else:
+                        index = child.findText(
+                            plugin.get_themes_available()[
+                                config.get(plugin.name, f'{theme}_theme')
+                            ]
+                        )
                     child.setCurrentIndex(index)
             else:
                 children = widget.findChildren(QtWidgets.QLineEdit)
