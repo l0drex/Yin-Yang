@@ -10,10 +10,8 @@ license: MIT
 """
 
 import logging
-import sys
 import time
 from datetime import datetime
-from signal import *
 
 from yin_yang.config import config, PLUGINS
 
@@ -52,19 +50,8 @@ def set_mode(dark: bool):
     config.dark_mode = dark
 
 
-def clean_up():
-    # application is not running anymore
-    config.running = False
-    sys.exit(0)
-
-
 def run():
-    config.running = True
-    # connect these signals to the clean_up method
-    for sig in (SIGABRT, SIGTERM, SIGBREAK, SIGINT):
-        signal(sig, clean_up)
-
-    while config.running:
+    while True:
         # load settings if something has changed
         config.load()
         time_light, time_dark = config.times

@@ -3,6 +3,7 @@ import logging
 import os
 import pathlib
 import re
+from psutil import process_iter, NoSuchProcess
 from datetime import time
 from enum import Enum
 from typing import Union
@@ -220,13 +221,14 @@ class ConfigManager:
 
     @property
     def running(self) -> bool:
-        return self._config_data['running']
-
-    @running.setter
-    def running(self, running: bool):
-        self._config_data['running'] = running
-        self.changed = True
-        self.write()
+        # check if a process called yin_yang is running
+        for process in process_iter():
+            try:
+                if 'yin-yang' in process.name():
+                    return True
+            except NoSuchProcess:
+                pass
+        return False
 
     @property
     def dark_mode(self) -> bool:
@@ -252,8 +254,6 @@ class ConfigManager:
     def mode(self, mode: Modes):
         self._config_data['mode'] = mode.value
         self.changed = True
-        if mode == Modes.manual:
-            self.running = False
 
     @property
     def listener(self) -> Listener:
