@@ -9,10 +9,10 @@ from yin_yang.plugins.plugin import PluginDesktopDependent, Plugin
 class Wallpaper(PluginDesktopDependent):
     name = 'Wallpaper'
 
-    def set_strategy(self, strategy: str):
-        if strategy == 'kde':
+    def set_strategy(self, desktop: str):
+        if desktop == 'kde':
             self.strategy = Kde()
-        elif strategy == 'gtk':
+        elif desktop == 'gtk':
             self.strategy = Gnome()
         else:
             raise ValueError('Unsupported desktop environment!')

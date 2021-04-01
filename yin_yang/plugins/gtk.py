@@ -8,8 +8,8 @@ from yin_yang.plugins.plugin import PluginDesktopDependent, Plugin
 class Gtk(PluginDesktopDependent):
     name = 'GTK'
 
-    def set_strategy(self, strategy: str):
-        if strategy == 'kde':
+    def set_strategy(self, desktop: str):
+        if desktop == 'kde':
             self.strategy = Kde()
         else:
             self.strategy = Gnome()

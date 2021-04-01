@@ -106,7 +106,7 @@ class PluginDesktopDependent(Plugin):
         super().__init__()
         self.strategy: Plugin = NonePlugin()
 
-    def set_strategy(self, strategy: str):
+    def set_strategy(self, desktop: str):
         raise NotImplementedError
 
     def set_theme(self, theme: str):

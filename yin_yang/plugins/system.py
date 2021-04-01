@@ -7,10 +7,10 @@ import os
 class System(PluginDesktopDependent):
     name = 'System'
 
-    def set_strategy(self, strategy):
-        if strategy == 'kde':
+    def set_strategy(self, desktop):
+        if desktop == 'kde':
             self.strategy = Kde()
-        elif strategy == 'gtk':
+        elif desktop == 'gtk':
             self.strategy = Gnome()
 
 
