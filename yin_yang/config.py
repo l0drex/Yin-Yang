@@ -23,6 +23,8 @@ PLUGINS: [PluginClass] = [system.System(), gtk.Gtk(), wallpaper.Wallpaper(), kva
 
 
 class Modes(Enum):
+    """Different modes for determining the theme that should be used"""
+
     manual = 'manual'
     scheduled = 'manual time'
     followSun = 'sunset to sunrise'
@@ -80,15 +82,17 @@ def update_config(config_old: dict, defaults: dict):
 
 
 class ConfigManager:
+    """Manages the configuration using the singleton pattern"""
+
     _config_data: dict = None
 
     def __init__(self):
-        self.changed = False
         self._config_data = self.defaults
-
         self._last_location_update = None
 
     def set_default(self):
+        """Resets all values to the defaults specified in the defaults property."""
+
         logger.info('Setting default values.')
         self._config_data = self.defaults
 
@@ -116,11 +120,7 @@ class ConfigManager:
         # check if config needs an update
         # if the default values are set, the version number is below 0
         if config_loaded['version'] < self.defaults['version']:
-            self.changed = True
             config_loaded = update_config(config_loaded, self.defaults)
-        else:
-            # no unsaved changes yet
-            self.changed = False
 
         self._config_data = config_loaded
 
@@ -138,9 +138,6 @@ class ConfigManager:
         try:
             with open(path + '/yin_yang/yin_yang.json', 'w') as conf_file:
                 json.dump(self._config_data, conf_file, indent=4)
-
-            # no unsaved changes anymore
-            self.changed = False
 
             return True
         except IOError as e:
@@ -174,8 +171,6 @@ class ConfigManager:
 
         try:
             self._config_data['plugins'][plugin][key] = value
-            # new unsaved changes
-            self.changed = True
             return self.get(plugin, key)
         except KeyError as e:
             logger.error(f'Error while updating {plugin}.{key}')
@@ -183,6 +178,8 @@ class ConfigManager:
 
     @property
     def defaults(self) -> dict:
+        """All default values"""
+
         # NOTE: if you change or add new values here, make sure to update the version number and update_config() method
         conf_default = {
             'version': 2.2,
@@ -207,7 +204,19 @@ class ConfigManager:
         return conf_default
 
     @property
+    def changed(self):
+        # compare data in dict to data in file
+        current_config = self._config_data.copy()
+        self.load()
+        changed: bool = current_config != self._config_data
+        self._config_data = current_config
+
+        return changed
+
+    @property
     def data(self) -> dict:
+        """All config values. Only use this for testing purposes!"""
+
         return self._config_data
 
     @property
@@ -216,6 +225,8 @@ class ConfigManager:
 
     @property
     def running(self) -> bool:
+        """True, if yin yang is currently running"""
+
         # check if a process called yin_yang is running
         for process in process_iter():
             try:
@@ -227,18 +238,20 @@ class ConfigManager:
 
     @property
     def dark_mode(self) -> bool:
+        """Currently used theme. Might be wrong on initial start."""
+
         return self._config_data['dark_mode']
 
     @dark_mode.setter
     def dark_mode(self, dark_mode: bool):
         self._config_data['dark_mode'] = dark_mode
-        self.changed = True
         self.write()
 
     @property
     def mode(self) -> Modes:
-        mode_string = self._config_data['mode']
+        """Mode that should be used to check wether dark mode should be active or not"""
 
+        mode_string = self._config_data['mode']
         for mode in list(Modes):
             if mode_string == mode.value:
                 return mode
@@ -248,29 +261,30 @@ class ConfigManager:
     @mode.setter
     def mode(self, mode: Modes):
         self._config_data['mode'] = mode.value
-        self.changed = True
 
     @property
     def location(self) -> tuple[float, float]:
-        # If the location should be updated automatically,
-        # do this by going to ipinfo.io and parse the text on that page.
-        # Also, only do this if the last time we visited that page
-        # was more than a minute ago.
+        if self._config_data['update_location']:
+            # Only update the location if the last time we visited that page
+            # was during the last check
 
-        # standard value
-        seconds_since_last_update = 61
-        # if it was already updated once, calculate the time
-        if self._last_location_update is not None:
-            seconds_since_last_update = (datetime.now() - self._last_location_update).seconds
+            # standard value
+            seconds_since_last_update = self.update_interval + 2
+            # if it was already updated once, calculate the time
+            if self._last_location_update is not None:
+                seconds_since_last_update = (datetime.now() - self._last_location_update).seconds
 
-        if self._config_data['update_location'] and \
-           seconds_since_last_update > self.update_interval + 1:
-            logger.debug('Updating location.')
-            logger.debug(f'Last location update was {seconds_since_last_update} seconds ago.')
-            loc = requests.get('http://www.ipinfo.io/loc').text.split(',')
-            assert len(loc) == 2, 'The returned location should have exactly 2 values.'
-            self._config_data['coordinates'] = [float(coordinate) for coordinate in loc]
-            self._last_location_update = datetime.now()
+            if seconds_since_last_update > (self.update_interval + 1):
+                logger.debug('Updating location.')
+                logger.debug(f'Last location update was {seconds_since_last_update} seconds ago.')
+
+                loc = requests.get('http://www.ipinfo.io/loc').text.split(',')
+                # convert the strings to floats
+                loc: tuple[float] = [float(coordinate) for coordinate in loc]
+                assert len(loc) == 2, 'The returned location should have exactly 2 values.'
+                self._config_data['coordinates'] = loc
+                self.write()
+                self._last_location_update = datetime.now()
 
         return self._config_data['coordinates']
 
@@ -282,24 +296,30 @@ class ConfigManager:
             raise ValueError('Updating location while not in mode follow sun is forbidden')
 
         self._config_data['coordinates'] = coordinates
-        self.changed = True
 
     @property
     def update_location(self) -> bool:
+        """Wether the location should be updated automatically"""
+
         return self._config_data['update_location']
 
     @update_location.setter
     def update_location(self, enabled: bool):
         self._config_data['update_location'] = enabled
-        self.changed = True
 
     @property
     def times(self) -> tuple[time, time]:
+        """Times during which dark mode should be inactive"""
+
         if self.mode == Modes.followSun:
             # use times for sunrise and sunset
             latitude, longitude = config.location
-            sun = Sun(latitude, longitude)
+            if latitude == longitude:
+                logger.warning(f'Latitude and longitude are both {latitude}')
+            else:
+                logger.debug(f'Calculating sunset and sunrise at location {latitude}, {longitude}.')
 
+            sun = Sun(latitude, longitude)
             try:
                 today_sr = sun.get_local_sunrise_time()
                 today_ss = sun.get_local_sunset_time()
@@ -321,13 +341,13 @@ class ConfigManager:
     def times(self, times: tuple[time, time]):
         if self.mode == Modes.scheduled:
             self._config_data['times'] = times[0].isoformat(), times[1].isoformat()
-            self.changed = True
         else:
             raise ValueError('Changing times is only allowed in mode scheduled!')
 
     @property
     def desktop(self) -> str:
         """Return the current desktops name or 'unknown' if can't determine it"""
+
         # just to get all possible implementations of desktop variables
         # noinspection SpellCheckingInspection
         env = str(os.getenv('GDMSESSION')).lower()
@@ -362,6 +382,7 @@ class ConfigManager:
     @property
     def update_interval(self) -> int:
         """Seconds that should pass until next check"""
+
         return self._config_data['update_interval']
 
 

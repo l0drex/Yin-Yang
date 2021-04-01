@@ -9,7 +9,7 @@ import sys
 import json
 import struct
 import time
-from datetime import date, datetime, time as datetimetime
+from datetime import datetime, time as datetimetime
 from pathlib import Path
 
 from yin_yang.config import config, Modes

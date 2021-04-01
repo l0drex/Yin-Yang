@@ -25,12 +25,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.move(frame_gm.topLeft())
 
         # set the config values to the elements
-        self.get_config()
+        self.load()
 
         # connects all buttons to the correct routes
         self.register_handlers()
 
-    def get_config(self):
+    def load(self):
         """Sets the values from the config to the elements"""
 
         # set current version in statusbar
@@ -54,11 +54,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.toggle_notification.setChecked(config.get(plugin='notification', key='enabled'))
 
         # sets the correct time based on config
-        self.get_time()
-        self.get_location()
-        self.get_plugins()
+        self.load_times()
+        self.load_location()
+        self.load_plugins()
 
-    def get_time(self):
+    def load_times(self):
+        """Loads the time from the config and sets it to the ui elements"""
         time_light, time_dark = config.times
 
         # giving the time widget the values of the config
@@ -66,7 +67,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.inp_time_dark.setTime(time_dark)
         self.update_label_enabled()
 
-    def get_location(self):
+    def load_location(self):
         if self.ui.btn_sun.isChecked():
             config.mode = Modes.followSun
         self.ui.btn_location.setChecked(config.update_location)
@@ -75,9 +76,8 @@ class MainWindow(QtWidgets.QMainWindow):
         coordinates = config.location
         self.ui.inp_latitude.setValue(coordinates[0])
         self.ui.inp_longitude.setValue(coordinates[1])
-        self.update_label_enabled()
 
-    def get_plugins(self):
+    def load_plugins(self):
         widget: QtWidgets.QWidget
         for plugin in PLUGINS:
             # filter out plugins for application
@@ -107,8 +107,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
             if plugin.name == 'Wallpaper':
                 children = widget.findChildren(QtWidgets.QPushButton)
-                children[0].clicked.connect(lambda: self.set_wallpaper(False))
-                children[1].clicked.connect(lambda: self.set_wallpaper(True))
+                children[0].clicked.connect(lambda: self.save_wallpaper(False))
+                children[1].clicked.connect(lambda: self.save_wallpaper(True))
 
             if plugin.get_themes_available():
                 # uses combobox instead of line edit
@@ -132,35 +132,36 @@ class MainWindow(QtWidgets.QMainWindow):
                 children[1].setText(config.get(plugin=plugin.name, key='dark_theme'))
 
     def update_label_enabled(self):
-        time_light, time_dark = config.times
+        time_light = self.ui.inp_time_light.time().toPyTime()
+        time_dark = self.ui.inp_time_dark.time().toPyTime()
         self.ui.label_active.setText(
             _translate('main_window',
                f'Dark mode will be active between {time_dark.strftime("%H:%M")} and {time_light.strftime("%H:%M")}.'))
 
     def register_handlers(self):
         # set sunrise and sunset times if mode is set to followSun or coordinates changed
-        self.ui.btn_enable.toggled.connect(self.set_mode)
-        self.ui.btn_schedule.toggled.connect(self.set_mode)
-        self.ui.btn_sun.toggled.connect(self.set_mode)
+        self.ui.btn_enable.toggled.connect(self.save_mode)
+        self.ui.btn_schedule.toggled.connect(self.save_mode)
+        self.ui.btn_sun.toggled.connect(self.save_mode)
 
         # buttons and inputs
-        self.ui.btn_location.stateChanged.connect(self.set_location)
-        self.ui.inp_latitude.valueChanged.connect(self.set_location)
-        self.ui.inp_longitude.valueChanged.connect(self.set_location)
-        self.ui.inp_time_light.timeChanged.connect(self.set_time)
-        self.ui.inp_time_dark.timeChanged.connect(self.set_time)
+        self.ui.btn_location.stateChanged.connect(self.save_location)
+        self.ui.inp_latitude.valueChanged.connect(self.save_location)
+        self.ui.inp_longitude.valueChanged.connect(self.save_location)
+        self.ui.inp_time_light.timeChanged.connect(self.save_times)
+        self.ui.inp_time_dark.timeChanged.connect(self.save_times)
 
         # connect dialog buttons
-        self.ui.btn_box.clicked.connect(self.save_config)
+        self.ui.btn_box.clicked.connect(self.save_config_to_file)
 
-    def set_config(self):
+    def save(self):
         """Sets the values to the config object, but does not save them"""
 
         config.update('sound', 'enabled', self.ui.toggle_sound.isChecked())
         config.update('notification', 'enabled', self.ui.toggle_notification.isChecked())
-        self.set_plugins()
+        self.save_plugins()
 
-    def set_mode(self):
+    def save_mode(self):
         if not self.ui.btn_enable.isChecked():
             config.mode = Modes.manual
         elif self.ui.btn_schedule.isChecked():
@@ -168,9 +169,9 @@ class MainWindow(QtWidgets.QMainWindow):
         elif self.ui.btn_sun.isChecked():
             config.mode = Modes.followSun
 
-        self.get_time()
+        self.load_times()
 
-    def set_time(self):
+    def save_times(self):
         """Sets the time set in the ui to the config"""
 
         if config.mode != Modes.scheduled:
@@ -183,26 +184,24 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.update_label_enabled()
 
-    def set_location(self):
+    def save_location(self):
         if config.mode != Modes.followSun:
             return
         config.update_location = self.ui.btn_location.isChecked()
         if config.update_location:
-            self.get_location()
-            return
+            self.load_location()
         else:
             self.ui.location_input.setEnabled(True)
 
-        coordinates = [
-            self.ui.inp_latitude.value(),
-            self.ui.inp_longitude.value()
-        ]
-        config.location = coordinates
+            coordinates = [
+                self.ui.inp_latitude.value(),
+                self.ui.inp_longitude.value()
+            ]
+            config.location = coordinates
         # update message
-        time_light, time_dark = config.times
-        self.update_label_enabled()
+        self.load_times()
 
-    def set_plugins(self):
+    def save_plugins(self):
         for plugin in PLUGINS:
             # filter out all plugins for application
             if plugin.name.casefold() in ['notification', 'sound']:
@@ -223,7 +222,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 config.update(plugin.name, 'light_theme', children[0].text())
                 config.update(plugin.name, 'dark_theme', children[1].text())
 
-    def set_wallpaper(self, dark: bool):
+    def save_wallpaper(self, dark: bool):
         message = _translate('main_window', f'Open Wallpaper {"dark" if dark else "light"}')
         file_name, _ = QFileDialog.getOpenFileName(
             self, message,
@@ -234,16 +233,16 @@ class MainWindow(QtWidgets.QMainWindow):
         i = 1 if dark else 0
         inputs_wallpaper[i].setText(file_name)
 
-    def save_config(self, button):
+    def save_config_to_file(self, button):
         """Saves the config to the file or restores values"""
 
         button = QDialogButtonBox.standardButton(self.ui.btn_box, button)
         if button == QDialogButtonBox.Apply:
-            self.set_config()
+            self.save()
             return config.write()
         elif button == QDialogButtonBox.RestoreDefaults:
             config.set_default()
-            self.get_config()
+            self.load()
         elif button == QDialogButtonBox.Cancel:
             self.close()
         else:

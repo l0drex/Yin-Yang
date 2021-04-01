@@ -18,12 +18,6 @@ from yin_yang.config import Modes, PLUGINS, config
 logger = logging.getLogger(__name__)
 
 
-def handle_time_change(*args):
-    if 'DayTime' in args[1]:
-        dark_mode: bool = bool(args[1]['DayTime'])
-        set_mode(dark_mode)
-
-
 def should_be_dark(time_current: time, time_light: time, time_dark: time) -> bool:
     """Compares two times with current time"""
 
@@ -34,6 +28,8 @@ def should_be_dark(time_current: time, time_light: time, time_dark: time) -> boo
 
 
 def set_mode(dark: bool):
+    """Activates light or dark theme"""
+
     if dark == config.dark_mode:
         return
 

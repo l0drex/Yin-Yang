@@ -73,6 +73,8 @@ class ConfigTest(unittest.TestCase):
                   Please restart the background process.')
 
     def test_update_value(self):
+        config.load()
+        self.assertFalse(config.changed, 'Changed should be false after loading')
         old_value = config.update_location
         config.update_location = not old_value
         self.assertEqual(config.update_location, not old_value,
