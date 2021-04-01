@@ -30,11 +30,6 @@ class Modes(Enum):
     followSun = 'sunset to sunrise'
 
 
-class Listener(Enum):
-    native = 'native'
-    clight = 'clight'
-
-
 # aliases for path to use later on
 home = str(pathlib.Path.home())
 path = home + '/.config'
@@ -194,7 +189,6 @@ class ConfigManager:
             'running': False,
             'dark_mode': False,
             'mode': Modes.manual.value,
-            'listener': Listener.native.value,
             'coordinates': (0, 0),
             'update_location': False,
             'times': ('07:00', '20:00'),
@@ -253,21 +247,6 @@ class ConfigManager:
     @mode.setter
     def mode(self, mode: Modes):
         self._config_data['mode'] = mode.value
-        self.changed = True
-
-    @property
-    def listener(self) -> Listener:
-        listener_string = self._config_data['listener']
-
-        for listener in list(Listener):
-            if listener_string == listener.value:
-                return listener
-
-        raise ValueError('Unsupported mode!')
-
-    @listener.setter
-    def listener(self, listener: Listener):
-        self._config_data['listener'] = listener.value
         self.changed = True
 
     @property
