@@ -51,6 +51,7 @@ def set_mode(dark: bool):
 
 
 def run():
+    print(f'System is currently using a {"dark" if config.dark_mode else "light"} theme.')
     while config.mode != Modes.manual:
         # load settings if something has changed
         config.load()
