@@ -17,10 +17,10 @@ from yin_yang.plugins import system, gtk, kvantum, wallpaper, vscode, atom, soun
 logger = logging.getLogger(__name__)
 
 # default objects
-PLUGINS: [PluginClass] = [system.System(), kvantum.Kvantum(),
+PLUGINS: [PluginClass] = [kvantum.Kvantum(),
                           vscode.Vscode(), atom.Atom(), konsole.Konsole(), firefox.Firefox(),
                           sound.Sound(), notify.Notification()]
-desktop_dependent_plugins = [gtk.Gtk(), wallpaper.Wallpaper()]
+desktop_dependent_plugins = [system.System(), gtk.Gtk(), wallpaper.Wallpaper()]
 PLUGINS += desktop_dependent_plugins
 
 
