@@ -11,17 +11,15 @@ from typing import Union
 import requests
 from suntime import Sun, SunTimeException
 
-from yin_yang.plugins.plugin import Plugin as PluginClass
+from yin_yang.plugins.plugin import Plugin as PluginClass, PluginDesktopDependent
 from yin_yang.plugins import system, gtk, kvantum, wallpaper, vscode, atom, sound, notify, konsole, firefox
 
 logger = logging.getLogger(__name__)
 
 # default objects
-PLUGINS: [PluginClass] = [kvantum.Kvantum(),
+PLUGINS: [PluginClass] = [system.System(), gtk.Gtk(), wallpaper.Wallpaper(), kvantum.Kvantum(),
                           vscode.Vscode(), atom.Atom(), konsole.Konsole(), firefox.Firefox(),
                           sound.Sound(), notify.Notification()]
-desktop_dependent_plugins = [system.System(), gtk.Gtk(), wallpaper.Wallpaper()]
-PLUGINS += desktop_dependent_plugins
 
 
 class Modes(Enum):
@@ -352,8 +350,9 @@ config.load()
 print('Detected desktop:', config.desktop)
 
 # set plugin themes
-for p in desktop_dependent_plugins:
-    p.set_strategy(config.desktop)
+for p in PLUGINS:
+    if isinstance(p, PluginDesktopDependent):
+        p.set_strategy(config.desktop)
 
 
 for p in PLUGINS:
