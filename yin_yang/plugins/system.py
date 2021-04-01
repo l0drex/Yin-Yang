@@ -12,6 +12,8 @@ class System(PluginDesktopDependent):
             self.strategy = Kde()
         elif desktop == 'gtk':
             self.strategy = Gnome()
+        else:
+            raise ValueError('Unsupported desktop environment!')
 
 
 # WIP: Potential Check for https://gist.github.com/atiensivu/fcc3183e9a6fd74ec1a283e3b9ad05f0
