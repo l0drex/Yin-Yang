@@ -13,7 +13,7 @@ import logging
 import time
 from datetime import datetime
 
-from yin_yang.config import config, PLUGINS
+from yin_yang.config import Modes, PLUGINS, config
 
 logger = logging.getLogger(__name__)
 
@@ -51,10 +51,10 @@ def set_mode(dark: bool):
 
 
 def run():
-    while True:
+    while config.mode != Modes.manual:
         # load settings if something has changed
         config.load()
         time_light, time_dark = config.times
         set_mode(should_be_dark(datetime.now().time(), time_light, time_dark))
         # subtract seconds so that the next switch is on the full minute
-        time.sleep(60 - datetime.today().time().second)
+        time.sleep(60 - datetime.now().second)

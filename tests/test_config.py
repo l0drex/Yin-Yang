@@ -39,15 +39,18 @@ class ConfigTest(unittest.TestCase):
                 self.assertIsInstance(config.get(p.name, 'enabled'), bool)
 
     def test_running(self):
+        # save some config values
         was_running = config.running
+        previous_mode = config.mode
         if was_running:
             # stop running processes
             # save is done automatically
-            config.running = False
+            config.mode = Modes.manual
 
             # wait until next check and give one extra second for computing
             print('Waiting until next check...')
             time.sleep(60 - datetime.now().second + 1)
+            config.mode = previous_mode
 
         self.assertFalse(config.running, 'Yin Yang is not running')
 
@@ -60,6 +63,8 @@ class ConfigTest(unittest.TestCase):
         p_check.join()
         p_main.terminate()
 
+        # this is not a test but rather a check for debugging,
+        # it should always be true
         config.load()
         assert not config.running, 'Yin Yang should not run anymore'
 
