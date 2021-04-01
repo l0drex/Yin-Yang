@@ -4,7 +4,7 @@ import os
 import pathlib
 import re
 from psutil import process_iter, NoSuchProcess
-from datetime import time
+from datetime import datetime, time
 from enum import Enum
 from typing import Union
 
@@ -85,6 +85,8 @@ class ConfigManager:
     def __init__(self):
         self.changed = False
         self._config_data = self.defaults
+
+        self._last_location_update = None
 
     def set_default(self):
         logger.info('Setting default values.')
@@ -249,9 +251,25 @@ class ConfigManager:
 
     @property
     def location(self) -> tuple[float, float]:
-        if self._config_data['update_location']:
+        # If the location should be updated automatically,
+        # do this by going to ipinfo.io and parse the text on that page.
+        # Also, only do this if the last time we visited that page
+        # was more than a minute ago.
+
+        # standard value
+        seconds_since_last_update = 61
+        # if it was already updated once, calculate the time
+        if self._last_location_update is not None:
+            seconds_since_last_update = (datetime.now() - self._last_location_update).seconds
+
+        if self._config_data['update_location'] and \
+           seconds_since_last_update > 60:
+            logger.debug('Updating location.')
+            logger.debug(f'Last location update was {seconds_since_last_update} seconds ago.')
             loc = requests.get('http://www.ipinfo.io/loc').text.split(',')
-            return float(loc[0]), float(loc[1])
+            assert len(loc) == 2, 'The returned location should have exactly 2 values.'
+            self._config_data['coordinates'] = [float(coordinate) for coordinate in loc]
+            self._last_location_update = datetime.now()
 
         return self._config_data['coordinates']
 
