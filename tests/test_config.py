@@ -4,6 +4,12 @@ import unittest
 from pathlib import Path
 
 from yin_yang.config import ConfigManager, PLUGINS, Modes, update_config
+from psutil import process_iter
+import time
+from datetime import datetime
+from yin_yang import yin_yang
+from multiprocessing import Process
+import subprocess
 
 path = str(Path.home()) + '/.config/yin_yang/yin_yang.json'
 config = ConfigManager()
@@ -31,6 +37,35 @@ class ConfigTest(unittest.TestCase):
                 self.assertIsInstance(config.get(p.name, 'light_theme'), str)
                 self.assertIsInstance(config.get(p.name, 'dark_theme'), str)
                 self.assertIsInstance(config.get(p.name, 'enabled'), bool)
+
+    def test_running(self):
+        was_running = config.running
+        if was_running:
+            # stop running processes
+            # save is done automatically
+            config.running = False
+
+            # wait until next check and give one extra second for computing
+            print('Waiting until next check...')
+            time.sleep(60 - datetime.now().second + 1)
+
+        self.assertFalse(config.running, 'Yin Yang is not running')
+
+        # start yin yang in the background and check if config.running is true
+        p_main = Process(target=yin_yang.run)
+        p_check = Process(target=self.check)
+        p_main.start()
+        p_check.start()
+        p_main.join(10)
+        p_check.join()
+        p_main.terminate()
+
+        config.load()
+        assert not config.running, 'Yin Yang should not run anymore'
+
+        if was_running:
+            print('Yin Yang was stopped for this test. \
+                  Please restart the background process.')
 
     def test_update_value(self):
         old_value = config.update_location
@@ -112,6 +147,10 @@ class ConfigTest(unittest.TestCase):
         if os.path.isfile(path):
             with open(path, 'w') as file:
                 json.dump(old_data, file, indent=4)
+
+    def check(self):
+        self.assertTrue(config.running, 'Yin Yang is running')
+        config.running = False
 
 
 if __name__ == '__main__':
