@@ -12,12 +12,12 @@ import requests
 from suntime import Sun, SunTimeException
 
 from yin_yang.plugins.plugin import Plugin as PluginClass
-from yin_yang.plugins import kde, gnome, gtk, kvantum, wallpaper, vscode, atom, sound, notify, konsole, firefox
+from yin_yang.plugins import system, gtk, kvantum, wallpaper, vscode, atom, sound, notify, konsole, firefox
 
 logger = logging.getLogger(__name__)
 
 # default objects
-PLUGINS: [PluginClass] = [kde.Kde(), gnome.Gnome(), kvantum.Kvantum(),
+PLUGINS: [PluginClass] = [system.System(), kvantum.Kvantum(),
                           vscode.Vscode(), atom.Atom(), konsole.Konsole(), firefox.Firefox(),
                           sound.Sound(), notify.Notification()]
 desktop_dependent_plugins = [gtk.Gtk(), wallpaper.Wallpaper()]
@@ -348,6 +348,8 @@ class ConfigManager:
 config = ConfigManager()
 # load config from file
 config.load()
+
+print('Detected desktop:', config.desktop)
 
 # set plugin themes
 for p in desktop_dependent_plugins:
