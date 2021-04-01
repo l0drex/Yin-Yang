@@ -13,33 +13,6 @@ class System(PluginDesktopDependent):
         elif strategy == 'gtk':
             self.strategy = Gnome()
 
-    @property
-    def theme_dark(self):
-        if hasattr(self, 'strategy'):
-            # needed since the plugin class checks if the themes are set correctly
-            # in it's init
-            return self.strategy.theme_dark
-        else:
-            return ''
-
-    @theme_dark.setter
-    def theme_dark(self, theme: str):
-        self.strategy.theme_dark = theme
-
-    @property
-    def theme_bright(self):
-        if hasattr(self, 'strategy'):
-            return self.strategy.theme_bright
-        else:
-            return ''
-
-    @theme_bright.setter
-    def theme_bright(self, theme: str):
-        self.strategy.theme_bright = theme
-
-    def get_themes_available(self) -> dict[str, str]:
-        return self.strategy.get_themes_available()
-
 
 # WIP: Potential Check for https://gist.github.com/atiensivu/fcc3183e9a6fd74ec1a283e3b9ad05f0
 # to reduce common issues, or write it in the FAQ

@@ -14,30 +14,6 @@ class Gtk(PluginDesktopDependent):
         else:
             self.strategy = Gnome()
 
-    @property
-    def theme_dark(self):
-        if hasattr(self, 'strategy'):
-            # needed since the plugin class checks if the themes are set correctly
-            # in it's init
-            return self.strategy.theme_dark
-        else:
-            return ''
-
-    @theme_dark.setter
-    def theme_dark(self, theme: str):
-        self.strategy.theme_dark = theme
-
-    @property
-    def theme_bright(self):
-        if hasattr(self, 'strategy'):
-            return self.strategy.theme_bright
-        else:
-            return ''
-
-    @theme_bright.setter
-    def theme_bright(self, theme: str):
-        self.strategy.theme_bright = theme
-
 
 class Gnome(Plugin):
     # TODO set default theme names

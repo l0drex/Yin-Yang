@@ -8,9 +8,6 @@ from yin_yang.plugins.plugin import PluginDesktopDependent, Plugin
 
 class Wallpaper(PluginDesktopDependent):
     name = 'Wallpaper'
-    # themes are actually image file paths
-    theme_dark = ''
-    theme_bright = ''
 
     def set_strategy(self, strategy: str):
         if strategy == 'kde':
@@ -42,6 +39,7 @@ class Wallpaper(PluginDesktopDependent):
 
 
 class Gnome(Plugin):
+    # themes are actually image file paths
     theme_dark = ''
     theme_bright = ''
 
@@ -52,6 +50,7 @@ class Gnome(Plugin):
 
 
 class Kde(Plugin):
+    # themes are actually image file paths
     theme_dark = ''
     theme_bright = ''
 

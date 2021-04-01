@@ -115,6 +115,33 @@ class PluginDesktopDependent(Plugin):
 
         self.strategy.set_theme(theme)
 
+    @property
+    def theme_dark(self):
+        if hasattr(self, 'strategy'):
+            # needed since the plugin class checks if the themes are set correctly
+            # in it's init
+            return self.strategy.theme_dark
+        else:
+            return ''
+
+    @theme_dark.setter
+    def theme_dark(self, theme: str):
+        self.strategy.theme_dark = theme
+
+    @property
+    def theme_bright(self):
+        if hasattr(self, 'strategy'):
+            return self.strategy.theme_bright
+        else:
+            return ''
+
+    @theme_bright.setter
+    def theme_bright(self, theme: str):
+        self.strategy.theme_bright = theme
+
+    def get_themes_available(self) -> dict[str, str]:
+        return self.strategy.get_themes_available()
+
 
 def inplace_change(filename, old_string, new_string):
     """@params: config - config to be written into file
