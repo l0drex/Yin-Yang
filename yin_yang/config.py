@@ -347,7 +347,7 @@ config = ConfigManager()
 # load config from file
 config.load()
 
-print('Detected desktop:', config.desktop)
+logger.info('Detected desktop:', config.desktop)
 
 # set plugin themes
 for p in PLUGINS:

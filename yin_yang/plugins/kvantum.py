@@ -12,7 +12,6 @@ class Kvantum(Plugin):
 
     def set_theme(self, theme: str):
         # uses a kvantum manager cli to switch to a light theme
-        print("Kvantum Light theme:", theme)
         # noinspection SpellCheckingInspection
         subprocess.run(["kvantummanager", "--set", theme])
 

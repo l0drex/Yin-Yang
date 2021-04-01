@@ -17,6 +17,8 @@ from yin_yang.config import Modes, config
 # using ArgumentParser for parsing arguments
 from yin_yang.yin_yang import set_mode
 
+logger = logging.getLogger(__name__)
+
 parser = ArgumentParser()
 parser.add_argument('-t', '--toggle',
                     help='toggles Yin-Yang',
@@ -24,16 +26,14 @@ parser.add_argument('-t', '--toggle',
 parser.add_argument('-s', '--schedule',
                     help='schedule theme toggle, starts daemon in bg',
                     action='store_true')
-parser.add_argument('-d', '--debugging',
-                    help='enables debugging mode',
-                    action='store_true')
 
 # fix HiDpi scaling
 QtWidgets.QApplication.setAttribute(
     QtCore.Qt.AA_EnableHighDpiScaling, True)
 
 
-def main(arguments):
+def main():
+    arguments = parser.parse_args()
     # set settings via terminal
     if arguments.schedule:
         mode = config.mode
@@ -43,7 +43,7 @@ def main(arguments):
                   'or edit to file ~/.config/yin_yang/yin_yang.json')
             return
         elif not config.running:
-            print(f'Starting in mode {mode.name}')
+            logger.info(f'Starting in mode {mode.name}')
             time_light, time_dark = config.times
             print(f'Dark mode will be active between {time_dark} and {time_light}')
             yin_yang.run()
@@ -61,13 +61,12 @@ def main(arguments):
         try:
             translator = QTranslator()
             lang = locale.getdefaultlocale()[0].split('_')[0]
-            print(f'Using language {lang}')
+            logger.debug(f'Using language {lang}')
             translator.load(':/language/resources/yin_yang' + '.' + lang)
             app.installTranslator(translator)
         except Exception as e:
-            print('Error while loading translation.')
-            print(str(e))
-            print('Using default language.')
+            logger.error(str(e))
+            print('Error while loading translation. Using default language.')
 
         window = config_window.MainWindow()
         window.show()
@@ -75,10 +74,7 @@ def main(arguments):
 
 
 if __name__ == '__main__':
-    args = parser.parse_args()
-
-    if args.debugging:
-        print('Debug mode enabled.')
+    if __debug__:
         # noinspection SpellCheckingInspection
         logging.basicConfig(level=logging.DEBUG,
                             format='%(asctime)s %(levelname)s - %(name)s: %(message)s')
@@ -88,4 +84,4 @@ if __name__ == '__main__':
         logging.basicConfig(filename=str(Path.home()) + '/.local/share/yin_yang.log', level=logging.WARNING,
                             format='%(asctime)s %(levelname)s - %(name)s: %(message)s')
 
-    main(args)
+    main()

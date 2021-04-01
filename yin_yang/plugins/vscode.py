@@ -6,7 +6,6 @@ from yin_yang.plugins.plugin import Plugin, get_stuff_in_dir
 
 
 def write_new_settings(settings, path):
-    print("SETTINGS ", len(settings))
     # simple adds a new field to the settings
     settings["workbench.colorTheme"] = "Default"
     with open(path, 'w') as conf:
