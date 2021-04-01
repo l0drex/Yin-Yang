@@ -49,7 +49,7 @@ class ConfigTest(unittest.TestCase):
 
             # wait until next check and give one extra second for computing
             print('Waiting until next check...')
-            time.sleep(60 - datetime.now().second + 1)
+            time.sleep(config.update_interval - datetime.now().second + 1)
             config.mode = previous_mode
 
         self.assertFalse(config.running, 'Yin Yang is not running')

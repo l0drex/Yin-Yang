@@ -191,6 +191,7 @@ class ConfigManager:
             'mode': Modes.manual.value,
             'coordinates': (0, 0),
             'update_location': False,
+            'update_interval': 60,
             'times': ('07:00', '20:00'),
             'plugins': {}
         }
@@ -263,7 +264,7 @@ class ConfigManager:
             seconds_since_last_update = (datetime.now() - self._last_location_update).seconds
 
         if self._config_data['update_location'] and \
-           seconds_since_last_update > 60:
+           seconds_since_last_update > self.update_interval + 1:
             logger.debug('Updating location.')
             logger.debug(f'Last location update was {seconds_since_last_update} seconds ago.')
             loc = requests.get('http://www.ipinfo.io/loc').text.split(',')
@@ -357,6 +358,11 @@ class ConfigManager:
                 plasma5_re.search(second_env) or plasma5_re.search(third_env)):
             return 'kde'
         return 'unknown'
+
+    @property
+    def update_interval(self) -> int:
+        """Seconds that should pass until next check"""
+        return self._config_data['update_interval']
 
 
 # create global object with current version

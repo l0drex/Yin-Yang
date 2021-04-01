@@ -58,4 +58,4 @@ def run():
         time_light, time_dark = config.times
         set_mode(should_be_dark(datetime.now().time(), time_light, time_dark))
         # subtract seconds so that the next switch is on the full minute
-        time.sleep(60 - datetime.now().second)
+        time.sleep(config.update_interval - datetime.now().second)
