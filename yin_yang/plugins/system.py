@@ -1,9 +1,59 @@
-import os
-import pwd
+from yin_yang.plugins.plugin import Plugin, PluginDesktopDependent
 import subprocess
-from typing import Dict
+import pwd
+import os
 
-from yin_yang.plugins.plugin import Plugin
+
+class System(PluginDesktopDependent):
+    name = 'System'
+
+    def set_strategy(self, strategy):
+        if strategy == 'kde':
+            self.strategy = Kde()
+        elif strategy == 'gtk':
+            self.strategy = Gnome()
+
+    @property
+    def theme_dark(self):
+        if hasattr(self, 'strategy'):
+            # needed since the plugin class checks if the themes are set correctly
+            # in it's init
+            return self.strategy.theme_dark
+        else:
+            return ''
+
+    @theme_dark.setter
+    def theme_dark(self, theme: str):
+        self.strategy.theme_dark = theme
+
+    @property
+    def theme_bright(self):
+        if hasattr(self, 'strategy'):
+            return self.strategy.theme_bright
+        else:
+            return ''
+
+    @theme_bright.setter
+    def theme_bright(self, theme: str):
+        self.strategy.theme_bright = theme
+
+    def get_themes_available(self) -> dict[str, str]:
+        return self.strategy.get_themes_available()
+
+
+# WIP: Potential Check for https://gist.github.com/atiensivu/fcc3183e9a6fd74ec1a283e3b9ad05f0
+# to reduce common issues, or write it in the FAQ
+class Gnome(Plugin):
+    name = 'Gnome'
+    # TODO set the default theme for gnome
+    theme_dark = ''
+    theme_bright = ''
+
+    def set_theme(self, theme: str):
+        # Shell theme
+        # noinspection SpellCheckingInspection
+        subprocess.run(["gsettings", "set", "org.gnome.shell.extensions.user-theme", "name",
+                        '"{}"'.format(theme)])
 
 
 translations = {}
@@ -16,7 +66,7 @@ class Kde(Plugin):
     # noinspection SpellCheckingInspection
     theme_dark = 'org.kde.breezedark.desktop'
 
-    def get_themes_available(self) -> Dict[str, str]:
+    def get_themes_available(self) -> dict[str, str]:
         return get_kde_theme_names()
 
     def set_theme(self, theme: str):
