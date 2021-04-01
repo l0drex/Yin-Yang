@@ -84,14 +84,14 @@ class Kde(Plugin):
             try:
                 # load the name from the metadata.desktop file
                 with open('/usr/share/plasma/look-and-feel/{long_name}/metadata.desktop'.format(**locals()), 'r') as file:
-                    self.translations[long_name] = get_short_name(file)
+                    self.translations[long_name] = self.get_short_name(file)
             except OSError:
                 # check the next path if the themes exist there
                 try:
                     # load the name from the metadata.desktop file
                     with open('{path}{long_name}/metadata.desktop'.format(**locals()), 'r') as file:
                         # search for the name
-                        self.translations[long_name] = get_short_name(file)
+                        self.translations[long_name] = self.get_short_name(file)
                 except OSError:
                     # if no file exist lets just use the long name
                     self.translations[long_name] = long_name
@@ -103,19 +103,18 @@ class Kde(Plugin):
         # noinspection SpellCheckingInspection
         subprocess.run(["lookandfeeltool", "-a", theme])
 
+    def get_short_name(self, file) -> str:
+        """Searches for the long_name in the file and maps it to the found short name"""
 
-def get_short_name(file) -> str:
-    """Searches for the long_name in the file and maps it to the found short name"""
-
-    for line in file:
-        if 'Name=' in line:
-            name: str = ''
-            write: bool = False
-            for letter in line:
-                if letter == '\n':
-                    write = False
-                if write:
-                    name += letter
-                if letter == '=':
-                    write = True
-            return name
+        for line in file:
+            if 'Name=' in line:
+                name: str = ''
+                write: bool = False
+                for letter in line:
+                    if letter == '\n':
+                        write = False
+                    if write:
+                        name += letter
+                    if letter == '=':
+                        write = True
+                return name
