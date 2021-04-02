@@ -59,7 +59,7 @@ class ConfigTest(unittest.TestCase):
         p_check = Process(target=self.check)
         p_main.start()
         p_check.start()
-        p_main.join(10)
+        p_main.join()
         p_check.join()
         p_main.terminate()
 

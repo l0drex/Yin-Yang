@@ -3,8 +3,9 @@ import logging
 import os
 import pathlib
 import re
+from functools import cache
 from psutil import process_iter, NoSuchProcess
-from datetime import datetime, time
+from datetime import time
 from enum import Enum
 from typing import Union
 
@@ -81,6 +82,34 @@ def update_config(config_old: dict, defaults: dict):
     return config_new
 
 
+@cache
+def get_sun_time(latitude, longitude) -> tuple[time, time]:
+    if latitude == longitude:
+        logger.warning(f'Latitude and longitude are both {latitude}')
+    else:
+        logger.debug(f'Calculating sunset and sunrise at location {latitude}, {longitude}.')
+
+    sun = Sun(latitude, longitude)
+    try:
+        today_sr = sun.get_local_sunrise_time()
+        today_ss = sun.get_local_sunset_time()
+
+        return today_sr.time(), today_ss.time()
+
+    except SunTimeException as e:
+        logger.error(f'Error: {e}.')
+
+
+@cache
+def get_current_location() -> tuple[float, float]:
+    logger.debug('Updating location.')
+    loc = requests.get('https://www.ipinfo.io/loc').text.split(',')
+    # convert the strings to floats
+    loc: tuple[float] = [float(coordinate) for coordinate in loc]
+    assert len(loc) == 2, 'The returned location should have exactly 2 values.'
+    return loc
+
+
 class ConfigManager:
     """Manages the configuration using the singleton pattern"""
 
@@ -88,7 +117,6 @@ class ConfigManager:
 
     def __init__(self):
         self._config_data = self.defaults
-        self._last_location_update = None
 
     def set_default(self):
         """Resets all values to the defaults specified in the defaults property."""
@@ -227,14 +255,19 @@ class ConfigManager:
     def running(self) -> bool:
         """True, if yin yang is currently running"""
 
-        # check if a process called yin_yang is running
+        # check if a process called yin_yang is running twice
+        process_number = 0
         for process in process_iter():
             try:
                 if 'yin-yang' in process.name():
-                    return True
+                    process_number += 1
             except NoSuchProcess:
                 pass
-        return False
+        return process_number > 1
+
+    @running.setter
+    def running(self, value: bool):
+        self._config_data['running'] = value
 
     @property
     def dark_mode(self) -> bool:
@@ -265,30 +298,11 @@ class ConfigManager:
     @property
     def location(self) -> tuple[float, float]:
         if self._config_data['update_location']:
-            # Only update the location if the last time we visited that page
-            # was during the last check
-
-            # standard value
-            seconds_since_last_update = self.update_interval + 2
-            # if it was already updated once, calculate the time
-            if self._last_location_update is not None:
-                seconds_since_last_update = (datetime.now() - self._last_location_update).seconds
-
-            if seconds_since_last_update > (self.update_interval - 3):
-                logger.debug('Updating location.')
-                logger.debug(f'Last location update was {seconds_since_last_update} seconds ago.')
-
-                try:
-                    loc = requests.get('https://www.ipinfo.io/loc').text.split(',')
-                    # convert the strings to floats
-                    loc: tuple[float] = [float(coordinate) for coordinate in loc]
-                    assert len(loc) == 2, 'The returned location should have exactly 2 values.'
-                    self._config_data['coordinates'] = loc
-                    self.write()
-                    self._last_location_update = datetime.now()
-                except requests.exceptions.ConnectionError as e:
-                    logger.warning('Could not update location. Please check your internet connection.')
-                    logger.error(str(e))
+            try:
+                return get_current_location()
+            except requests.exceptions.ConnectionError as e:
+                logger.warning('Could not update location. Please check your internet connection.')
+                logger.error(str(e))
 
         return self._config_data['coordinates']
 
@@ -316,22 +330,8 @@ class ConfigManager:
         """Times during which dark mode should be inactive"""
 
         if self.mode == Modes.followSun:
-            # use times for sunrise and sunset
-            latitude, longitude = config.location
-            if latitude == longitude:
-                logger.warning(f'Latitude and longitude are both {latitude}')
-            else:
-                logger.debug(f'Calculating sunset and sunrise at location {latitude}, {longitude}.')
-
-            sun = Sun(latitude, longitude)
-            try:
-                today_sr = sun.get_local_sunrise_time()
-                today_ss = sun.get_local_sunset_time()
-
-                return today_sr.time(), today_ss.time()
-
-            except SunTimeException as e:
-                logger.error(f'Error: {e}.')
+            latitude, longitude = self.location
+            return get_sun_time(latitude, longitude)
 
         # return time in config data
         time_light, time_dark = self._config_data['times']
