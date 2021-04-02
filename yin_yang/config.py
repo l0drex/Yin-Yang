@@ -274,17 +274,21 @@ class ConfigManager:
             if self._last_location_update is not None:
                 seconds_since_last_update = (datetime.now() - self._last_location_update).seconds
 
-            if seconds_since_last_update > (self.update_interval + 1):
+            if seconds_since_last_update > (self.update_interval - 3):
                 logger.debug('Updating location.')
                 logger.debug(f'Last location update was {seconds_since_last_update} seconds ago.')
 
-                loc = requests.get('http://www.ipinfo.io/loc').text.split(',')
-                # convert the strings to floats
-                loc: tuple[float] = [float(coordinate) for coordinate in loc]
-                assert len(loc) == 2, 'The returned location should have exactly 2 values.'
-                self._config_data['coordinates'] = loc
-                self.write()
-                self._last_location_update = datetime.now()
+                try:
+                    loc = requests.get('https://www.ipinfo.io/loc').text.split(',')
+                    # convert the strings to floats
+                    loc: tuple[float] = [float(coordinate) for coordinate in loc]
+                    assert len(loc) == 2, 'The returned location should have exactly 2 values.'
+                    self._config_data['coordinates'] = loc
+                    self.write()
+                    self._last_location_update = datetime.now()
+                except requests.exceptions.ConnectionError as e:
+                    logger.warning('Could not update location. Please check your internet connection.')
+                    logger.error(str(e))
 
         return self._config_data['coordinates']
 
