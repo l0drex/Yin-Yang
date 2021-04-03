@@ -1,8 +1,12 @@
 import os
 import json
+import logging
 from pathlib import Path
 
 from yin_yang.plugins.plugin import Plugin, get_stuff_in_dir
+
+
+logger = logging.getLogger(__name__)
 
 
 def write_new_settings(settings, path):
@@ -40,30 +44,48 @@ class Vscode(Plugin):
                     json.dump(settings, sett)
 
     def get_themes_available(self) -> dict[str, str]:
-        try:
-            path = '/usr/lib/code/extensions'
-            theme_packages = get_stuff_in_dir(path, type='dir')
-            theme_packages = [package_name.replace('theme-', '')
-                              for package_name in theme_packages
-                              if package_name.startswith('theme-')]
-            assert len(theme_packages) > 0
-            theme_packages.sort()
+        paths = ['/usr/lib/code/extensions',
+                 str(Path.home()) + '/.vscode-oss/extensions']
+        themes_dict = {}
 
-            themes_dict: dict = {}
+        for path in paths:
+            extension_dirs = get_stuff_in_dir(path, type='dir')
 
-            for package_name in theme_packages:
-                with open(f'{path}/theme-{package_name}/package.json', 'r') as file:
-                    package_metadata = json.load(file)
+            for extension_dir in extension_dirs:
                 try:
-                    theme_ids = package_metadata['contributes']['themes']
-                    # only take the ids
-                    theme_ids = [theme_meta['id'] for theme_meta in theme_ids]
+                    with open(f'{path}/{extension_dir}/package.json', 'r') as file:
+                        manifest = json.load(file)
 
-                    for theme_id in theme_ids:
-                        themes_dict[theme_id] = theme_id
-                except KeyError:
-                    continue
+                    try:
+                        if 'Themes' not in manifest['categories']:
+                            continue
+                    except KeyError:
+                        pass
+                    try:
+                        if 'themes' not in manifest['contributes']:
+                            continue
+                    except KeyError:
+                        pass
 
-            return themes_dict
-        except FileNotFoundError:
-            return {}
+                    try:
+                        themes: list = manifest['contributes']['themes']
+
+                        for theme in themes:
+                            if 'id' in theme:
+                                themes_dict[theme['id']] = theme['id']
+                            else:
+                                themes_dict[theme['label']] = theme['label']
+                    except KeyError as e:
+                        logger.error(str(e))
+                        continue
+
+                except FileNotFoundError as e:
+                    logger.error(str(e))
+                    if 'node_modules' in extension_dir:
+                        logger.warning('Ignoring')
+                        continue
+                    themes_dict = {}
+                    break
+
+        assert themes_dict != {}, 'No themes found'
+        return themes_dict
