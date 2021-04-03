@@ -37,7 +37,7 @@ class Plugin(ABC):
         """Set the theme"""
 
         theme = self.theme_dark if dark else self.theme_bright
-        logger.info(f'Switching theme to {theme} in {self.name}')
+        logger.info(f'Switching {self.name} theme to {theme}.')
         self.set_theme(theme)
 
     @abstractmethod
