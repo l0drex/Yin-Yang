@@ -233,6 +233,7 @@ class ConfigManager:
 
     @property
     def changed(self):
+        logger.debug('Checking if something has been changed.')
         # compare data in dict to data in file
         current_config = self._config_data.copy()
         self.load()
