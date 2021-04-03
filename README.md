@@ -1,4 +1,4 @@
-# <img src="resources/icon.svg" width="50" height="50" style="vertical-align:bottom"> Yin-Yang
+# <img src=".github/resources/icon.svg" width="50" height="50" style="vertical-align:bottom"> Yin-Yang
 
 Auto Night-mode for Linux, it supports popular Desktops like
 KDE, Gnome, Budgie and also themes your favourite Editors like VSCode or Atom. 
@@ -8,7 +8,7 @@ KDE, Gnome, Budgie and also themes your favourite Editors like VSCode or Atom.
 ![](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)
 ![](https://img.shields.io/badge/Build%20with-Python-yellow)
 
-![](resources/showcase.png)
+![](.github/resources/showcase.png)
 
 
 ## Features
@@ -29,7 +29,7 @@ git clone https://github.com/daehruoydeef/Yin-Yang && cd Yin-Yang && sh ./script
 You will need some dependencies for the installation process to work correctly check the Wiki for what is needed:
 [![Generic badge](https://img.shields.io/badge/see-Wiki-BLUE.svg)](<https://github.com/daehruoydeef/Yin-Yang/wiki>)
 
-![](resources/settings.png)
+![](.github/resources/settings.png)
 
 ## Documentation
 
@@ -40,6 +40,6 @@ Want to know more? Visit the Wiki and read about Installation, Building, Trouble
 
 ## Thanks to all Contributors 
 
-This project exists thanks to all the people who [contribute](CONTRIBUTING.md).
+This project exists thanks to all the people who [contribute](.github/CONTRIBUTING.md).
 
 [![](https://opencollective.com/Yin-Yang/contributors.svg?width=890&button=false)](https://github.com/daehruoydeef/Yin-Yang/graphs/contributors)
