@@ -50,6 +50,10 @@ class Vscode(Plugin):
 
         for path in paths:
             extension_dirs = get_stuff_in_dir(path, type='dir')
+            # filter for a dir that doesnt seem to be an extion
+            # since it has no manifest
+            if 'node_modules' in extension_dirs:
+                extension_dirs.pop(extension_dirs.index('node_modules'))
 
             for extension_dir in extension_dirs:
                 try:
@@ -81,9 +85,6 @@ class Vscode(Plugin):
 
                 except FileNotFoundError as e:
                     logger.error(str(e))
-                    if 'node_modules' in extension_dir:
-                        logger.warning('Ignoring')
-                        continue
                     themes_dict = {}
                     break
 
