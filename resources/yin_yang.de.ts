@@ -75,25 +75,25 @@
     <message>
         <location filename="../yin_yang/ui/config_window.py" line="37"/>
         <source>Yin-Yang is {&quot;not &quot; if not config.running else &quot;&quot;}running.</source>
-        <translation>Yin-Yang läuft zurzeit {&quot;nicht&quot; if not config.running else &quot;&quot;} im Hintergrund.</translation>
+        <translation type="obsolete">Yin-Yang läuft zurzeit {&quot;nicht&quot; if not config.running else &quot;&quot;} im Hintergrund.</translation>
     </message>
     <message>
-        <location filename="../yin_yang/ui/config_window.py" line="131"/>
+        <location filename="../yin_yang/ui/config_window.py" line="137"/>
         <source>Dark mode will be active between {time_dark.strftime(&quot;%H:%M&quot;)} and {time_light.strftime(&quot;%H:%M&quot;)}.</source>
         <translation>Dunkler Modus wird zwischen {time_dark.strftime(&quot;%H:%M)} und {time_light.strftime(&quot;%H:%M&quot;)} aktiviert.</translation>
     </message>
     <message>
-        <location filename="../yin_yang/ui/config_window.py" line="222"/>
+        <location filename="../yin_yang/ui/config_window.py" line="226"/>
         <source>Open Wallpaper {&quot;dark&quot; if dark else &quot;light&quot;}</source>
         <translation>Öffne {&quot;dunklen&quot; if dark else &quot;hellen&quot;} Hintergrund</translation>
     </message>
     <message>
-        <location filename="../yin_yang/ui/config_window.py" line="252"/>
+        <location filename="../yin_yang/ui/config_window.py" line="256"/>
         <source>The settings have been modified. Do you want to save them?</source>
         <translation>Die Einstellungen wurden geändert. Möchten Sie sie speichern?</translation>
     </message>
     <message>
-        <location filename="../yin_yang/ui/config_window.py" line="253"/>
+        <location filename="../yin_yang/ui/config_window.py" line="257"/>
         <source>Unsaved changes</source>
         <translation>Ungespeicherte Änderungen</translation>
     </message>

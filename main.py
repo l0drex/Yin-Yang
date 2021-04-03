@@ -10,7 +10,7 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import QTranslator
 
 from yin_yang import yin_yang
-from yin_yang.ui import config_window, resources_rc
+from yin_yang.ui import config_window
 from yin_yang.config import Modes, config
 
 
