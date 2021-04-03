@@ -1,19 +1,10 @@
+import logging
 from configparser import ConfigParser
 from pathlib import Path
 
 from yin_yang.plugins.plugin import Plugin, get_stuff_in_dir
 
-
-def get_file() -> str:
-    # noinspection SpellCheckingInspection
-    path = str(Path.home()) + '/.local/share/konsole/'
-    files = get_stuff_in_dir(path, type='dir')
-
-    if len(files) == 1:
-        return files[0]
-    else:
-        # TODO either return all profiles or return the standard profile
-        return path + 'Bash.profile'
+logger = logging.getLogger(__name__)
 
 
 class Konsole(Plugin):
@@ -25,12 +16,39 @@ class Konsole(Plugin):
         config = ConfigParser()
         # leave casing as is
         config.optionxform = str
-        config_file = get_file()
-        config.read(config_file)
+        path = str(Path.home()) + '/.local/share/konsole'
+        files = get_stuff_in_dir(path, type='file')
+        # only take profiles
+        files = [path + '/' + f for f in files if f.endswith('.profile')]
 
-        config['Appearance']['ColorScheme'] = theme
-        with open(config_file, 'w') as file:
-            config.write(file)
+        assert len(files) > 0, 'No profiles found!'
+
+        for config_file in files:
+            config.read(config_file)
+
+            try:
+                config['Appearance']['ColorScheme'] = theme
+            except KeyError as e:
+                logger.warning(
+                    f"""
+                    No key {str(e)} found. Trying to add one. 
+                    If this doesnt work, try to change the theme manually once.
+                    """)
+
+                if str(e) == '\'Appearance\'':
+                    config.add_section('Appearance')
+                else:
+                    raise e
+
+                with open(config_file, 'w+') as file:
+                    config.write(file)
+
+                self.set_theme(theme)
+                logger.info('Success!')
+                return
+
+            with open(config_file, 'w') as file:
+                config.write(file)
 
     def get_themes_available(self) -> dict[str, str]:
         try:
