@@ -85,6 +85,10 @@ class Plugin(ABC):
 
         return inputs
 
+    @property
+    def available(self) -> bool:
+        raise NotImplementedError(f'{self.name} must implement the available property!')
+
 
 class NonePlugin(Plugin):
     """A plugin that is none. Used for desktop dependent plugins."""
@@ -96,6 +100,10 @@ class NonePlugin(Plugin):
 
     def __init__(self):
         super().__init__()
+
+    @property
+    def available(self) -> bool:
+         return False
 
 
 class PluginDesktopDependent(Plugin):
@@ -141,6 +149,10 @@ class PluginDesktopDependent(Plugin):
 
     def get_themes_available(self) -> dict[str, str]:
         return self.strategy.get_themes_available()
+
+    @property
+    def available(self) -> bool:
+        return not isinstance(self.strategy, NonePlugin)
 
 
 def inplace_change(filename, old_string, new_string):

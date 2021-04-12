@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+from os.path import isdir
 from pathlib import Path
 
 from yin_yang.plugins.plugin import Plugin, get_stuff_in_dir
@@ -22,6 +23,7 @@ class Vscode(Plugin):
     theme_dark = 'Default Dark+'
 
     def set_theme(self, theme: str):
+        assert self.available, 'VS Code is not installed!'
         path = str(Path.home()) + "/.config"
 
         possible_editors = [
@@ -47,6 +49,8 @@ class Vscode(Plugin):
         paths = ['/usr/lib/code/extensions',
                  str(Path.home()) + '/.vscode-oss/extensions']
         themes_dict = {}
+        if not self.available:
+            return themes_dict
 
         for path in paths:
             extension_dirs = get_stuff_in_dir(path, type='dir')
@@ -90,3 +94,7 @@ class Vscode(Plugin):
 
         assert themes_dict != {}, 'No themes found'
         return themes_dict
+
+    @property
+    def available(self) -> bool:
+        return isdir('/usr/lib/code/extensions')

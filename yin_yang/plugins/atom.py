@@ -1,4 +1,5 @@
 import re
+from os.path import isfile
 from pathlib import Path
 
 from yin_yang.plugins.plugin import Plugin, inplace_change
@@ -23,13 +24,16 @@ class Atom(Plugin):
     name = 'Atom'
     theme_dark = "one-dark"
     theme_bright = "one-light"
+    # noinspection SpellCheckingInspection
+    config_path = str(Path.home()) + "/.atom/config.cson"
 
     def set_theme(self, theme: str):
-        # noinspection SpellCheckingInspection
-        path = str(Path.home()) + "/.atom/config.cson"
-
         # getting the old theme first
-        current_theme = get_old_theme(path)
+        current_theme = get_old_theme(self.config_path)
 
         # updating the old theme with theme specified in config
-        inplace_change(path, current_theme, theme)
+        inplace_change(self.config_path, current_theme, theme)
+
+    @property
+    def available(self) -> bool:
+        return isfile(self.config_path)

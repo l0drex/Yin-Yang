@@ -403,6 +403,9 @@ logger.info('Detected desktop:', config.desktop)
 for p in PLUGINS:
     if isinstance(p, PluginDesktopDependent):
         p.set_strategy(config.desktop)
+    if not p.available:
+        logger.info(f'{p.name} is not installed!')
+        PLUGINS.remove(p)
 
 
 for p in PLUGINS:

@@ -24,3 +24,10 @@ class Sound(Plugin):
     def set_theme(self, theme: str):
         # noinspection SpellCheckingInspection
         subprocess.run(["paplay", resource_path(theme)])
+
+    @property
+    def available(self) -> bool:
+        try:
+            return subprocess.run(['paplay', '--help']).returncode == 0
+        except FileNotFoundError:
+            return False

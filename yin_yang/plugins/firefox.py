@@ -1,5 +1,6 @@
 import json
 from configparser import ConfigParser
+from os.path import isdir
 from pathlib import Path
 
 from yin_yang.plugins.plugin import Plugin
@@ -23,16 +24,21 @@ class Firefox(Plugin):
         pass
 
     def get_themes_available(self) -> dict[str, str]:
-        try:
-            path = get_default_profile_path() + '/extensions.json'
-            themes: dict[str, str] = {}
-
-            with open(path, 'r') as file:
-                content = json.load(file)
-                for addon in content['addons']:
-                    if addon['type'] == 'theme':
-                        themes[addon['id']] = addon['defaultLocale']['name']
-
-            return themes
-        except FileNotFoundError:
+        if not self.available:
             return {}
+
+        path = get_default_profile_path() + '/extensions.json'
+        themes: dict[str, str] = {}
+
+        with open(path, 'r') as file:
+            content = json.load(file)
+            for addon in content['addons']:
+                if addon['type'] == 'theme':
+                    themes[addon['id']] = addon['defaultLocale']['name']
+
+        assert themes != {}, 'No themes found!'
+        return themes
+
+    @property
+    def available(self) -> bool:
+        return isdir(get_default_profile_path())
