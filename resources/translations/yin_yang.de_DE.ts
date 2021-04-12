@@ -58,24 +58,9 @@
         <translation>Sende eine Benachrichtigung</translation>
     </message>
     <message>
-        <location filename="../yin_yang/ui/mainwindow.py" line="231"/>
-        <source>Darkmode will be active between</source>
-        <translation type="obsolete">Dunkler Modus wird aktive sein zwischen</translation>
-    </message>
-    <message>
         <location filename="../../yin_yang/ui/main_window.py" line="233"/>
         <source>Plugins</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../yin_yang/ui/config_window.py" line="37"/>
-        <source>You are using Version {config.version}. </source>
-        <translation type="obsolete">Sie benutzen Version {config.versionn}. </translation>
-    </message>
-    <message>
-        <location filename="../yin_yang/ui/config_window.py" line="37"/>
-        <source>Yin-Yang is {&quot;not &quot; if not config.running else &quot;&quot;}running.</source>
-        <translation type="obsolete">Yin-Yang läuft zurzeit {&quot;nicht&quot; if not config.running else &quot;&quot;} im Hintergrund.</translation>
     </message>
     <message>
         <location filename="../../yin_yang/ui/config_window.py" line="137"/>
@@ -100,7 +85,7 @@
     <message>
         <location filename="../../yin_yang/ui/config_window.py" line="37"/>
         <source>You are using version {config.version}. </source>
-        <translation type="unfinished"></translation>
+        <translation>Sie benutzen Version {config.version}. </translation>
     </message>
 </context>
 </TS>
