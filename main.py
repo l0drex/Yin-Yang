@@ -62,7 +62,8 @@ def main():
             translator = QTranslator()
             lang = locale.getdefaultlocale()[0].split('_')[0]
             logger.debug(f'Using language {lang}')
-            translator.load(':/language/resources/yin_yang' + '.' + lang)
+            if not translator.load(':/language/yin_yang.' + lang + '.qm'):
+                logger.warning('Error while loading translation file!')
             app.installTranslator(translator)
         except Exception as e:
             logger.error(str(e))
