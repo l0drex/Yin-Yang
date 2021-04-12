@@ -2,7 +2,4 @@
   <qresource prefix="/icons">
     <file alias="Logo">resources/icon.svg</file>
   </qresource>
-  <qresource prefix="/language">
-    <file>resources/translations/yin_yang.de_DE.qm</file>
-  </qresource>
 </RCC>
