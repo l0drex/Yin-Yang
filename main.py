@@ -60,7 +60,7 @@ def main():
         # load translation
         try:
             translator = QTranslator()
-            lang = QtCore.QLocale().name().split('_')[0]
+            lang = QtCore.QLocale().name()
             logger.debug(f'Using language {lang}')
             if not translator.load('./resources/translations/yin_yang.' + lang + '.qm'):
                 raise FileNotFoundError('Loading was not successful!')
