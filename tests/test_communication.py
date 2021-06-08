@@ -10,9 +10,10 @@ from yin_yang.config import ConfigManager, config as std_config
 from yin_yang.yin_yang import should_be_dark
 
 config = ConfigManager()
+config.update('Firefox', 'enabled', True)
 
 
-def should_be_dark_extensions(time_current: int, time_light: int, time_dark: int):
+def should_be_dark_extensions(time_current: int, time_dark: int):
     """Determines if dark mode should be active like the extensions do"""
     return time_dark <= time_current
 
@@ -20,6 +21,7 @@ def should_be_dark_extensions(time_current: int, time_light: int, time_dark: int
 class CommunicationTest(unittest.TestCase):
     def setUp(self):
         config.set_default()
+        config.update('Firefox', 'enabled', True)
 
     def test_move_time(self):
         time_light = time.fromisoformat('07:00')
@@ -50,7 +52,7 @@ class CommunicationTest(unittest.TestCase):
                 self.assertTrue(time_light_unix <= time_current_unix <= time_dark_unix or
                                 time_dark_unix <= time_current_unix <= time_light_unix)
 
-    @unittest.skipUnless(config.get('firefox', 'enabled'), 'Firefox plugin is disabled')
+    @unittest.skipUnless(config.get('Firefox', 'enabled'), 'Firefox plugin is disabled')
     def test_message_build(self):
         message = communicate.send_config('firefox')
         self.assertNotEqual(message, None,
@@ -71,7 +73,7 @@ class CommunicationTest(unittest.TestCase):
                 self.assertTrue(time_light <= time_now < time_dark or time_dark <= time_now < time_light,
                                 'Current time should always be between light and dark times')
 
-    @unittest.skipUnless(config.get('firefox', 'enabled'), 'Firefox plugin is disabled')
+    @unittest.skipUnless(config.get('Firefox', 'enabled'), 'Firefox plugin is disabled')
     def test_encode_decode(self):
         config.load()
         process = Popen([sys.executable, '../communicate.py'],
@@ -83,25 +85,28 @@ class CommunicationTest(unittest.TestCase):
             config.write()
             with self.subTest('Returned message should be correct', plugin=plugin):
 
-                # build call
+                # simulate call from extension
+
                 call_encoded = json.dumps(plugin).encode('utf-8')
                 call_encoded = struct.pack(str(len(call_encoded)) + 's',
                                            call_encoded)
                 msg_length = struct.pack('=I', len(call_encoded))
 
-                # send call and get response
                 process.stdin.write(msg_length)
                 process.stdin.write(call_encoded)
                 process.stdin.flush()
                 process.stdin.close()
-                response = process.stdout.readline()
+                response: bytes = process.stdout.readline()
                 process.terminate()
 
                 self.assertTrue(response is not None and len(response) > 0,
                                 'Response should not be empty')
 
                 # decode response
-                response_length = struct.unpack('=I', response[:4])[0]
+                # =I means native unsigned integer
+                response_length: int = struct.unpack('=I', response[:4])[0]
+                self.assertTrue(response_length > 0,
+                                'Length of response must be bigger than 0')
                 response = response[4:]
                 response_decoded = response[:response_length].decode('utf-8')
                 response_decoded = json.loads(response_decoded)
@@ -134,17 +139,13 @@ class CommunicationTest(unittest.TestCase):
                 with self.subTest('Dark mode should be decided correctly.',
                                   time_current=time_current_str, swap=swap):
                     if swap:
-                        time_swap = time_dark
-                        time_dark = time_light
-                        time_light = time_swap
-                        time_swap = None
+                        time_light, time_dark = time_dark, time_light
                     # get unix times
                     time_light_unix, time_dark_unix = communicate.move_times(time_current, time_light, time_dark)
 
                     is_dark = should_be_dark(time_current.time(), time_light, time_dark)
                     # NOTE: this should be equal to how the extension calculates the theme
-                    detected_dark = should_be_dark_extensions(int(time_current.timestamp()),
-                                                                   time_light_unix, time_dark_unix)
+                    detected_dark = should_be_dark_extensions(int(time_current.timestamp()), time_dark_unix)
 
                     self.assertEqual(is_dark, detected_dark,
                                      f'Dark mode should be {"active" if is_dark else "inactive"} at {time_current_str}')
