@@ -14,6 +14,6 @@ class Notification(Plugin):
     @property
     def available(self) -> bool:
         try:
-            return subprocess.run(['notify-send', '--help']).returncode == 0
+            return subprocess.run(['notify-send', '--help'], stdout=subprocess.DEVNULL).returncode == 0
         except FileNotFoundError:
             return False

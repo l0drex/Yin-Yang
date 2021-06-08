@@ -28,6 +28,6 @@ class Sound(Plugin):
     @property
     def available(self) -> bool:
         try:
-            return subprocess.run(['paplay', '--help']).returncode == 0
+            return subprocess.run(['paplay', '--help'], stdout=subprocess.DEVNULL).returncode == 0
         except FileNotFoundError:
             return False

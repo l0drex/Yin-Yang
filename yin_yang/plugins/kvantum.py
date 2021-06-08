@@ -34,6 +34,6 @@ class Kvantum(Plugin):
     @property
     def available(self) -> bool:
         try:
-            return subprocess.run(['kvantummanager', '--help']).returncode == 0
+            return subprocess.run(['kvantummanager', '--help'], stdout=subprocess.DEVNULL).returncode == 0
         except FileNotFoundError:
             return False
